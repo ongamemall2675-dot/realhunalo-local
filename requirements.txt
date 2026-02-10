@@ -1,0 +1,24 @@
+fastapi
+uvicorn
+# Video Processing
+moviepy<2.0
+imageio-ffmpeg
+Pillow
+# AI & Cloud Services
+openai>=1.0.0
+replicate
+elevenlabs
+azure-cognitiveservices-speech
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
+# Utilities
+requests
+python-multipart
+aiofiles
+pytrends
+pandas
+python-dotenv
+gdown
+# Async
+httpx

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>캐시 테스트</title>
+</head>
+<body>
+    <h1>캐시 테스트 페이지</h1>
+
+    <h2>1. 파일 버전 확인</h2>
+    <div id="file-version">확인 중...</div>
+
+    <h2>2. 스틱맨 옵션 확인</h2>
+    <div id="stickman-check">확인 중...</div>
+
+    <h2>3. 초기화 버튼 확인</h2>
+    <div id="reset-button-check">확인 중...</div>
+
+    <script type="module">
+        // ScriptModule.js 파일 직접 로드해서 내용 확인
+        fetch('./assets/js/modules/ScriptModule.js?t=' + Date.now())
+            .then(response => response.text())
+            .then(content => {
+                document.getElementById('file-version').innerHTML =
+                    '파일 크기: ' + content.length + ' bytes';
+
+                // 스틱맨 체크
+                const hasStickman = content.includes('스틱맨 (졸라맨)');
+                document.getElementById('stickman-check').innerHTML = hasStickman
+                    ? '✅ <strong style="color: green">스틱맨 옵션 있음!</strong>'
+                    : '❌ <strong style="color: red">스틱맨 옵션 없음</strong>';
+
+                // 초기화 버튼 체크
+                const hasResetButton = content.includes('btn-reset-script');
+                document.getElementById('reset-button-check').innerHTML = hasResetButton
+                    ? '✅ <strong style="color: green">초기화 버튼 코드 있음!</strong>'
+                    : '❌ <strong style="color: red">초기화 버튼 코드 없음</strong>';
+
+                // 상세 내용 출력
+                if (hasStickman) {
+                    const stickmanMatch = content.match(/스틱맨 \(졸라맨\)[^<]*/);
+                    if (stickmanMatch) {
+                        document.getElementById('stickman-check').innerHTML +=
+                            '<br><small>발견된 텍스트: ' + stickmanMatch[0] + '</small>';
+                    }
+                }
+            })
+            .catch(err => {
+                document.getElementById('file-version').innerHTML =
+                    '❌ 파일 로드 실패: ' + err.message;
+            });
+    </script>
+</body>
+</html>

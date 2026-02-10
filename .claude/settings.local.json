@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(.venvScriptspython tests/test_tts_vrew.py)",
+      "Bash(\".venv\\\\Scripts\\\\pip.exe\" install gdown)",
+      "Bash(\".venv\\\\Scripts\\\\python.exe\" -m pytest tests/test_e2e_workflow.py -v)",
+      "Bash(\".venv\\\\Scripts\\\\python.exe\" tests/test_e2e_workflow.py --local-only)",
+      "Bash(PYTHONIOENCODING=utf-8 \".venv\\\\Scripts\\\\python.exe\":*)",
+      "Bash(\".venv\\\\Scripts\\\\python.exe\" backend.py)",
+      "Bash(\".venv\\\\Scripts\\\\pip.exe\" install --upgrade replicate)",
+      "Bash(\".venv\\\\Scripts\\\\pip.exe\" install:*)",
+      "Bash(\".venv\\\\Scripts\\\\pip.exe\" install azure-cognitiveservices-speech)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(pip install:*)",
+      "Bash(.venvScriptspython.exe test_script_segmentation.py)",
+      "Bash(taskkill:*)",
+      "Bash(Get-Process)",
+      "Bash(Where-Object {$_MainWindowTitle -match \"backend\"})",
+      "Bash(Select-Object Id,Name,MainWindowTitle)",
+      "Bash(start cmd /k \"python backend.py\")",
+      "Bash(start:*)",
+      "Bash(ping:*)",
+      "Bash(cmd /c \"chcp 65001 >nul && python backend.py\")",
+      "Bash(powershell:*)",
+      "WebFetch(domain:infohelpful.com)",
+      "Bash(node -c:*)",
+      "Bash(nslookup:*)",
+      "Bash(cloudflared tunnel route dns:*)"
+    ]
+  }
+}

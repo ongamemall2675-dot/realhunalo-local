@@ -1,0 +1,7 @@
+tunnel: 9c835c00-7bdb-4693-8465-5dfb2d0fc284
+credentials-file: C:\Users\ongam\.cloudflared\9c835c00-7bdb-4693-8465-5dfb2d0fc284.json
+
+ingress:
+  - hostname: alo.hyehwa72.org
+    service: http://127.0.0.1:8000
+  - service: http_status:404

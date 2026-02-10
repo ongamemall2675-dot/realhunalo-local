@@ -1,0 +1,2234 @@
+// ================================================================
+// RealHunalo Studio - Unified Office Application
+// ================================================================
+
+// --- ⚙️ CONFIGURATION ---
+const CONFIG = {
+    // 여기에 n8n 실제 주소를 입력하세요 (server.py 대신 직접 호출)
+    endpoints: {
+        // [Production URL] n8n 워크플로우가 'Activated' 되어 있어야 합니다.
+        script: "https://n8n.hyehwa72.org/webhook/script-scenes/process",
+
+        image: "https://n8n.hyehwa72.org/webhook/process-image",
+        motion: "https://n8n.hyehwa72.org/webhook/process-motion",
+        tts: "https://n8n.hyehwa72.org/webhook/process-tts",
+        video: "https://n8n.hyehwa72.org/webhook/process-video"
+    }
+};
+
+// --- 🏗️ SYSTEM ARCHITECTURE ---
+
+// 1. Module Base Class
+class Module {
+    constructor(id, name, icon, desc) {
+        this.id = id;
+        this.name = name;
+        this.icon = icon;
+        this.desc = desc;
+    }
+    render() { return `<div class="text-center p-20">모듈 준비 중...</div>`; }
+    onMount() { } // Called after render
+}
+
+// 1.5 Global State Management
+const AppState = {
+    currentModule: 'script',
+    scenes: [],
+    script: '',
+    style: '2D infographic',
+    ratio: '16:9',
+    resolution: '2K',
+
+    setScenes(scenes) {
+        this.scenes = scenes;
+        window.dispatchEvent(new CustomEvent('app-state-changed'));
+    },
+    getScenes() { return this.scenes; },
+
+    setScript(text) { this.script = text; },
+    getScript() { return this.script; },
+
+    setStyle(style) { this.style = style; },
+    setRatio(ratio) { this.ratio = ratio; },
+    setResolution(res) { this.resolution = res; }
+};
+
+// --- 🛠️ UTILS ---
+async function processInBatches(items, batchSize, asyncFn, onProgress) {
+    const results = [];
+    let completed = 0;
+
+    // Split into chunks
+    for (let i = 0; i < items.length; i += batchSize) {
+        const chunk = items.slice(i, i + batchSize);
+        // Process chunk in parallel
+        const chunkResults = await Promise.all(chunk.map(async (item) => {
+            try {
+                return await asyncFn(item);
+            } catch (e) {
+                console.error("Batch processing error:", e);
+                return null;
+            } finally {
+                completed++;
+                if (onProgress) onProgress(completed, items.length);
+            }
+        }));
+        results.push(...chunkResults);
+
+        // Optional delay between batches
+        if (i + batchSize < items.length) await new Promise(r => setTimeout(r, 500));
+    }
+    return results;
+}
+
+// --- 🎯 GLOBAL DRAG & DROP HANDLERS ---
+// VideoModule에서 사용하는 드래그앤드랍 및 파일 선택 핸들러
+
+window.handleVideoAssetDrop = function (event, dropZone) {
+    event.preventDefault();
+    dropZone.classList.remove('border-purple-500', 'bg-purple-500/10');
+
+    const sceneId = dropZone.getAttribute('data-scene-id');
+    const files = event.dataTransfer.files;
+
+    if (files.length > 0) {
+        const file = files[0];
+        processDroppedFile(file, sceneId, dropZone);
+    }
+};
+
+window.handleVideoFileSelect = function (event, sceneId) {
+    const file = event.target.files[0];
+    if (file) {
+        const dropZone = document.querySelector(`.drop-zone-video[data-scene-id="${sceneId}"]`);
+        processDroppedFile(file, sceneId, dropZone);
+    }
+};
+
+function processDroppedFile(file, sceneId, dropZone) {
+    const scene = AppState.getScenes().find(s => s.sceneId == sceneId);
+    if (!scene) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        const dataUrl = e.target.result;
+
+        if (file.type.startsWith('video/')) {
+            // 비디오 파일
+            scene.videoUrl = dataUrl;
+            dropZone.innerHTML = `<video src="${dataUrl}" controls class="w-full h-full object-cover"></video>`;
+        } else if (file.type.startsWith('image/')) {
+            // 이미지 파일
+            scene.generatedUrl = dataUrl;
+            dropZone.innerHTML = `<img src="${dataUrl}" class="w-full h-full object-cover">`;
+        }
+
+        console.log(`Scene ${sceneId}: 미디어 교체됨 (${file.name})`);
+        alert(`Scene ${sceneId}의 미디어가 교체되었습니다.`);
+    };
+    reader.readAsDataURL(file);
+}
+
+// --- 🎬 VIDEO LIGHTBOX ---
+window.openVideoLightbox = function (src) {
+    // 기존 lightbox가 있다면 제거
+    const existing = document.getElementById('video-lightbox-overlay');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'video-lightbox-overlay';
+    overlay.className = 'fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-8';
+    overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+
+    overlay.innerHTML = `
+        <div class="relative max-w-4xl w-full">
+            <video src="${src}" controls autoplay class="w-full rounded-2xl shadow-2xl" style="max-height: 80vh;"></video>
+            <button onclick="this.closest('#video-lightbox-overlay').remove()" 
+                class="absolute -top-4 -right-4 p-2 bg-red-500 hover:bg-red-400 text-white rounded-full shadow-lg transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+};
+
+// 2. Trend Module (트렌드 분석)
+class TrendModule extends Module {
+    constructor() { super('trend', '트렌드 분석실', 'trending-up', '네이버/구글 실시간 트렌드를 분석합니다.'); }
+    render() {
+        return `
+            <div class="max-w-4xl mx-auto space-y-8 slide-up">
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="bg-slate-800/40 border border-slate-700 p-6 rounded-2xl hover:border-green-500/50 transition duration-300">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center text-green-500"><i data-lucide="search"></i></div>
+                            <h3 class="font-bold text-lg text-white">Naver Trend API</h3>
+                        </div>
+                        <p class="text-sm text-slate-400 mb-6">네이버 검색어 순위 및 연관 검색어 추출</p>
+                        <button class="w-full py-3 bg-slate-700 hover:bg-green-600 hover:text-white rounded-xl text-sm font-bold transition">데이터 수집 시작</button>
+                    </div>
+                    <div class="bg-slate-800/40 border border-slate-700 p-6 rounded-2xl hover:border-red-500/50 transition duration-300">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center text-red-500"><i data-lucide="globe"></i></div>
+                            <h3 class="font-bold text-lg text-white">Google Trends</h3>
+                        </div>
+                        <p class="text-sm text-slate-400 mb-6">글로벌 및 지역별 관심도 변화 추적</p>
+                        <button class="w-full py-3 bg-slate-700 hover:bg-red-600 hover:text-white rounded-xl text-sm font-bold transition">데이터 수집 시작</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// 3. Youtube Module (유튜브 소재)
+class YoutubeModule extends Module {
+    constructor() { super('youtube', '유튜브 소재실', 'youtube', '유튜브 API 기반 인기 소재 발굴'); }
+    render() {
+        return `
+            <div class="max-w-4xl mx-auto slide-up">
+                 <div class="bg-slate-800/40 border border-slate-700 p-8 rounded-3xl">
+                    <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2"><i data-lucide="youtube" class="text-red-500"></i> 키워드 탐색</h3>
+                    <div class="flex gap-4">
+                        <input type="text" placeholder="검색할 키워드 (예: 경제 전망)" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-5 py-4 text-white focus:border-red-500 outline-none transition">
+                        <button class="px-8 bg-slate-700 hover:bg-red-600 text-white font-bold rounded-xl transition">검색</button>
+                    </div>
+                 </div>
+            </div>
+        `;
+    }
+}
+
+// 4. Script Module (대본 분할 - 핵심)
+class ScriptModule extends Module {
+    constructor() { super('script', '대본 분석실', 'file-text', 'GPT-Mini 기반 대본 초정밀 세분화'); }
+
+    render() {
+        return `
+            <div class="h-full flex flex-col lg:flex-row gap-8 slide-up">
+                <!-- Input Section -->
+                <div class="flex-1 bg-slate-800/40 border border-slate-700 rounded-3xl p-1 flex flex-col">
+                    <div class="bg-slate-800/20 border border-slate-700/50 rounded-3xl p-8 mb-8 shadow-inner">
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-widest mb-4">대본 본문</label>
+                    <textarea id="script-input" 
+                        class="w-full h-80 bg-transparent text-slate-200 text-lg leading-relaxed placeholder-slate-600 focus:outline-none resize-none scrollbar-hide"
+                        placeholder="여기에 대본을 입력하세요...">${AppState.getScript()}</textarea>
+                </div>
+                    <div class="p-4 border-t border-slate-700 flex justify-between items-center bg-slate-900/50 rounded-b-3xl">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-widest pl-4">Script Input</span>
+                        <button id="btn-analyze" class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-blue-600/20 transition flex items-center gap-2">
+                            <i data-lucide="sparkles" class="w-4 h-4"></i> 분석 시작
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Options Section -->
+                <div class="w-80 space-y-6">
+                    <div class="bg-slate-800/40 border border-slate-700 p-6 rounded-2xl">
+                        <h4 class="text-sm font-bold text-white mb-4 flex items-center gap-2"><i data-lucide="sliders" class="w-4 h-4 text-blue-400"></i> 분석 옵션</h4>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-2">화풍 스타일</label>
+                                <select id="opt-style" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm text-slate-300 outline-none focus:border-blue-500">
+                                    <option value="stickman">스틱맨 (인포그래픽)</option>
+                                    <option value="realistic">실사 (Cinematic)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-2">화면 비율</label>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <button class="opt-ratio active py-2 bg-slate-900 border border-blue-500 text-blue-400 rounded-lg text-xs font-bold transition">16:9</button>
+                                    <button class="opt-ratio py-2 bg-slate-900 border border-slate-700 text-slate-400 rounded-lg text-xs font-bold hover:border-slate-500 transition">9:16</button>
+                                    <button class="opt-ratio py-2 bg-slate-900 border border-slate-700 text-slate-400 rounded-lg text-xs font-bold hover:border-slate-500 transition">1:1</button>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-2">해상도</label>
+                                <select class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm text-slate-300 outline-none focus:border-blue-500">
+                                    <option>1K (Fast)</option>
+                                    <option>2K (Balanced)</option>
+                                    <option>4K (High)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6 rounded-2xl bg-blue-500/10 border border-blue-500/20">
+                        <p class="text-xs text-blue-300 leading-relaxed font-medium">
+                            💡 <b>Tip:</b> GPT-Mini가 장면을 자동으로 구분하고 최적의 프롬프트를 생성합니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    onMount() {
+        const btn = document.getElementById('btn-analyze');
+        const textarea = document.getElementById('script-input');
+
+        // Sync textarea to AppState
+        textarea.addEventListener('input', (e) => {
+            AppState.setScript(e.target.value);
+        });
+
+        btn.addEventListener('click', async () => {
+            const text = textarea.value.trim();
+            if (!text) return alert("대본을 입력해주세요.");
+
+            // Save state before starting
+            const style = document.getElementById('opt-style').value;
+            const ratioBtn = document.querySelector('.opt-ratio.active') || document.querySelector('.opt-ratio');
+            const ratio = ratioBtn ? ratioBtn.innerText : '16:9';
+            const resolution = document.querySelector('select:not(#opt-style)').value || '2K';
+
+            AppState.setScript(text);
+            AppState.setStyle(style);
+            AppState.setRatio(ratio);
+            AppState.setResolution(resolution);
+
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> 분석 중...`;
+
+            try {
+                console.log("Starting Fetch to:", CONFIG.endpoints.script);
+
+                // Call Direct n8n URL
+                const response = await fetch(CONFIG.endpoints.script, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        script: text,
+                        style: AppState.style,
+                        aspect_ratio: AppState.ratio,
+                        resolution: AppState.resolution
+                    })
+                });
+
+                if (!response.ok) throw new Error(`서버 통신 실패: ${response.status}`);
+
+                const rawText = await response.text();
+                console.log("Raw Server Response:", rawText);
+
+                if (!rawText) {
+                    throw new Error("서버로부터 빈 응답이 왔습니다. n8n 워크플로우 실행 내역을 확인해 주세요.");
+                }
+
+                let result;
+                try {
+                    result = JSON.parse(rawText);
+                } catch (e) {
+                    throw new Error("JSON 파싱 실패. 응답 내용: " + rawText);
+                }
+
+                console.log("분석 결과:", result);
+
+                if (result.scenes && Array.isArray(result.scenes)) {
+                    AppState.setScenes(result.scenes);
+                    alert(`분석 완료! ${result.scenes.length}개의 장면이 생성되었습니다.`);
+                    app.route('image');
+                } else {
+                    throw new Error("분석 결과에 장면(scenes) 데이터가 없습니다.");
+                }
+            } catch (e) {
+                console.error("Fetch Error Detail:", e);
+                alert("에러 발생: " + e.message + "\n\n(참고: n8n의 'Test Workflow'가 활성화되어 있는지 확인하거나, Production URL 사용을 검토하세요.)");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i data-lucide="sparkles" class="w-4 h-4"></i> 분석 시작`;
+                lucide.createIcons();
+            }
+        });
+
+        // Simple ratio selector logic
+        const ratios = document.querySelectorAll('.opt-ratio');
+        ratios.forEach(r => r.addEventListener('click', () => {
+            ratios.forEach(b => {
+                b.classList.remove('active', 'border-blue-500', 'text-blue-400');
+                b.classList.add('border-slate-700', 'text-slate-400');
+            });
+            r.classList.remove('border-slate-700', 'text-slate-400');
+            r.classList.add('active', 'border-blue-500', 'text-blue-400');
+        }));
+    }
+}
+
+// 5. Image Module
+class ImageModule extends Module {
+    constructor() { super('image', '미술 작업실', 'palette', '분석된 장면을 시각화합니다.'); }
+
+    render() {
+        const scenes = AppState.getScenes();
+
+        // 독립 실행 모드 패널
+        const standalonePanel = `
+            <div class="bg-gradient-to-r from-green-900/30 to-blue-900/30 border border-green-500/30 rounded-2xl p-6 mb-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-2 bg-green-500/20 rounded-lg text-green-400">
+                        <i data-lucide="plus-square" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">➕ 장면 수동 추가</h3>
+                    <span class="ml-auto text-xs text-green-400 bg-green-500/20 px-3 py-1 rounded-full">분석 없이 직접 추가</span>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">대본</label>
+                        <textarea id="manual-scene-script" 
+                            class="w-full h-20 bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-slate-200 focus:ring-2 focus:ring-green-500 focus:border-transparent transition resize-none scrollbar-hide"
+                            placeholder="장면의 대본을 입력하세요..."></textarea>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">이미지 프롬프트 (선택)</label>
+                        <textarea id="manual-scene-prompt" 
+                            class="w-full h-20 bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-slate-200 focus:ring-2 focus:ring-green-500 focus:border-transparent transition resize-none scrollbar-hide"
+                            placeholder="이미지 프롬프트를 입력하세요... (비우면 자동 생성)"></textarea>
+                    </div>
+                </div>
+                
+                <button id="btn-add-manual-scene" class="mt-4 w-full bg-green-600 hover:bg-green-500 text-white px-4 py-3 rounded-xl text-sm font-bold shadow-lg shadow-green-600/20 transition flex items-center justify-center gap-2">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i> 장면 추가
+                </button>
+            </div>
+        `;
+
+        if (scenes.length === 0) {
+            return `
+                <div class="max-w-4xl mx-auto slide-up space-y-6">
+                    ${standalonePanel}
+                    
+                    <div class="text-center p-10 text-slate-500 border border-dashed border-slate-700 rounded-2xl">
+                        <i data-lucide="image" class="w-12 h-12 mx-auto mb-4 opacity-50"></i>
+                        <h3 class="text-lg font-bold">장면이 없습니다</h3>
+                        <p class="text-sm mt-2">위에서 장면을 수동으로 추가하거나, 대본 분석실에서 분석을 진행하세요.</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        const sceneRows = scenes.map(scene => `
+            <tr class="border-b border-slate-800/30 hover:bg-white/5 transition group" id="row-${scene.sceneId}">
+                <td class="py-4 pl-6 text-xs font-bold text-slate-500 w-16">#${scene.sceneId}</td>
+                <td class="py-4 px-4 w-1/4">
+                    <textarea class="scene-script-edit w-full bg-slate-900/50 border border-slate-700 rounded-lg p-2 text-sm text-slate-300 resize-none h-16 scrollbar-hide focus:ring-1 focus:ring-blue-500" 
+                        data-scene-id="${scene.sceneId}">${scene.originalScript}</textarea>
+                </td>
+                <td class="py-4 px-4 w-1/3">
+                    <textarea class="scene-prompt-edit w-full bg-slate-900/50 border border-slate-700 rounded-lg p-2 text-[11px] text-slate-400 font-mono italic resize-none h-16 scrollbar-hide focus:ring-1 focus:ring-blue-500" 
+                        data-scene-id="${scene.sceneId}"
+                        placeholder="이미지 프롬프트 (편집 가능)">${scene.imagePrompt || ''}</textarea>
+                </td>
+                <td class="py-4 px-4">
+                    <div class="w-40 aspect-video bg-slate-900/50 rounded-lg border border-slate-700/50 flex items-center justify-center overflow-hidden relative group drop-zone" 
+                         data-scene-id="${scene.sceneId}" 
+                         data-drop-type="image"
+                         ondragover="event.preventDefault(); this.classList.add('border-blue-500', 'bg-blue-500/10');" 
+                         ondragleave="this.classList.remove('border-blue-500', 'bg-blue-500/10');" 
+                         ondrop="window.handleAssetDrop(event, this)">
+                        <div class="image-placeholder text-[8px] text-slate-600 font-bold uppercase tracking-widest text-center px-2">No Image<br><span class="text-[7px] opacity-60">Drag to Replace</span></div>
+                        <img src="${scene.generatedUrl || ''}" class="${scene.generatedUrl ? '' : 'hidden'} w-full h-full object-cover cursor-pointer" id="img-${scene.sceneId}" onclick="window.openLightbox(this.src)" title="클릭하여 크게 보기">
+                        <div class="loading-overlay hidden absolute inset-0 bg-slate-900/80 flex items-center justify-center">
+                            <i data-lucide="loader-2" class="w-4 h-4 text-blue-500 animate-spin"></i>
+                        </div>
+                        <!-- Drag Hint -->
+                        <div class="absolute bottom-1 right-1 text-[7px] text-slate-500 bg-black/40 px-1 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none">
+                            📎 Drop to replace
+                        </div>
+                    </div>
+                </td>
+                <td class="py-4 pr-6 text-right w-28">
+                    <div class="flex flex-col gap-2 scale-90 origin-right">
+                        <button class="btn-gen-image bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1" data-id="${scene.sceneId}">
+                            <i data-lucide="wand-2" class="w-3.5 h-3.5"></i> 생성
+                        </button>
+                        <button class="btn-down-image ${scene.generatedUrl ? '' : 'hidden'} bg-slate-700 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1" id="btn-down-${scene.sceneId}" data-id="${scene.sceneId}">
+                            <i data-lucide="download" class="w-3.5 h-3.5"></i> 다운로드
+                        </button>
+                        <button class="btn-delete-scene bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1" data-id="${scene.sceneId}">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> 삭제
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+
+        return `
+            <div class="max-w-7xl mx-auto slide-up space-y-6">
+                <!-- Toolbar -->
+                <div class="flex justify-between items-center bg-slate-800/40 p-4 rounded-2xl border border-slate-700/50">
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm font-bold text-slate-400">총 <b>${scenes.length}</b>개 장면</span>
+                    </div>
+                    <div class="flex gap-3">
+                        <button id="btn-gen-all" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/20 transition flex items-center gap-2">
+                            <i data-lucide="play" class="w-4 h-4"></i> 전체 일괄 이미지 생성
+                        </button>
+                        <button id="btn-down-all" class="bg-slate-700 hover:bg-green-600 text-white px-6 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2">
+                            <i data-lucide="download-cloud" class="w-4 h-4"></i> 이미지 일괄 다운로드
+                        </button>
+                        <button id="btn-down-prompts" class="bg-slate-700 hover:bg-orange-600 text-white px-6 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2">
+                            <i data-lucide="file-text" class="w-4 h-4"></i> 프롬프트 다운로드 (TXT)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Table Area -->
+                <div class="bg-slate-800/20 border border-slate-700/50 rounded-3xl overflow-hidden shadow-2xl">
+                    <table class="w-full text-left table-fixed">
+                        <thead class="bg-slate-900/60 border-b border-slate-700">
+                            <tr>
+                                <th class="py-4 pl-6 text-[10px] font-black text-slate-500 uppercase tracking-widest w-16">ID</th>
+                                <th class="py-4 px-4 text-[10px] font-black text-slate-500 uppercase tracking-widest w-1/3">대본(한글)</th>
+                                <th class="py-4 px-4 text-[10px] font-black text-slate-500 uppercase tracking-widest w-1/3">이미지 프롬프트</th>
+                                <th class="py-4 px-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">미리보기 (클릭 시 확대)</th>
+                                <th class="py-4 pr-6 text-right text-[10px] font-black text-slate-500 uppercase tracking-widest w-24">액션</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${sceneRows}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+
+    onMount() {
+        const scenes = AppState.getScenes();
+
+        // --- 📝 장면 수동 추가 ---
+        const btnAddManual = document.getElementById('btn-add-manual-scene');
+        if (btnAddManual) {
+            btnAddManual.addEventListener('click', () => {
+                const scriptInput = document.getElementById('manual-scene-script');
+                const promptInput = document.getElementById('manual-scene-prompt');
+
+                const script = scriptInput?.value.trim();
+                if (!script) return alert('대본을 입력해주세요.');
+
+                const prompt = promptInput?.value.trim();
+                const currentScenes = AppState.getScenes();
+                const newId = currentScenes.length > 0 ? Math.max(...currentScenes.map(s => s.sceneId)) + 1 : 1;
+
+                const newScene = {
+                    sceneId: newId,
+                    originalScript: script,
+                    scriptForTTS: script,
+                    imagePrompt: prompt || '',
+                    motionPrompt: '',
+                    generatedUrl: null,
+                    videoUrl: null,
+                    audioUrl: null,
+                    srtData: null
+                };
+
+                AppState.setScenes([...currentScenes, newScene]);
+                scriptInput.value = '';
+                promptInput.value = '';
+                alert(`장면 #${newId}이 추가되었습니다.`);
+
+                if (window.app) window.app.route('image');
+            });
+        }
+
+        // --- ✏️ 대본 및 프롬프트 편집 동기화 ---
+        document.querySelectorAll('.scene-script-edit').forEach(textarea => {
+            textarea.addEventListener('input', (e) => {
+                const sceneId = e.target.getAttribute('data-scene-id');
+                const scene = AppState.getScenes().find(s => s.sceneId == sceneId);
+                if (scene) {
+                    scene.originalScript = e.target.value;
+                    scene.scriptForTTS = e.target.value;
+                }
+            });
+        });
+
+        document.querySelectorAll('.scene-prompt-edit').forEach(textarea => {
+            textarea.addEventListener('input', (e) => {
+                const sceneId = e.target.getAttribute('data-scene-id');
+                const scene = AppState.getScenes().find(s => s.sceneId == sceneId);
+                if (scene) {
+                    scene.imagePrompt = e.target.value;
+                }
+            });
+        });
+
+        // --- 🗑️ 장면 삭제 ---
+        document.querySelectorAll('.btn-delete-scene').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const sceneId = parseInt(btn.getAttribute('data-id'));
+                if (!confirm(`장면 #${sceneId}을 삭제하시겠습니까?`)) return;
+
+                const currentScenes = AppState.getScenes();
+                const updatedScenes = currentScenes.filter(s => s.sceneId !== sceneId);
+                AppState.setScenes(updatedScenes);
+
+                if (window.app) window.app.route('image');
+            });
+        });
+
+        // --- 개별 생성 로직 ---
+        const generateItem = async (btn) => {
+            const sceneId = btn.getAttribute('data-id');
+            const scene = AppState.getScenes().find(s => s.sceneId == sceneId);
+            const img = document.getElementById(`img-${sceneId}`);
+            const placeholder = img.parentElement.querySelector('.image-placeholder');
+            const loading = img.parentElement.querySelector('.loading-overlay');
+            const downBtn = document.getElementById(`btn-down-${sceneId}`);
+
+            // UI Update
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> 요청 중`;
+            loading.classList.remove('hidden');
+
+            try {
+                console.log(`Sending request to ${CONFIG.endpoints.image} for Scene ${sceneId}`);
+                const response = await fetch(CONFIG.endpoints.image, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sceneId: sceneId,
+                        prompt: scene.imagePrompt,
+                        style: AppState.style,
+                        ratio: AppState.ratio
+                    })
+                });
+
+                const responseText = await response.text();
+                console.log("Raw Response:", responseText); // Debugging
+
+                if (!response.ok) {
+                    throw new Error(`Server Error (${response.status}): ${responseText}`);
+                }
+
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                } catch (e) {
+                    throw new Error(`Invalid JSON Response: ${responseText.substring(0, 100)}...`);
+                }
+
+                if (result.success === false) {
+                    throw new Error(result.error || "Unknown Error from n8n");
+                }
+
+                if (result.imageUrl) {
+                    img.src = result.imageUrl;
+                    img.classList.remove('hidden');
+                    placeholder.classList.add('hidden');
+                    downBtn.classList.remove('hidden');
+                    scene.generatedUrl = result.imageUrl;
+                } else {
+                    throw new Error("No image URL in response");
+                }
+
+            } catch (e) {
+                console.error(e);
+                btn.classList.replace('bg-blue-600', 'bg-red-900');
+                btn.innerText = "에러";
+                // 에러 내용을 버튼 툴팁이나 alert으로 표시
+                alert(`이미지 생성 실패:\n${e.message}`);
+            } finally {
+                btn.disabled = false;
+                if (btn.innerText !== "에러") {
+                    btn.innerHTML = `<i data-lucide="wand-2" class="w-3.5 h-3.5"></i> 생성`;
+                    btn.classList.replace('bg-red-900', 'bg-blue-600');
+                } else {
+                    setTimeout(() => {
+                        btn.innerHTML = `<i data-lucide="wand-2" class="w-3.5 h-3.5"></i> 생성`;
+                        btn.classList.replace('bg-red-900', 'bg-blue-600');
+                    }, 3000);
+                }
+                loading.classList.add('hidden');
+                lucide.createIcons();
+            }
+        };
+
+        // --- 이벤트 리스너 등록 ---
+        document.querySelectorAll('.btn-gen-image').forEach(btn => {
+            btn.addEventListener('click', () => generateItem(btn));
+        });
+
+        document.querySelectorAll('.btn-down-image').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const sceneId = btn.getAttribute('data-id');
+                const img = document.getElementById(`img-${sceneId}`);
+                const link = document.createElement('a');
+                link.href = img.src;
+                link.download = `scene_${sceneId}.png`;
+                link.click();
+            });
+        });
+
+        // 일괄 생성 (순차 처리 + 5초 딜레이)
+        const btnGenAll = document.getElementById('btn-gen-all');
+        if (btnGenAll) {
+            btnGenAll.addEventListener('click', async () => {
+                const btns = Array.from(document.querySelectorAll('.btn-gen-image'));
+                const total = btns.length;
+
+                // 일괄 생성 (병렬 처리 + Promise.all)
+                if (!confirm(`총 ${total}개 이미지를 **동시에** 생성합니다.\n서버 부하에 따라 시간이 걸릴 수 있습니다.\n\n계속하시겠습니까?`)) return;
+
+                btnGenAll.disabled = true;
+                const originalText = btnGenAll.innerHTML;
+                let completed = 0;
+
+                const updateProgress = (count, total) => {
+                    btnGenAll.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> 생성 중 (${count}/${total})`;
+                    lucide.createIcons();
+                };
+
+                updateProgress(0, total);
+
+                // Use new batch processor (Concurrency limit: 3)
+                await processInBatches(btns, 3, async (btn) => {
+                    await generateItem(btn);
+                }, updateProgress);
+
+                await Promise.all([]); // Compatibility cleanup
+
+                btnGenAll.disabled = false;
+                btnGenAll.innerHTML = originalText;
+                lucide.createIcons();
+                alert(`일괄 생성 완료! (${total}개)`);
+            });
+        }
+
+        // 일괄 다운로드
+        const btnDownAll = document.getElementById('btn-down-all');
+        if (btnDownAll) {
+            btnDownAll.addEventListener('click', () => {
+                const generated = scenes.filter(s => s.generatedUrl);
+                if (generated.length === 0) return alert("먼저 이미지를 생성해 주세요.");
+
+                generated.forEach((s, i) => {
+                    setTimeout(() => {
+                        const link = document.createElement('a');
+                        link.href = s.generatedUrl;
+                        link.download = `scene_${s.sceneId}.png`;
+                        link.click();
+                    }, i * 500); // 0.5초 간격으로 다운로드 트리거
+                });
+            });
+        }
+
+        // 프롬프트 다운로드 (텍스트)
+        const btnDownPrompts = document.getElementById('btn-down-prompts');
+        if (btnDownPrompts) {
+            btnDownPrompts.addEventListener('click', () => {
+                let content = "";
+                scenes.forEach(s => {
+                    // Scene ID 2자리 포맷 (01, 02...)
+                    const id = String(s.sceneId).padStart(2, '0');
+                    content += `Scene${id}_${s.imagePrompt}\n\n`;
+                });
+
+                const blob = new Blob([content], { type: 'text/plain' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = "image_prompts.txt";
+                link.click();
+                URL.revokeObjectURL(link.href);
+            });
+        }
+
+        lucide.createIcons();
+    }
+}
+
+// 6. Motion Module
+class MotionModule extends Module {
+    constructor() {
+        super('motion', '모션 작업실', 'video', '정적인 이미지를 역동적인 영상으로 변환합니다.');
+    }
+
+    render() {
+        const scenes = AppState.getScenes();
+
+        // 독립 실행 모드: 외부 이미지 URL로 바로 비디오 생성
+        const standalonePanel = `
+            <div class="bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-2xl p-6 mb-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-2 bg-purple-500/20 rounded-lg text-purple-400">
+                        <i data-lucide="link" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">🔗 외부 이미지로 비디오 생성</h3>
+                    <span class="ml-auto text-xs text-purple-400 bg-purple-500/20 px-3 py-1 rounded-full">URL 직접 입력</span>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">이미지 URL</label>
+                        <input id="external-image-url" type="url"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-slate-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                            placeholder="https://example.com/image.jpg">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">모션 프롬프트</label>
+                        <input id="external-motion-prompt" type="text"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-slate-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                            placeholder="Slow dolly-in, smooth camera movement">
+                    </div>
+                </div>
+                
+                <button id="btn-external-gen-video" class="mt-4 w-full bg-purple-600 hover:bg-purple-500 text-white px-4 py-3 rounded-xl text-sm font-bold shadow-lg shadow-purple-600/20 transition flex items-center justify-center gap-2">
+                    <i data-lucide="clapperboard" class="w-4 h-4"></i> 비디오 생성
+                </button>
+            </div>
+        `;
+
+        if (scenes.length === 0) {
+            return `
+                <div class="max-w-4xl mx-auto slide-up space-y-6">
+                    ${standalonePanel}
+                    
+                    <div class="text-center p-10 text-slate-500 border border-dashed border-slate-700 rounded-2xl">
+                        <i data-lucide="video" class="w-12 h-12 mx-auto mb-4 opacity-50"></i>
+                        <h3 class="text-lg font-bold">장면이 없습니다</h3>
+                        <p class="text-sm mt-2">위에서 외부 이미지 URL을 입력하거나, 미술 작업실에서 이미지를 먼저 생성하세요.</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        const sceneRows = scenes.map(scene => `
+            <tr class="border-b border-slate-800/30 hover:bg-white/5 transition group" id="motion-row-${scene.sceneId}">
+                <td class="py-4 pl-6 text-xs font-bold text-slate-500 w-16">#${scene.sceneId}</td>
+                <td class="py-4 px-4 w-1/4">
+                    <div class="max-h-24 overflow-y-auto pr-2 text-sm text-slate-300 leading-relaxed scrollbar-hide">
+                        ${scene.originalScript}
+                    </div>
+                </td>
+                <td class="py-4 px-4">
+                    <div class="w-32 aspect-video bg-slate-900/50 rounded-lg border border-slate-700/50 overflow-hidden relative group/img">
+                        <img src="${scene.generatedUrl || ''}" class="${scene.generatedUrl ? '' : 'hidden'} w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-black/40 ${scene.generatedUrl ? 'hidden' : ''} flex items-center justify-center">
+                            <span class="text-[8px] text-slate-500 font-bold uppercase tracking-widest">Image Missing</span>
+                        </div>
+                         <!-- Lightbox Trigger -->
+                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover/img:opacity-100 transition flex items-center justify-center pointer-events-none group-hover/img:pointer-events-auto">
+                            ${scene.generatedUrl ? `
+                                <button onclick="window.openLightbox('${scene.generatedUrl}')" class="p-1.5 bg-white/20 hover:bg-white/40 rounded-full text-white backdrop-blur-sm transition" title="크게 보기">
+                                    <i data-lucide="maximize-2" class="w-3 h-3"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </td>
+                <td class="py-4 px-4 w-1/3">
+                    <div class="bg-black/20 p-2 rounded-lg border border-slate-700/30">
+                        <span class="text-[8px] text-purple-600 font-bold block mb-1 uppercase tracking-widest">Motion Prompt (편집 가능)</span>
+                        <textarea id="motion-prompt-text-${scene.sceneId}" 
+                            class="w-full h-16 bg-transparent text-[11px] text-slate-400 font-mono italic resize-none focus:outline-none focus:ring-1 focus:ring-purple-500 rounded p-1 scrollbar-hide"
+                            placeholder="모션 프롬프트를 입력하세요..."
+                            data-scene-id="${scene.sceneId}">${scene.motionPrompt || ''}</textarea>
+                    </div>
+                </td>
+                <td class="py-4 px-4">
+                    <div class="w-32 aspect-video bg-slate-900 border border-slate-700 rounded-lg flex items-center justify-center overflow-hidden relative group/video drop-zone" 
+                         data-scene-id="${scene.sceneId}" 
+                         data-drop-type="video"
+                         ondragover="event.preventDefault(); this.classList.add('border-purple-500', 'bg-purple-500/10');" 
+                         ondragleave="this.classList.remove('border-purple-500', 'bg-purple-500/10');" 
+                         ondrop="window.handleAssetDrop(event, this)">
+                        ${scene.videoUrl
+                ? `<video src="${scene.videoUrl}" class="w-full h-full object-cover" muted></video>
+                               <div class="absolute inset-0 bg-black/50 opacity-0 group-hover/video:opacity-100 transition flex items-center justify-center gap-2 pointer-events-none group-hover/video:pointer-events-auto">
+                                   <button onclick="window.openVideoLightbox('${scene.videoUrl}')" class="p-2 bg-white/20 hover:bg-white/40 rounded-full text-white backdrop-blur-sm transition" title="확대 미리보기">
+                                       <i data-lucide="play-circle" class="w-4 h-4"></i>
+                                   </button>
+                                   <button onclick="window.openLightbox('${scene.videoUrl}')" class="p-1.5 bg-white/20 hover:bg-white/40 rounded-full text-white backdrop-blur-sm transition" title="크게 보기">
+                                       <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+                                   </button>
+                               </div>`
+                : `<span class="text-[8px] text-slate-600 font-bold uppercase tracking-widest">Video Pending<br><span class="text-[7px] opacity-60">Drag to Replace</span></span>`}
+                        <!-- Drag Hint -->
+                        <div class="absolute bottom-1 right-1 text-[7px] text-slate-500 bg-black/40 px-1 rounded opacity-0 group-hover/video:opacity-100 transition pointer-events-none">
+                            📎 Drop to replace
+                        </div>
+                    </div>
+                </td>
+                <td class="py-4 pr-6 text-right w-36">
+                    <div class="flex flex-col gap-2 scale-90 origin-right">
+                        <button class="btn-gen-video bg-purple-600 hover:bg-purple-500 text-white px-3 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1 ${scene.generatedUrl ? '' : 'opacity-50 cursor-not-allowed'}" 
+                            id="btn-video-${scene.sceneId}" data-id="${scene.sceneId}" ${scene.generatedUrl ? '' : 'disabled'}>
+                            <i data-lucide="clapperboard" class="w-3.5 h-3.5"></i> 비디오 변환
+                        </button>
+                        <button class="btn-down-video bg-slate-800 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1 ${scene.videoUrl ? '' : 'hidden'}"
+                            id="btn-down-video-${scene.sceneId}" data-id="${scene.sceneId}" onclick="const link = document.createElement('a'); link.href = '${scene.videoUrl}'; link.download = 'scene_${scene.sceneId}.mp4'; link.click();">
+                            <i data-lucide="download" class="w-3.5 h-3.5"></i> 영상 다운로드
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+
+        return `
+            <div class="max-w-7xl mx-auto slide-up space-y-6">
+                <!-- Toolbar -->
+                <div class="flex justify-between items-center bg-slate-800/40 p-4 rounded-2xl border border-slate-700/50">
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm font-bold text-slate-400">총 <b>${scenes.length}</b>개 장면</span>
+                        <div class="h-6 w-px bg-slate-700"></div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-slate-500 uppercase">Range</span>
+                            <input type="number" id="motion-range-start" class="w-16 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-sm text-center font-bold text-white focus:outline-none focus:border-purple-500" value="1" min="1" max="${scenes.length}">
+                            <span class="text-slate-500 font-bold">-</span>
+                            <input type="number" id="motion-range-end" class="w-16 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-sm text-center font-bold text-white focus:outline-none focus:border-purple-500" value="${scenes.length}" min="1" max="${scenes.length}">
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <button id="btn-gen-motion-batch" class="bg-purple-600 hover:bg-purple-500 text-white px-6 py-2 rounded-xl text-sm font-bold shadow-lg shadow-purple-600/20 transition flex items-center gap-2">
+                            <i data-lucide="layers" class="w-4 h-4"></i> 프롬프트 일괄 생성
+                        </button>
+                        <button id="btn-gen-motion-video-batch" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/20 transition flex items-center gap-2">
+                            <i data-lucide="film" class="w-4 h-4"></i> 비디오 일괄 생성
+                        </button>
+                        <button id="btn-down-motion-prompts" class="bg-slate-700 hover:bg-orange-600 text-white px-6 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2">
+                            <i data-lucide="file-text" class="w-4 h-4"></i> 프롬프트 다운로드 (TXT)
+                        </button>
+                        <button id="btn-down-motion-videos" class="bg-slate-700 hover:bg-green-600 text-white px-6 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2">
+                            <i data-lucide="download-cloud" class="w-4 h-4"></i> 영상 일괄 다운로드
+                        </button>
+                    </div>
+                </div>
+
+                 <div class="bg-slate-800/20 border border-slate-700/50 rounded-3xl overflow-hidden shadow-2xl">
+                    <table class="w-full text-left table-fixed">
+                        <thead class="bg-slate-900/60 border-b border-slate-700">
+                            <tr>
+                                <th class="py-4 pl-6 text-[10px] font-black text-slate-500 uppercase tracking-widest w-16">ID</th>
+                                <th class="py-4 px-4 text-[10px] font-black text-slate-500 uppercase tracking-widest w-1/4">대본(한글)</th>
+                                <th class="py-4 px-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">생성 이미지</th>
+                                <th class="py-4 px-4 text-[10px] font-black text-slate-500 uppercase tracking-widest w-1/4">모션 설정</th>
+                                <th class="py-4 px-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">최종 영상</th>
+                                <th class="py-4 pr-6 text-right text-[10px] font-black text-slate-500 uppercase tracking-widest w-36">액션</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${sceneRows}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+
+    onMount() {
+        const scenes = AppState.getScenes();
+
+        // --- 🔗 외부 이미지 URL로 비디오 생성 ---
+        const btnExternalGen = document.getElementById('btn-external-gen-video');
+        if (btnExternalGen) {
+            btnExternalGen.addEventListener('click', async () => {
+                const imageUrl = document.getElementById('external-image-url')?.value.trim();
+                const motionPrompt = document.getElementById('external-motion-prompt')?.value.trim();
+
+                if (!imageUrl) return alert('이미지 URL을 입력해주세요.');
+
+                btnExternalGen.disabled = true;
+                const originalText = btnExternalGen.innerHTML;
+                btnExternalGen.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> 생성 중...`;
+                lucide.createIcons();
+
+                try {
+                    const response = await fetch(CONFIG.endpoints.motion, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            sceneId: 'external',
+                            imageUrl: imageUrl,
+                            motionPrompt: motionPrompt || 'Slow dolly-in, smooth camera movement'
+                        })
+                    });
+
+                    if (!response.ok) throw new Error(`서버 오류: ${response.status}`);
+
+                    const result = await response.json();
+                    if (result.videoUrl) {
+                        const link = document.createElement('a');
+                        link.href = result.videoUrl;
+                        link.download = 'external_video.mp4';
+                        link.click();
+                        alert('비디오 생성 완료! 다운로드가 시작됩니다.');
+                    } else {
+                        throw new Error('비디오 URL이 없습니다.');
+                    }
+                } catch (e) {
+                    console.error(e);
+                    alert(`비디오 생성 실패: ${e.message}`);
+                } finally {
+                    btnExternalGen.disabled = false;
+                    btnExternalGen.innerHTML = originalText;
+                    lucide.createIcons();
+                }
+            });
+        }
+
+        // 모션 프롬프트 편집 시 상태 동기화
+        document.querySelectorAll('textarea[id^="motion-prompt-text-"]').forEach(textarea => {
+            textarea.addEventListener('input', (e) => {
+                const sceneId = e.target.getAttribute('data-scene-id');
+                const scene = scenes.find(s => s.sceneId == sceneId);
+                if (scene) {
+                    scene.motionPrompt = e.target.value;
+                }
+            });
+        });
+
+        // 구간 일괄 생성
+        const btnGenBatch = document.getElementById('btn-gen-motion-batch');
+        if (btnGenBatch) {
+            btnGenBatch.addEventListener('click', async () => {
+                const start = parseInt(document.getElementById('motion-range-start').value);
+                const end = parseInt(document.getElementById('motion-range-end').value);
+
+                if (isNaN(start) || isNaN(end) || start < 1 || end > scenes.length || start > end) {
+                    return alert(`유효한 범위를 입력해주세요 (1 ~ ${scenes.length})`);
+                }
+
+                const targetScenes = scenes.filter(s => s.sceneId >= start && s.sceneId <= end);
+                if (targetScenes.length === 0) return alert("선택된 범위에 장면이 없습니다.");
+
+                if (!confirm(`Scene ${start} 부터 ${end} 까지 총 ${targetScenes.length}개의 모션 프롬프트를 **동시에** 생성하시겠습니까?`)) return;
+
+                btnGenBatch.disabled = true;
+                const originalText = btnGenBatch.innerHTML;
+                let completed = 0;
+
+                const updateProgress = (count, total) => {
+                    btnGenBatch.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> 분석 중 (${count}/${targetScenes.length})`;
+                    lucide.createIcons();
+                };
+                updateProgress(0, targetScenes.length);
+
+                // Use batch processor (Concurrency limit: 5)
+                await processInBatches(targetScenes, 5, async (scene) => {
+                    const btn = document.querySelector(`.btn-gen-motion-prompt[data-id="${scene.sceneId}"]`);
+                    if (btn) {
+                        await generateMotionPrompt(btn);
+                    }
+                }, updateProgress);
+
+                btnGenBatch.disabled = false;
+                btnGenBatch.innerHTML = originalText;
+                lucide.createIcons();
+                alert(`구간 일괄 생성 완료! (${targetScenes.length}개)`);
+            });
+        }
+
+        // 비디오 일괄 생성 (병렬)
+        const btnGenVideoBatch = document.getElementById('btn-gen-motion-video-batch');
+        if (btnGenVideoBatch) {
+            btnGenVideoBatch.addEventListener('click', async () => {
+                const start = parseInt(document.getElementById('motion-range-start').value);
+                const end = parseInt(document.getElementById('motion-range-end').value);
+
+                if (isNaN(start) || isNaN(end) || start < 1 || end > scenes.length || start > end) {
+                    return alert(`유효한 범위를 입력해주세요 (1 ~ ${scenes.length})`);
+                }
+
+                const targetScenes = scenes.filter(s => s.sceneId >= start && s.sceneId <= end);
+                if (targetScenes.length === 0) return alert("선택된 범위에 장면이 없습니다.");
+
+                const validScenes = targetScenes.filter(s => s.generatedUrl && s.motionPrompt);
+                if (validScenes.length === 0) return alert("선택된 범위에 생성 가능한 장면이 없습니다.\n(이미지와 모션 프롬프트가 필요합니다)");
+
+                if (!confirm(`Scene ${start} 부터 ${end} 까지 생성 가능한 ${validScenes.length}개의 비디오를 **동시에** 생성하시겠습니까?\n\n(주의: 모션 비디오 생성은 시간이 오래 걸리며 서버 부하가 높을 수 있습니다)`)) return;
+
+                btnGenVideoBatch.disabled = true;
+                const originalText = btnGenVideoBatch.innerHTML;
+                let completed = 0;
+
+                const updateProgress = (count, total) => {
+                    btnGenVideoBatch.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> 생성 중 (${count}/${validScenes.length})`;
+                    lucide.createIcons();
+                };
+                updateProgress(0, validScenes.length);
+
+                // Batch Process for Video (Limit 2 - heavy)
+                await processInBatches(validScenes, 2, async (scene) => {
+                    const btn = document.querySelector(`#btn-video-${scene.sceneId}`);
+                    if (!btn) return;
+
+                    try {
+                        const sceneId = scene.sceneId;
+                        console.log(`Starting Batch Motion for Scene ${sceneId}`);
+
+                        const response = await fetch(CONFIG.endpoints.motion, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                sceneId: sceneId,
+                                imageUrl: scene.generatedUrl,
+                                motionPrompt: scene.motionPrompt,
+                                duration: 5,
+                                aspectRatio: AppState.ratio || '16:9'
+                            })
+                        });
+
+                        if (!response.ok) throw new Error('Failed');
+                        const result = await response.json();
+
+                        if (result.videoUrl) {
+                            scene.videoUrl = result.videoUrl;
+                            // Update UI
+                            const videoContainer = document.querySelector(`#motion-row-${sceneId} td:nth-child(5) div`);
+                            if (videoContainer) {
+                                videoContainer.innerHTML = `<video src="${result.videoUrl}" class="w-full h-full object-cover cursor-pointer" onclick="window.openLightbox(this.src)" title="클릭하여 크게 보기"></video>`;
+                                // Restore drag handlers
+                                videoContainer.setAttribute('ondragover', "event.preventDefault(); this.classList.add('border-purple-500', 'bg-purple-500/10');");
+                                videoContainer.setAttribute('ondragleave', "this.classList.remove('border-purple-500', 'bg-purple-500/10');");
+                                videoContainer.setAttribute('ondrop', 'window.handleAssetDrop(event, this)');
+                            }
+                            const downBtn = document.getElementById(`btn-down-video-${sceneId}`);
+                            if (downBtn) downBtn.classList.remove('hidden');
+                        }
+                    } catch (e) { console.error(`Batch Scene ${scene.sceneId} failed`, e); }
+                }, updateProgress);
+
+                await Promise.all([]); // Compatibility cleanup
+
+                btnGenVideoBatch.disabled = false;
+                btnGenVideoBatch.innerHTML = originalText;
+                lucide.createIcons();
+                alert(`비디오 일괄 생성 완료! (${validScenes.length}개 시도)`);
+            });
+        }
+
+        // 프롬프트 다운로드 (TXT)
+        const btnDownPrompts = document.getElementById('btn-down-motion-prompts');
+        if (btnDownPrompts) {
+            btnDownPrompts.addEventListener('click', () => {
+                let content = "";
+                scenes.forEach(s => {
+                    const id = String(s.sceneId).padStart(2, '0');
+                    const prompt = s.motionPrompt || "모션 프롬프트가 생성되지 않았습니다.";
+                    content += `Scene${id}_${prompt}\n\n`;
+                });
+
+                const blob = new Blob([content], { type: 'text/plain' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = "motion_prompts.txt";
+                link.click();
+                URL.revokeObjectURL(link.href);
+            });
+        }
+
+        // 비디오 일괄 다운로드
+        const btnDownVideos = document.getElementById('btn-down-motion-videos');
+        if (btnDownVideos) {
+            btnDownVideos.addEventListener('click', () => {
+                const scenesWithVideo = scenes.filter(s => s.videoUrl);
+                if (scenesWithVideo.length === 0) return alert("생성된 영상이 없습니다.");
+
+                if (!confirm(`총 ${scenesWithVideo.length}개의 영상을 다운로드 하시겠습니까?`)) return;
+
+                scenesWithVideo.forEach((s, i) => {
+                    setTimeout(() => {
+                        const link = document.createElement('a');
+                        link.href = s.videoUrl;
+                        link.download = `scene_${s.sceneId}.mp4`;
+                        link.click();
+                    }, i * 1000); // 1초 간격으로 다운로드
+                });
+            });
+        }
+
+        document.querySelectorAll('.btn-gen-video').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const sceneId = btn.getAttribute('data-id');
+                const scene = scenes.find(s => s.sceneId == sceneId);
+
+                // 필수 조건 체크
+                if (!scene.generatedUrl) {
+                    return alert("이미지가 먼저 생성되어야 합니다.");
+                }
+                if (!scene.motionPrompt) {
+                    return alert("모션 프롬프트를 먼저 생성해 주세요.");
+                }
+
+                const videoPreview = document.querySelector(`#motion-row-${sceneId} video`);
+                const videoContainer = videoPreview?.parentElement;
+                const downBtn = document.getElementById(`btn-down-video-${sceneId}`);
+
+                btn.disabled = true;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> 생성 중...`;
+                lucide.createIcons();
+
+                try {
+                    console.log(`Sending motion request for Scene ${sceneId}`);
+                    const response = await fetch(CONFIG.endpoints.motion, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            sceneId: sceneId,
+                            imageUrl: scene.generatedUrl,
+                            motionPrompt: scene.motionPrompt,
+                            duration: 5,
+                            aspectRatio: AppState.ratio || '16:9'
+                        })
+                    });
+
+                    const responseText = await response.text();
+                    console.log("Motion Response:", responseText);
+
+                    if (!response.ok) {
+                        throw new Error(`Server Error (${response.status}): ${responseText}`);
+                    }
+
+                    let result;
+                    try {
+                        result = JSON.parse(responseText);
+                    } catch (e) {
+                        throw new Error(`Invalid JSON Response: ${responseText.substring(0, 100)}...`);
+                    }
+
+                    if (result.success === false) {
+                        throw new Error(result.error || "Unknown Error from n8n");
+                    }
+
+                    if (result.videoUrl) {
+                        scene.videoUrl = result.videoUrl;
+
+                        // 비디오 미리보기 업데이트
+                        if (videoContainer) {
+                            videoContainer.innerHTML = `<video src="${result.videoUrl}" class="w-full h-full object-cover" controls></video>`;
+                        }
+
+                        // 다운로드 버튼 보이기
+                        if (downBtn) {
+                            downBtn.classList.remove('hidden');
+                            downBtn.setAttribute('onclick', `const link = document.createElement('a'); link.href = '${result.videoUrl}'; link.download = 'scene_${sceneId}.mp4'; link.click();`);
+                        }
+
+                        alert(`Scene ${sceneId} 비디오 생성 완료!`);
+                    } else {
+                        throw new Error("No videoUrl in response");
+                    }
+                } catch (e) {
+                    console.error(e);
+                    alert(`비디오 생성 실패: ${e.message}`);
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    lucide.createIcons();
+                }
+            });
+        });
+
+        lucide.createIcons();
+    }
+}
+
+// 7. TTS Module
+class TTSModule extends Module {
+    constructor() {
+        super('tts', 'TTS 녹음실', 'mic-2', 'ElevenLabs 음성 합성 및 타임라인 생성');
+        this.voiceSettings = {
+            voiceId: 'zcAOhNBS3c14rBihAFp1', // Default: Michael
+            stability: 0.5,
+            similarity: 0.75,
+            speed: 1.0
+        };
+        this.isPlayingAll = false;
+    }
+
+    render() {
+        const scenes = AppState.getScenes();
+
+        // 독립 실행 모드: 장면이 없어도 직접 TTS 생성 가능
+        const standalonePanel = `
+            <div class="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-500/30 rounded-2xl p-6 mb-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-2 bg-blue-500/20 rounded-lg text-blue-400">
+                        <i data-lucide="zap" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">🚀 독립 실행 모드</h3>
+                    <span class="ml-auto text-xs text-blue-400 bg-blue-500/20 px-3 py-1 rounded-full">분석 없이 바로 TTS</span>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">대본 직접 입력</label>
+                        <textarea id="standalone-tts-input" 
+                            class="w-full h-32 bg-slate-900 border border-slate-700 rounded-xl p-4 text-sm text-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none scrollbar-hide"
+                            placeholder="여기에 대본을 직접 입력하세요. 줄바꿈으로 여러 항목을 추가할 수 있습니다."></textarea>
+                        <div class="flex justify-between text-xs text-slate-500 px-1 mt-1">
+                            <span><i data-lucide="info" class="w-3 h-3 inline"></i> 줄바꿈(Enter)으로 여러 TTS 항목 분리</span>
+                            <span id="standalone-char-count">0자</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <button id="btn-standalone-add-items" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white px-4 py-3 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2">
+                            <i data-lucide="plus-circle" class="w-4 h-4"></i> 목록에 추가
+                        </button>
+                        <button id="btn-standalone-tts-gen" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white px-4 py-3 rounded-xl text-sm font-bold shadow-lg shadow-blue-600/20 transition flex items-center justify-center gap-2">
+                            <i data-lucide="mic" class="w-4 h-4"></i> 즉시 TTS 생성
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        if (scenes.length === 0) {
+            return `
+                <div class="max-w-4xl mx-auto slide-up space-y-6">
+                    ${standalonePanel}
+                    
+                    <!-- Empty State Hint -->
+                    <div class="text-center p-10 text-slate-500 border border-dashed border-slate-700 rounded-2xl">
+                        <i data-lucide="list-plus" class="w-12 h-12 mx-auto mb-4 opacity-50"></i>
+                        <h3 class="text-lg font-bold">TTS 항목이 없습니다</h3>
+                        <p class="text-sm mt-2">위 입력창에서 대본을 입력하고 "목록에 추가" 버튼을 누르세요.</p>
+                        <p class="text-xs mt-1 text-slate-600">또는 대본 분석실에서 장면 분할을 먼저 진행하세요.</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        const sceneRows = scenes.map(scene => `
+            <tr class="border-b border-slate-800/50 hover:bg-white/5 transition group" id="tts-row-${scene.sceneId}">
+                <td class="py-4 pl-4 text-xs font-bold text-slate-500 align-top pt-6">#${scene.sceneId}</td>
+                <td class="py-4 px-4 w-1/2">
+                    <div class="flex flex-col gap-2">
+                        <textarea id="tts-script-${scene.sceneId}" 
+                            class="w-full bg-slate-900/50 border border-slate-700 rounded-lg p-3 text-sm text-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none h-24 scrollbar-hide"
+                            placeholder="대본을 입력하세요...">${scene.scriptForTTS || scene.originalScript}</textarea>
+                        <div class="flex justify-between text-xs text-slate-500 px-1">
+                            <span><i data-lucide="edit-3" class="w-3 h-3 inline"></i> 편집 가능</span>
+                            <span id="tts-char-count-${scene.sceneId}">${(scene.scriptForTTS || scene.originalScript).length}자</span>
+                        </div>
+                    </div>
+                </td>
+                <td class="py-4 px-4 align-top pt-6">
+                    <div class="flex flex-col gap-3">
+                         <div class="bg-black/30 rounded-lg p-3 border border-slate-700/50 min-h-[60px] flex flex-col justify-center items-center relative" id="audio-container-${scene.sceneId}">
+                            ${scene.audioUrl
+                ? `<audio src="${scene.audioUrl}" controls class="w-full h-8" id="audio-player-${scene.sceneId}"></audio>
+                                   <div class="mt-2 flex gap-2 w-full">
+                                        <div class="flex-1 bg-green-900/30 text-green-400 text-[10px] font-mono px-2 py-1 rounded border border-green-500/30 flex items-center justify-center gap-1">
+                                            <i data-lucide="check-circle-2" class="w-3 h-3"></i> Audio Ready
+                                        </div>
+                                        ${scene.alignmentData
+                    ? `<div class="flex-1 bg-purple-900/30 text-purple-400 text-[10px] font-mono px-2 py-1 rounded border border-purple-500/30 flex items-center justify-center gap-1" title="Word Timestamps Available">
+                                                <i data-lucide="clock" class="w-3 h-3"></i> Sync Data
+                                               </div>`
+                    : `<div class="flex-1 bg-slate-800 text-slate-600 text-[10px] font-mono px-2 py-1 rounded border border-slate-700 flex items-center justify-center gap-1 opacity-50">
+                                                No Sync Data
+                                               </div>`
+                }
+                                   </div>`
+                : `<span class="text-xs text-slate-600">오디오 미생성</span>`
+            }
+                        </div>
+                    </div>
+                </td>
+                <td class="py-4 pr-6 text-right w-32 align-top pt-6">
+                     <button class="btn-gen-tts w-full bg-slate-700 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-2 mb-2" 
+                        data-id="${scene.sceneId}">
+                        <i data-lucide="mic" class="w-3.5 h-3.5"></i> 생성
+                    </button>
+                    ${scene.audioUrl ? `
+                    <button onclick="const a = document.createElement('a'); a.href='${scene.audioUrl}'; a.download='voice_${scene.sceneId}.mp3'; a.click();" 
+                        class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-lg text-[10px] font-bold transition flex items-center justify-center gap-2">
+                        <i data-lucide="download" class="w-3 h-3"></i> 다운로드
+                    </button>` : ''}
+                </td>
+            </tr>
+        `).join('');
+
+        return `
+            <div class="max-w-6xl mx-auto slide-up space-y-6">
+                
+                <!-- 1. Voice Settings Panel (Global) -->
+                <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
+                    <div class="flex items-center gap-3 mb-4 border-b border-slate-700 pb-4">
+                        <div class="p-2 bg-blue-500/20 rounded-lg text-blue-400">
+                            <i data-lucide="sliders" class="w-5 h-5"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white">보이스 설정 (Global Settings)</h3>
+                        <span class="text-xs text-slate-400 ml-auto">* 모든 장면에 일괄 적용됩니다.</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <!-- Voice ID Selector -->
+                        <div class="space-y-2 col-span-2">
+                            <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Voice Actor (Korean Optimized)</label>
+                            <select id="tts-voice-id" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                                <option value="zcAOhNBS3c14rBihAFp1" selected>Michael (Standard Male / 차분함)</option>
+                                <option value="EXAVITQu4vr4xnSDxMaL">Sarah (Professional Female / 전문가)</option>
+                                <option value="JBFQNCBsd6RMkjVDRZzb">George (Narration / 깊은 울림)</option>
+                                <option value="FGY2WhTYq4uDQk601ULg">Nicole (Whisper / 감성적)</option>
+                                <option value="Xb7hH8MSUJpSbSDYk0k2">Alice (News Anchor / 뉴스 톤)</option>
+                            </select>
+                        </div>
+
+                        <!-- Stability Slider -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Stability</label>
+                                <span id="val-stability" class="text-xs font-mono text-blue-400">${this.voiceSettings.stability}</span>
+                            </div>
+                            <input type="range" id="rng-stability" min="0" max="1" step="0.05" value="${this.voiceSettings.stability}" 
+                                class="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                        </div>
+
+                        <!-- Speed Slider -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Speed</label>
+                                <span id="val-speed" class="text-xs font-mono text-blue-400">${this.voiceSettings.speed}x</span>
+                            </div>
+                            <input type="range" id="rng-speed" min="0.5" max="2.0" step="0.1" value="${this.voiceSettings.speed}" 
+                                class="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Action Toolbar -->
+                <div class="flex justify-between items-center bg-slate-800/40 p-4 rounded-2xl border border-slate-700/50">
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm font-bold text-slate-400">총 <b>${scenes.length}</b>개 스크립트</span>
+                    </div>
+                    <div class="flex gap-3">
+                        <button id="btn-tts-play-all" class="bg-slate-700 hover:bg-green-600 text-white px-6 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2">
+                            <i data-lucide="play-circle" class="w-4 h-4"></i> 전체 이어듣기
+                        </button>
+                         <button id="btn-tts-gen-all" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/20 transition flex items-center gap-2">
+                            <i data-lucide="zap" class="w-4 h-4"></i> 전체 일괄 생성
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3. Scripts List -->
+                <div class="bg-slate-800/20 border border-slate-700/50 rounded-3xl overflow-hidden shadow-2xl">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-900/60 border-b border-slate-700">
+                            <tr>
+                                <th class="py-4 pl-4 text-[10px] font-black text-slate-500 uppercase tracking-widest w-16">ID</th>
+                                <th class="py-4 px-4 text-[10px] font-black text-slate-500 uppercase tracking-widest w-1/2">대본 편집 (실제 발음용)</th>
+                                <th class="py-4 px-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">오디오 및 싱크 데이터</th>
+                                <th class="py-4 pr-6 text-right text-[10px] font-black text-slate-500 uppercase tracking-widest w-32">액션</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${sceneRows}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+
+    onMount() {
+        const scenes = AppState.getScenes();
+        const self = this; // Capture 'this' for event listeners
+
+        // --- 🚀 Standalone TTS 이벤트 핸들러 ---
+        const standaloneInput = document.getElementById('standalone-tts-input');
+        const standaloneCharCount = document.getElementById('standalone-char-count');
+        const btnAddItems = document.getElementById('btn-standalone-add-items');
+        const btnStandaloneTts = document.getElementById('btn-standalone-tts-gen');
+
+        if (standaloneInput) {
+            // 글자 수 카운터
+            standaloneInput.addEventListener('input', () => {
+                if (standaloneCharCount) {
+                    standaloneCharCount.innerText = `${standaloneInput.value.length}자`;
+                }
+            });
+        }
+
+        if (btnAddItems) {
+            btnAddItems.addEventListener('click', () => {
+                const text = standaloneInput?.value.trim();
+                if (!text) return alert('대본을 입력해주세요.');
+
+                // 줄바꿈으로 분리하여 여러 항목 추가
+                const lines = text.split('\n').filter(line => line.trim());
+                const currentScenes = AppState.getScenes();
+                const startId = currentScenes.length > 0 ? Math.max(...currentScenes.map(s => s.sceneId)) + 1 : 1;
+
+                const newScenes = lines.map((line, index) => ({
+                    sceneId: startId + index,
+                    originalScript: line.trim(),
+                    scriptForTTS: line.trim(),
+                    imagePrompt: '',
+                    motionPrompt: '',
+                    generatedUrl: null,
+                    videoUrl: null,
+                    audioUrl: null,
+                    srtData: null
+                }));
+
+                AppState.setScenes([...currentScenes, ...newScenes]);
+                standaloneInput.value = '';
+                alert(`${newScenes.length}개의 TTS 항목이 추가되었습니다.`);
+
+                // Re-render the module
+                if (window.app) window.app.route('tts');
+            });
+        }
+
+        if (btnStandaloneTts) {
+            btnStandaloneTts.addEventListener('click', async () => {
+                const text = standaloneInput?.value.trim();
+                if (!text) return alert('대본을 입력해주세요.');
+
+                btnStandaloneTts.disabled = true;
+                const originalText = btnStandaloneTts.innerHTML;
+                btnStandaloneTts.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> 생성 중...`;
+                lucide.createIcons();
+
+                try {
+                    const payload = {
+                        sceneId: 'standalone',
+                        text: text,
+                        settings: self.voiceSettings
+                    };
+
+                    const response = await fetch(CONFIG.endpoints.tts, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) throw new Error(`서버 오류: ${response.status}`);
+
+                    const result = await response.json();
+                    if (result.audioUrl) {
+                        // 오디오 다운로드
+                        const link = document.createElement('a');
+                        link.href = result.audioUrl;
+                        link.download = 'standalone_tts.mp3';
+                        link.click();
+                        alert('TTS 생성 완료! 다운로드가 시작됩니다.');
+                    } else {
+                        throw new Error('오디오 URL이 없습니다.');
+                    }
+                } catch (e) {
+                    console.error(e);
+                    alert(`TTS 생성 실패: ${e.message}`);
+                } finally {
+                    btnStandaloneTts.disabled = false;
+                    btnStandaloneTts.innerHTML = originalText;
+                    lucide.createIcons();
+                }
+            });
+        }
+
+        // --- Settings Event Listeners ---
+        const updateSetting = (key, val, displayId) => {
+            if (key === 'voiceId') val = String(val); // VoiceId string
+            else val = parseFloat(val); // Numbers
+
+            this.voiceSettings[key] = val;
+            if (displayId) {
+                const el = document.getElementById(displayId);
+                if (el) el.innerText = key === 'speed' ? val + 'x' : val;
+            }
+            console.log("Updated Voice Settings:", this.voiceSettings);
+        };
+
+        const selVoice = document.getElementById('tts-voice-id');
+        if (selVoice) {
+            selVoice.value = this.voiceSettings.voiceId; // Set stored value
+            selVoice.addEventListener('change', (e) => updateSetting('voiceId', e.target.value));
+        }
+
+        const rngStability = document.getElementById('rng-stability');
+        if (rngStability) rngStability.addEventListener('input', (e) => updateSetting('stability', e.target.value, 'val-stability'));
+
+        const rngSpeed = document.getElementById('rng-speed');
+        if (rngSpeed) rngSpeed.addEventListener('input', (e) => updateSetting('speed', e.target.value, 'val-speed'));
+
+
+        // --- Helper: Generate TTS ---
+        const generateTTS = async (sceneId, btn) => {
+            const scene = AppState.getScenes().find(s => s.sceneId == sceneId);
+            const textArea = document.getElementById(`tts-script-${sceneId}`);
+            const updatedScript = textArea.value.trim();
+            const audioContainer = document.getElementById(`audio-container-${sceneId}`);
+
+            // Save the updated script to state
+            scene.scriptForTTS = updatedScript;
+
+            if (!updatedScript) return alert("대본 내용이 없습니다.");
+
+            const originalBtnHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> 생성 중`;
+            lucide.createIcons();
+
+            try {
+                // Send Global Settings along with request
+                const payload = {
+                    sceneId: sceneId,
+                    text: updatedScript,
+                    settings: this.voiceSettings // { voiceId, stability, speed }
+                };
+
+                console.log("Sending TTS Request:", payload);
+
+                const response = await fetch(CONFIG.endpoints.tts, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                // 응답 본문 먼저 읽기
+                const responseText = await response.text();
+
+                if (!response.ok) {
+                    let errorDetail = responseText;
+                    try {
+                        const json = JSON.parse(responseText);
+                        errorDetail = json.error || json.message || responseText;
+                    } catch (e) { }
+
+                    // UI Error State: Highlight script area
+                    textArea.classList.add('border-red-500', 'bg-red-900/10');
+                    setTimeout(() => textArea.classList.remove('border-red-500', 'bg-red-900/10'), 5000);
+
+                    throw new Error(`Server Error (${response.status}): ${errorDetail}`);
+                }
+
+                // 빈 응답 확인
+                if (!responseText || responseText.trim() === '') {
+                    throw new Error('TTS 서버에서 빈 응답을 받았습니다. n8n 워크플로우를 확인하세요.');
+                }
+
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                } catch (e) {
+                    console.error('JSON Parse Error:', responseText.substring(0, 200));
+                    throw new Error(`TTS 응답 파싱 실패: ${responseText.substring(0, 100)}...`);
+                }
+
+                if (result.success === false) {
+                    throw new Error(result.error || "Unknown Error from n8n");
+                }
+
+                if (result.audioUrl) {
+                    // Update State
+                    scene.audioUrl = result.audioUrl;
+                    scene.alignmentData = result.alignment || null; // Capture timestamp data if available
+                    scene.srtData = result.srt || null; // Capture SRT data
+
+                    console.log(`[TTS Debug Scene ${sceneId}]`, result); // Debug log
+                    if (!result.srt) console.warn('Missing SRT data in response');
+
+                    // UI Update: Show Audio Player & Sync Badge
+                    const hasSync = !!scene.alignmentData;
+                    const srtPreview = result.srt ? result.srt.substring(0, 50).replace(/\n/g, ' ') + '...' : 'No Subtitles';
+
+                    audioContainer.innerHTML = `
+                        <audio src="${result.audioUrl}" controls class="w-full h-8" id="audio-player-${sceneId}"></audio>
+                        <div class="mt-2 flex gap-2 w-full">
+                            <div class="flex-1 bg-green-900/30 text-green-400 text-[10px] font-mono px-2 py-1 rounded border border-green-500/30 flex items-center justify-center gap-1">
+                                <i data-lucide="check-circle-2" class="w-3 h-3"></i> Audio Ready
+                            </div>
+                            ${hasSync
+                            ? `<div class="flex-1 bg-purple-900/30 text-purple-400 text-[10px] font-mono px-2 py-1 rounded border border-purple-500/30 flex items-center justify-center gap-1 group relative cursor-help">
+                                    <i data-lucide="subtitles" class="w-3 h-3"></i> SRT Ready
+                                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 w-64 bg-slate-900 border border-slate-700 p-2 rounded-lg text-[10px] text-slate-300 hidden group-hover:block z-50 mb-2 shadow-xl whitespace-pre-wrap font-sans">
+                                        <div class="font-bold text-white border-b border-slate-700 pb-1 mb-1">SRT Preview for Creatomate</div>
+                                        ${result.srt || 'No SRT data received'}
+                                    </div>
+                                   </div>`
+                            : `<div class="flex-1 bg-slate-800 text-slate-600 text-[10px] font-mono px-2 py-1 rounded border border-slate-700 flex items-center justify-center gap-1 opacity-50">
+                                    No Sync Data
+                                   </div>`
+                        }
+                        </div>
+                    `;
+                    lucide.createIcons();
+                } else {
+                    throw new Error("No audioUrl returned");
+                }
+
+            } catch (e) {
+                console.error(e);
+                alert(`TTS 생성 실패: ${e.message}`);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalBtnHtml;
+                lucide.createIcons();
+            }
+        };
+
+
+        // --- Event Listeners: Individual Generate ---
+        document.querySelectorAll('.btn-gen-tts').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.getAttribute('data-id');
+                generateTTS(id, btn);
+            });
+        });
+
+        // --- Event Listeners: Textarea Change ---
+        document.querySelectorAll('textarea[id^="tts-script-"]').forEach(ta => {
+            ta.addEventListener('input', (e) => {
+                const id = e.target.id.split('-').pop();
+                const charCnt = document.getElementById(`tts-char-count-${id}`);
+                if (charCnt) charCnt.innerText = `${e.target.value.length}자`;
+
+                // Update state immediately to prevent loss
+                const scene = AppState.getScenes().find(s => s.sceneId == id);
+                if (scene) scene.scriptForTTS = e.target.value;
+            });
+        });
+
+        // --- Batch Generation ---
+        const btnGenAll = document.getElementById('btn-tts-gen-all');
+        if (btnGenAll) {
+            btnGenAll.addEventListener('click', async () => {
+                const btns = Array.from(document.querySelectorAll('.btn-gen-tts'));
+                if (!confirm(`총 ${btns.length}개 스크립트에 대해 음성을 일괄 생성합니다.\n(현재 보이스 설정이 적용됩니다)\n계속하시겠습니까?`)) return;
+
+                btnGenAll.disabled = true;
+                const originalText = btnGenAll.innerHTML;
+
+                for (let i = 0; i < btns.length; i++) {
+                    const btn = btns[i];
+                    const id = btn.getAttribute('data-id');
+
+                    btnGenAll.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> 생성 중 (${i + 1}/${btns.length})`;
+                    lucide.createIcons();
+
+                    await generateTTS(id, btn);
+
+                    // Small safety delay
+                    if (i < btns.length - 1) await new Promise(r => setTimeout(r, 1000));
+                }
+
+                btnGenAll.disabled = false;
+                btnGenAll.innerHTML = originalText;
+                lucide.createIcons();
+                alert("일괄 생성 완료!");
+            });
+        }
+
+        // --- Sequential Playback (Preview Flow) ---
+        const btnPlayAll = document.getElementById('btn-tts-play-all');
+        if (btnPlayAll) {
+            btnPlayAll.addEventListener('click', async () => {
+                const audioElements = [];
+                // Collect only available audios in order
+                AppState.getScenes().forEach(s => {
+                    if (s.audioUrl) {
+                        const el = document.getElementById(`audio-player-${s.sceneId}`);
+                        if (el) audioElements.push(el);
+                    }
+                });
+
+                if (audioElements.length === 0) return alert("재생할 오디오가 없습니다.");
+
+                // Stop current playback if any
+                audioElements.forEach(el => { el.pause(); el.currentTime = 0; });
+
+                btnPlayAll.disabled = true;
+                btnPlayAll.innerHTML = `<i data-lucide="volume-2" class="w-4 h-4 animate-pulse"></i> 재생 중...`;
+                lucide.createIcons();
+
+                // Recursive play function
+                const playNext = (index) => {
+                    if (index >= audioElements.length) {
+                        btnPlayAll.disabled = false;
+                        btnPlayAll.innerHTML = `<i data-lucide="play-circle" class="w-4 h-4"></i> 전체 이어듣기`;
+                        lucide.createIcons();
+                        return;
+                    }
+
+                    const current = audioElements[index];
+                    current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    current.parentElement.classList.add('ring-2', 'ring-blue-500'); // Highlight
+
+                    current.play().catch(e => console.log("Auto-play blocked or error", e));
+
+                    current.onended = () => {
+                        current.parentElement.classList.remove('ring-2', 'ring-blue-500');
+                        playNext(index + 1);
+                    };
+                };
+
+                playNext(0);
+            });
+        }
+
+        lucide.createIcons();
+    }
+}
+
+// 5. Video Module (Final Assembly)
+class VideoModule extends Module {
+    constructor() {
+        super('video', '최종 편집실', 'film', '시각/청각 자산 통합 및 최종 영상 생성');
+    }
+
+    render() {
+        const scenes = AppState.getScenes();
+        if (scenes.length === 0) return this.renderEmpty('생성된 장면이 없습니다.');
+
+        const sceneRows = scenes.map(scene => this.renderSceneRow(scene)).join('');
+
+        return `
+            <div class="max-w-6xl mx-auto slide-up space-y-6">
+                <!-- Action Toolbar -->
+                <div class="flex justify-between items-center bg-slate-800/40 p-4 rounded-2xl border border-slate-700/50">
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm font-bold text-slate-400">총 <b>${scenes.length}</b>개 씬</span>
+                    </div>
+                    <div>
+                         <button id="btn-gen-final-video" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/20 transition flex items-center gap-2">
+                            <i data-lucide="clapperboard" class="w-4 h-4"></i> 최종 영상 생성 (Creatomate)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Final Video Preview (Hidden by default) -->
+                <div id="final-video-container" class="hidden bg-slate-800/60 border border-slate-700 rounded-3xl p-6 shadow-2xl">
+                    <div class="flex items-center gap-3 mb-4 border-b border-slate-700 pb-4">
+                        <div class="p-2 bg-green-500/20 rounded-lg text-green-400">
+                            <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white">최종 영상 생성 완료!</h3>
+                    </div>
+                    <div class="aspect-video bg-black rounded-xl overflow-hidden mb-4">
+                        <video id="final-video-player" controls class="w-full h-full"></video>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div class="text-sm text-slate-400">
+                            <span id="final-video-info"></span>
+                        </div>
+                        <button id="btn-download-final" class="bg-green-600 hover:bg-green-500 text-white px-6 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2">
+                            <i data-lucide="download" class="w-4 h-4"></i> 최종 영상 다운로드
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Scene List -->
+                <div class="bg-slate-800/20 border border-slate-700/50 rounded-3xl overflow-hidden shadow-2xl">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-900/60 border-b border-slate-700">
+                            <tr>
+                                <th class="py-4 pl-4 text-[10px] font-black text-slate-500 uppercase tracking-widest w-16">ID</th>
+                                <th class="py-4 px-4 text-[10px] font-black text-slate-500 uppercase tracking-widest w-1/3">Visual Asset</th>
+                                <th class="py-4 px-4 text-[10px] font-black text-slate-500 uppercase tracking-widest w-1/3">Audio & Subtitle</th>
+                                <th class="py-4 px-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Settings</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${sceneRows}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+
+    renderSceneRow(scene) {
+        const hasImage = !!scene.generatedUrl;
+        const hasMotion = !!scene.videoUrl;
+        const hasAudio = !!scene.audioUrl;
+        // SRT 데이터 체크 수정: srtData 또는 srt 둘 다 확인
+        const srtContent = scene.srtData || scene.srt || null;
+        const hasSrt = !!srtContent;
+
+        // Visual Source Toggle State (Default to motion if available, else image)
+        const useMotion = hasMotion;
+
+        return `
+            <tr class="border-b border-slate-700/50 hover:bg-slate-800/30 transition group" data-scene-id="${scene.sceneId}">
+                <td class="py-4 pl-4 font-mono text-xs text-slate-500 align-top pt-6">#${scene.sceneId}</td>
+                
+                <!-- Visual Asset Column with Drag & Drop -->
+                <td class="py-4 px-4 align-top">
+                    <div class="flex flex-col gap-3">
+                        <div class="aspect-video bg-slate-900 rounded-lg overflow-hidden border border-slate-700 relative group-hover:border-slate-600 transition drop-zone-video"
+                             data-scene-id="${scene.sceneId}"
+                             ondragover="event.preventDefault(); this.classList.add('border-purple-500', 'bg-purple-500/10');"
+                             ondragleave="this.classList.remove('border-purple-500', 'bg-purple-500/10');"
+                             ondrop="window.handleVideoAssetDrop(event, this)">
+                            ${useMotion && hasMotion
+                ? `<video src="${scene.videoUrl}" controls class="w-full h-full object-cover"></video>`
+                : (hasImage ? `<img src="${scene.generatedUrl}" class="w-full h-full object-cover">` : `<div class="w-full h-full flex items-center justify-center text-xs text-slate-600">No Asset<br><span class="text-[10px] opacity-60">Drag to Replace</span></div>`
+                )}
+                            <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
+                                ${scene.generatedUrl ? `
+                                    <button onclick="openLightbox('${scene.generatedUrl}')" class="p-2 bg-white/20 hover:bg-white/40 rounded-full text-white backdrop-blur-sm transition" title="크게 보기">
+                                        <i data-lucide="maximize-2" class="w-4 h-4"></i>
+                                    </button>
+                                ` : ''}
+                                <label class="p-2 bg-white/20 hover:bg-white/40 rounded-full text-white backdrop-blur-sm transition cursor-pointer" title="파일 선택">
+                                    <i data-lucide="upload" class="w-4 h-4"></i>
+                                    <input type="file" accept="image/*,video/*" class="hidden" onchange="window.handleVideoFileSelect(event, ${scene.sceneId})">
+                                </label>
+                            </div>
+                            <!-- Drag Hint -->
+                            <div class="absolute bottom-1 right-1 text-[7px] text-slate-500 bg-black/40 px-1 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none">
+                                📎 Drop to replace
+                            </div>
+                        </div>
+                    </div>
+                </td>
+
+                <!-- Audio & Subtitle Column -->
+                <td class="py-4 px-4 align-top">
+                    <div class="space-y-2">
+                        <div class="p-3 bg-slate-900/50 rounded-xl border border-slate-700">
+                             <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-bold text-slate-400">Audio Track</span>
+                                ${hasAudio
+                ? `<span class="text-[10px] text-green-400 font-mono bg-green-900/30 px-1.5 py-0.5 rounded border border-green-500/30">Ready</span>`
+                : `<span class="text-[10px] text-red-400 font-mono bg-red-900/30 px-1.5 py-0.5 rounded border border-red-500/30">Missing</span>`
+            }
+                             </div>
+                             ${hasAudio ? `<audio src="${scene.audioUrl}" controls class="w-full h-6 rounded"></audio>` : ''}
+                        </div>
+
+                        <div class="p-3 bg-slate-900/50 rounded-xl border border-slate-700">
+                             <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-bold text-slate-400">Subtitle (SRT)</span>
+                                ${hasSrt
+                ? `<span class="text-[10px] text-purple-400 font-mono bg-purple-900/30 px-1.5 py-0.5 rounded border border-purple-500/30">Sync Data</span>`
+                : `<span class="text-[10px] text-slate-500 font-mono">No Data</span>`
+            }
+                             </div>
+                             <div class="text-[10px] text-slate-400 font-mono h-12 overflow-y-auto bg-black/20 p-2 rounded">
+                                ${hasSrt ? srtContent.replace(/\n/g, '<br>') : '...'}
+                             </div>
+                        </div>
+                    </div>
+                </td>
+
+                <!-- Settings -->
+                <td class="py-4 px-4 align-top text-right">
+                    <div class="flex flex-col gap-2 items-end">
+                        <label class="flex items-center gap-2 text-xs text-slate-400 cursor-pointer">
+                            <input type="checkbox" checked class="rounded bg-slate-700 border-slate-600 text-blue-600 focus:ring-0">
+                            <span>Include in Final Video</span>
+                        </label>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+
+    onMount() {
+        super.onMount();
+
+        // Handle "Generate Final Video" button
+        const btnGen = document.getElementById('btn-gen-final-video');
+        if (btnGen) {
+            btnGen.addEventListener('click', () => this.generateFinalVideo(btnGen));
+        }
+    }
+
+    async generateFinalVideo(btn) {
+        if (!confirm('모든 씬을 하나로 합쳐 최종 영상을 생성하시겠습니까?')) return;
+
+        const scenes = AppState.getScenes();
+
+        // Helper: Extract duration from SRT content (last timestamp)
+        const getDurationFromSRT = (srtContent) => {
+            if (!srtContent) return 5; // Default 5s if no SRT
+
+            const timeRegex = /(\d{2}):(\d{2}):(\d{2}),(\d{3})/g;
+            const matches = [...srtContent.matchAll(timeRegex)];
+
+            if (matches.length === 0) return 5;
+
+            // Get last timestamp (even index = start, odd = end)
+            const lastMatch = matches[matches.length - 1];
+            const [_, hours, minutes, seconds, milliseconds] = lastMatch;
+
+            const totalSeconds =
+                parseInt(hours) * 3600 +
+                parseInt(minutes) * 60 +
+                parseInt(seconds) +
+                parseInt(milliseconds) / 1000;
+
+            return Math.ceil(totalSeconds); // Round up to ensure full audio
+        };
+
+        const timeline = scenes.map(s => ({
+            sceneId: s.sceneId,
+            visualUrl: s.videoUrl || s.generatedUrl, // Prefer video, fallback to image
+            audioUrl: s.audioUrl,
+            srtContent: s.srtData,
+            duration: getDurationFromSRT(s.srtData) // Calculate from SRT timestamps
+        })).filter(item => {
+            if (!item.visualUrl || !item.audioUrl) return false;
+
+            // Check for large Base64 (approx > 2MB) which might fail in Creatomate download
+            if (item.visualUrl.startsWith('data:image') && item.visualUrl.length > 2000000) {
+                console.warn(`Scene ${item.sceneId}: Base64 image might be too large for direct download.`);
+                // We still allow it but maybe we should warn? 
+                // Actually, let's allow it but rely on n8n to handle it if possible.
+                // But better yet, if we have a cloud URL (which we don't for generic DALL-E unless uploaded), 
+                // we face this issue. 
+                // Let's just proceed.
+            }
+            return true;
+        });
+
+        if (timeline.length === 0) return alert('생성 가능한 씬이 없습니다. (이미지/동영상 + 오디오 필수)');
+
+        console.log("✅ Sending to n8n - Video Timeline:", timeline);
+
+        // Show loading state
+        const totalDuration = timeline.reduce((sum, item) => sum + item.duration, 0);
+        btn.disabled = true;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> 생성 중... (약 ${Math.ceil(totalDuration / 60)}분 예상)`;
+        lucide.createIcons();
+
+        try {
+            // Call n8n video workflow
+            const response = await fetch(CONFIG.endpoints.video, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ timeline })
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Server Error (${response.status}): ${errorText}`);
+            }
+
+            const result = await response.json();
+            console.log("✅ Creatomate Response:", result);
+
+            // Expected response from Creatomate: { url: 'video_url', id: 'render_id', status: 'succeeded' }
+            if (result.url || result.video_url) {
+                const videoUrl = result.url || result.video_url;
+
+                // Show final video container
+                const container = document.getElementById('final-video-container');
+                const player = document.getElementById('final-video-player');
+                const info = document.getElementById('final-video-info');
+                const downloadBtn = document.getElementById('btn-download-final');
+
+                if (container && player && info && downloadBtn) {
+                    player.src = videoUrl;
+                    info.textContent = `총 ${timeline.length}개 씬 | 재생 시간: ${totalDuration}초`;
+                    container.classList.remove('hidden');
+
+                    // Download handler
+                    downloadBtn.onclick = () => {
+                        const link = document.createElement('a');
+                        link.href = videoUrl;
+                        link.download = `final_video_${Date.now()}.mp4`;
+                        link.click();
+                    };
+
+                    lucide.createIcons();
+
+                    // Scroll to video
+                    container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+
+                alert(`✅ 최종 영상 생성 완료!\n\n아래에서 확인하실 수 있습니다.`);
+            } else {
+                throw new Error('No video URL in response. Check n8n workflow and Creatomate API key.');
+            }
+
+        } catch (e) {
+            console.error('❌ Video Generation Error:', e);
+            alert(`영상 생성 실패:\n${e.message}\n\nn8n 워크플로우와 Creatomate API 키를 확인해주세요.`);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+            lucide.createIcons();
+        }
+    }
+}
+
+// --- 🎮 APP CONTROLLER ---
+class App {
+    constructor() {
+        this.modules = [
+            // new Module('home', '대시보드', 'layout-dashboard', '전체 작업 흐름'), // Replaced by standard modules
+            new TrendModule(),
+            new YoutubeModule(),
+            new ScriptModule(),
+            new ImageModule(),
+            new MotionModule(),
+            new TTSModule(),
+            new VideoModule()
+        ];
+        this.currentModuleId = 'script'; // Default start
+        this.init();
+    }
+
+    init() {
+        this.renderNav();
+        this.route(this.currentModuleId);
+    }
+
+    renderNav() {
+        const nav = document.getElementById('main-nav');
+        nav.innerHTML = this.modules.map(mod => {
+            const isActive = this.currentModuleId === mod.id;
+            const baseClass = "flex items-center gap-4 px-6 py-4 rounded-xl transition-all duration-300 relative overflow-hidden group w-full text-left";
+            const activeClass = "bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-[0_0_20px_rgba(59,130,246,0.3)]";
+            const inactiveClass = "text-slate-400 hover:bg-white/10 hover:text-white";
+
+            return `
+                <button onclick="app.route('${mod.id}')" class="${baseClass} ${isActive ? activeClass : inactiveClass}">
+                    ${isActive ? `<div class="absolute left-0 top-0 w-1 h-full bg-blue-500 shadow-[0_0_10px_#3b82f6]"></div>` : ''}
+                    <i data-lucide="${mod.icon}" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                    <span class="font-bold text-sm tracking-wide">${mod.name}</span>
+                </button>
+                ${mod.id === 'home' || mod.id === 'youtube' ? '<div class="h-px bg-slate-800 m-2 mx-4"></div>' : ''}
+            `;
+        }).join('');
+        lucide.createIcons();
+    }
+
+    route(moduleId) {
+        this.currentModuleId = moduleId;
+        const module = this.modules.find(m => m.id === moduleId);
+
+        // Update Nav UI
+        this.renderNav();
+
+        // Update Header
+        document.getElementById('page-title').innerText = module.name;
+        document.getElementById('page-desc').innerText = module.desc || "";
+
+        // Render Content
+        const contentArea = document.getElementById('app-content');
+        contentArea.innerHTML = module.render();
+
+        // Execute Logic
+        module.onMount();
+
+        lucide.createIcons();
+    }
+}
+
+// Start Application
+const app = new App();
+
+// --- 🖼️ GLOBAL LIGHTBOX LOGIC ---
+const lightboxOverlay = document.getElementById('lightbox-overlay');
+const lightboxContent = document.getElementById('lightbox-content');
+const lightboxClose = document.getElementById('lightbox-close');
+
+window.openLightbox = (content) => {
+    // Check if content is URL (image) or HTML
+    if (content.match(/\.(jpeg|jpg|gif|png|webp)$/) || content.startsWith('data:image')) {
+        lightboxContent.innerHTML = `<img src="${content}" class="max-w-[90vw] max-h-[90vh] rounded-lg shadow-2xl object-contain">`;
+    } else if (content.match(/\.(mp4|webm)$/)) {
+        lightboxContent.innerHTML = `<video src="${content}" controls autoplay class="max-w-[90vw] max-h-[90vh] rounded-lg shadow-2xl"></video>`;
+    } else {
+        lightboxContent.innerHTML = content;
+    }
+
+    lightboxOverlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden'; // Prevent scrolling
+};
+
+const closeLightbox = () => {
+    lightboxOverlay.classList.add('hidden');
+    lightboxContent.innerHTML = '';
+    document.body.style.overflow = '';
+};
+
+if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
+if (lightboxOverlay) {
+    lightboxOverlay.addEventListener('click', (e) => {
+        if (e.target === lightboxOverlay) closeLightbox();
+    });
+}
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !lightboxOverlay.classList.contains('hidden')) closeLightbox();
+});
+
+// --- 📎 GLOBAL DRAG-AND-DROP ASSET REPLACEMENT ---
+window.handleAssetDrop = (event, dropZone) => {
+    event.preventDefault();
+    dropZone.classList.remove('border-blue-500', 'bg-blue-500/10', 'border-purple-500', 'bg-purple-500/10');
+
+    const sceneId = dropZone.getAttribute('data-scene-id');
+    const dropType = dropZone.getAttribute('data-drop-type'); // 'image' or 'video'
+    const files = event.dataTransfer.files;
+
+    if (files.length === 0) return;
+
+    const file = files[0];
+    const fileType = file.type;
+
+    // Validate file type
+    if (dropType === 'image' && !fileType.startsWith('image/')) {
+        return alert('이미지 파일만 업로드 가능합니다. (JPG, PNG, WebP 등)');
+    }
+    if (dropType === 'video' && !fileType.startsWith('video/')) {
+        return alert('동영상 파일만 업로드 가능합니다. (MP4, WebM 등)');
+    }
+
+    // Read file as Base64
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const base64Data = e.target.result;
+        const scene = AppState.getScenes().find(s => s.sceneId == sceneId);
+
+        if (!scene) return console.error('Scene not found:', sceneId);
+
+        // Update state
+        if (dropType === 'image') {
+            scene.generatedUrl = base64Data;
+            // Update UI
+            const img = document.getElementById(`img-${sceneId}`);
+            const placeholder = dropZone.querySelector('.image-placeholder');
+            if (img && placeholder) {
+                img.src = base64Data;
+                img.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            }
+            console.log(`✅ Scene ${sceneId}: Image replaced via drag-drop`);
+        } else if (dropType === 'video') {
+            scene.videoUrl = base64Data;
+            // Update UI
+            const videoContainer = dropZone;
+            videoContainer.innerHTML = `
+                <video src="${base64Data}" class="w-full h-full object-cover cursor-pointer" onclick="window.openLightbox(this.src)" title="클릭하여 크게 보기"></video>
+                <div class="absolute bottom-1 right-1 text-[7px] text-slate-500 bg-black/40 px-1 rounded opacity-0 group-hover/video:opacity-100 transition pointer-events-none">
+                    📎 Drop to replace
+                </div>
+            `;
+            // Re-add drop handlers
+            videoContainer.setAttribute('ondragover', "event.preventDefault(); this.classList.add('border-purple-500', 'bg-purple-500/10');");
+            videoContainer.setAttribute('ondragleave', "this.classList.remove('border-purple-500', 'bg-purple-500/10');");
+            videoContainer.setAttribute('ondrop', 'window.handleAssetDrop(event, this)');
+            console.log(`✅ Scene ${sceneId}: Video replaced via drag-drop`);
+        }
+
+        // Show success feedback
+        const successMsg = document.createElement('div');
+        successMsg.className = 'fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-bounce';
+        successMsg.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 inline"></i> Scene ${sceneId} ${dropType === 'image' ? '이미지' : '동영상'} 교체 완료!`;
+        document.body.appendChild(successMsg);
+        lucide.createIcons();
+        setTimeout(() => successMsg.remove(), 3000);
+    };
+
+    reader.onerror = () => {
+        alert('파일 읽기 실패. 다시 시도해주세요.');
+    };
+
+    reader.readAsDataURL(file);
+};
