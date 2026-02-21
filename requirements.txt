@@ -9,6 +9,7 @@ openai>=1.0.0
 replicate
 elevenlabs
 azure-cognitiveservices-speech
+google-genai>=1.5.0
 google-api-python-client
 google-auth-httplib2
 google-auth-oauthlib
@@ -22,3 +23,7 @@ python-dotenv
 gdown
 # Async
 httpx
+pydub
+# Optimization Services
+psutil
+aiohttpopencv-python
