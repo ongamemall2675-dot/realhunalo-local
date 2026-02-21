@@ -23,6 +23,22 @@ export class Module {
         }
     }
 
+    /**
+     * Helper to add event listener safely
+     * @param {string} eventType - Event type (click, change, etc)
+     * @param {string} selector - CSS selector
+     * @param {function} handler - Event handler callback
+     */
+    addEvent(eventType, selector, handler) {
+        const elements = document.querySelectorAll(selector);
+        // if (elements.length === 0) {
+        //     console.warn(`[Module: ${this.id}] No elements found for selector: ${selector}`);
+        // }
+        elements.forEach(el => {
+            el.addEventListener(eventType, handler);
+        });
+    }
+
     // ================================================================
     // USER GUIDE SYSTEM
     // ================================================================

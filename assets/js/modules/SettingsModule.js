@@ -13,10 +13,10 @@ export class SettingsModule extends Module {
 
         // 기본 AI 모델 설정
         this.aiModels = {
+            deepseek: { name: 'DeepSeek', provider: 'DeepSeek', status: 'unchecked' },
             gemini: { name: 'Gemini Pro', provider: 'Google', status: 'unchecked' },
             openai: { name: 'GPT-4', provider: 'OpenAI', status: 'unchecked' },
             anthropic: { name: 'Claude 3', provider: 'Anthropic', status: 'unchecked' },
-            deepseek: { name: 'DeepSeek', provider: 'DeepSeek', status: 'unchecked' },
             perplexity: { name: 'Perplexity', provider: 'Perplexity', status: 'unchecked' }
         };
 
@@ -37,7 +37,7 @@ export class SettingsModule extends Module {
 
         // 백엔드에서 저장된 API 키 상태 확인
         try {
-            const response = await fetch('http://localhost:8000/api/check-saved-keys');
+            const response = await fetch(CONFIG.endpoints.checkSavedKeys);
             const result = await response.json();
             if (result.success) {
                 // 각 모델에 saved 플래그 설정
@@ -408,7 +408,7 @@ export class SettingsModule extends Module {
 
     async checkGoogleDriveStatus() {
         try {
-            const response = await fetch('http://localhost:8000/api/google-drive/status');
+            const response = await fetch(CONFIG.endpoints.googleDriveStatus);
             const status = await response.json();
 
             const statusDiv = document.getElementById('drive-status');
@@ -444,7 +444,7 @@ export class SettingsModule extends Module {
 
         try {
             // Backend API 호출
-            const response = await fetch('http://localhost:8000/api/test-ai-model', {
+            const response = await fetch(CONFIG.endpoints.testAiModel, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -536,7 +536,7 @@ export class SettingsModule extends Module {
         lucide.createIcons();
 
         try {
-            const response = await fetch('http://localhost:8000/api/save-youtube-key', {
+            const response = await fetch(CONFIG.endpoints.saveYoutubeKey, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ apiKey: apiKey })
@@ -567,8 +567,8 @@ export class SettingsModule extends Module {
         lucide.createIcons();
 
         try {
-            // Backend TTS validation API 호출
-            const response = await fetch('http://localhost:8000/api/tts/validate', {
+            // Backend TTS validation API 호출 (URL 수정됨)
+            const response = await fetch(CONFIG.endpoints.ttsValidate, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ engine: engine })
@@ -616,7 +616,7 @@ export class SettingsModule extends Module {
 
         try {
             // Backend에 API 키 저장 요청
-            const response = await fetch('http://localhost:8000/api/save-api-key', {
+            const response = await fetch(CONFIG.endpoints.saveApiKey, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -649,7 +649,7 @@ export class SettingsModule extends Module {
     async connectGoogleDrive() {
         try {
             // Google Drive 인증 URL 가져오기
-            const response = await fetch('http://localhost:8000/api/google-drive/auth-url');
+            const response = await fetch(CONFIG.endpoints.googleDriveAuthUrl);
             const result = await response.json();
 
             if (result.success && result.authUrl) {

@@ -189,6 +189,21 @@ class ElevenLabsTTSEngine(TTSEngineBase):
                 error=str(e)
             )
 
+    def get_voices_list(self) -> list:
+        """UI 표시용 음성 목록 반환 (기본 보이스)"""
+        # ElevenLabs는 API를 통해 동적으로 가져올 수도 있지만, 
+        # 여기서는 안정성을 위해 기본 보이스 목록에 성별 정보를 추가하여 반환
+        return [
+            { "id": "pNInz6obpgDQGcFmaJgB", "name": "아담 (Adam)", "gender": "남성", "description": "다국어 · 깊고 신뢰감" },
+            { "id": "21m00Tcm4TlvDq8ikWAM", "name": "레이첼 (Rachel)", "gender": "여성", "description": "다국어 · 차분하고 전문적" },
+            { "id": "AZnzlk1XvdvUeBnXmlld", "name": "도미 (Domi)", "gender": "여성", "description": "다국어 · 밝고 친근함" },
+            { "id": "EXAVITQu4vr4xnSDxMaL", "name": "벨라 (Bella)", "gender": "여성", "description": "다국어 · 세련되고 우아함" },
+            { "id": "ErXwobaYiN019PkySvjV", "name": "안토니 (Antoni)", "gender": "남성", "description": "다국어 · 명랑하고 젊음" },
+            { "id": "MF3mGyEYCl7XYWbV9V6O", "name": "엔조 (Enzo)", "gender": "남성", "description": "다국어 · 부드럽고 나레이션" },
+            { "id": "TxGEqnHWrfWFTfGW9XjX", "name": "조쉬 (Josh)", "gender": "남성", "description": "다국어 · 활기차고 뉴스 스타일" },
+            { "id": "VR6AewLTigWG4xSOukaG", "name": "아놀드 (Arnold)", "gender": "남성", "description": "다국어 · 강인하고 웅장함" }
+        ]
+
 # 싱글톤 인스턴스
 try:
     elevenlabs_tts_engine = ElevenLabsTTSEngine()

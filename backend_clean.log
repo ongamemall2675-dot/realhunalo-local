@@ -1,0 +1,330 @@
+c:\Users\ongam\antigravity project\realhunalo_local\backend.py:63: DeprecationWarning: 
+        on_event is deprecated, use lifespan event handlers instead.
+
+        Read more about it in the
+        [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+        
+  @app.on_event("startup")
+INFO:     Will watch for changes in these directories: ['c:\\Users\\ongam\\antigravity project\\realhunalo_local']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [32684] using StatReload
+INFO:     Started server process [34548]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+
+============================================================
+[ENV] .env 파일 로드: c:\Users\ongam\antigravity project\realhunalo_local\.env
+   파일 존재: True
+   OPENAI_API_KEY: 설정됨
+   GEMINI_API_KEY: 설정됨
+   ANTHROPIC_API_KEY: 설정됨
+   DEEPSEEK_API_KEY: 설정됨
+   REPLICATE_API_TOKEN: 설정됨
+============================================================
+
+[OK] Script Service 초기화 완료 (timeout: 90s)
+[OK] Character Anchor Mode: FIXED
+[OK] Image Service 초기화 완료
+[OK] Motion Service 초기화 완료
+[OK] TTS Service 초기화 완료
+   - Primary Engine: elevenlabs
+   - Available Engines: ['azure', 'elevenlabs']
+[OK] FFmpeg 확인: ffmpeg version 8.0.1-full_build-www.gyan.dev Copyright (c) 2000-2025 the FFmpeg developers
+[OK] Video Service 초기화 완료
+[OK] Vrew Service (New) 초기화 완료
+[OK] Vrew Batch Service 초기화 완료
+[OK] Trend Service 초기화 완료
+[OK] YouTube API 초기화 완료
+
+[AI] AI Service 초기화
+  [OK] openai: sk-proj-...Dj0A
+  [OK] anthropic: sk-ant-a...qQAA
+  [OK] gemini: AIzaSyBt...DALo
+  [OK] deepseek: sk-b6458...d65e
+  [OK] perplexity: pplx-Znk...8e76
+[OK] Google Drive Service 초기화 완료
+[OK] Shorts Service 초기화 완료 (timeout: 60s)
+[OK] Audio Segmentation Service 초기화 완료
+
+============================================================
+[ENV] .env 파일 로드: c:\Users\ongam\antigravity project\realhunalo_local\.env
+   파일 존재: True
+   OPENAI_API_KEY: 설정됨
+   GEMINI_API_KEY: 설정됨
+   ANTHROPIC_API_KEY: 설정됨
+   DEEPSEEK_API_KEY: 설정됨
+   REPLICATE_API_TOKEN: 설정됨
+============================================================
+
+
+============================================================
+[OK] RealHunalo Backend Started - Version: 2026.02.12.01
+[OK] /api/generate-script endpoint confirmed
+[OK] /api/analyze-shorts endpoint confirmed
+============================================================
+
+INFO:     127.0.0.1:12155 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4843 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4843 - "GET /assets/style.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8975 - "GET /assets/js/app.js?v=20250210-2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8975 - "GET /assets/js/state.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4843 - "GET /assets/js/lightbox.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8570 - "GET /assets/js/utils.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4843 - "GET /assets/js/modules/DashboardModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8975 - "GET /assets/js/cache.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8570 - "GET /assets/js/modules/ProjectModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4843 - "GET /assets/js/modules/TrendModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8975 - "GET /assets/js/modules/YoutubeModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8570 - "GET /assets/js/modules/ScriptModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4843 - "GET /assets/js/modules/ImageModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8975 - "GET /assets/js/modules/MotionModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8570 - "GET /assets/js/modules/TTSModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8975 - "GET /assets/js/modules/VideoModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8570 - "GET /assets/js/modules/ShortsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4843 - "GET /assets/js/modules/ShortsEditModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8975 - "GET /assets/js/modules/BatchVrewModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4843 - "GET /assets/js/modules/IntegratedWorkflowModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8570 - "GET /assets/js/modules/AudioSegmentationModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4843 - "GET /assets/js/modules/SettingsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8975 - "GET /assets/js/Module.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8570 - "GET /assets/js/config.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4843 - "GET /assets/js/utils/download.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4843 - "GET /assets/js/guides.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4843 - "GET /api/check-saved-keys HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4843 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8570 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8975 - "GET /api/motion/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8975 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:8975 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8975 - "GET /api/video/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8975 - "GET /assets/upload_c580b66f-63de-4f42-838f-0d598a5adbdf_001_scene_01_2D_flat_ve_1_20260119_162752.png HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:7632 - "GET /assets/upload_158338e9-8e2e-43b0-a0e0-54943a10dc1b_004_scene_03_2D_flat_ve_1_20260119_162822.png HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:8570 - "GET /assets/upload_8eb846a1-2d1b-499e-b2f1-bb01cdc503da_002_scene_01__1__Style_W_1_20260118_23141.png HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:4843 - "GET /assets/upload_72f0d5f9-97be-4c29-bf80-2446563e314e_003__scene_04_2D_flat_ve_1_20260119_162835.png HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:4843 - "GET /output/segments/6198336a/001_audio.mp3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:8570 - "GET /output/segments/6198336a/002_audio.mp3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:7632 - "GET /output/segments/6198336a/003_audio.mp3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:8975 - "GET /output/segments/6198336a/004_audio.mp3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:8975 - "GET /output/tts_426f28a1-990b-47de-be7f-c2e022868002.mp3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:8975 - "GET /api/tts/voices?engine=azure HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8975 - "GET /uploads/tts_426f28a1-990b-47de-be7f-c2e022868002.mp3 HTTP/1.1" 404 Not Found
+[TTS] TTS 생성 시도 1/3
+[TTS] 생성 시작 (Scene: full_script, 엔진: azure, 글자수: 129)
+[TTS] 음성 'ko-KR-SunHiNeural' 사용: 선희 (SunHi) (밝고 친근함)
+[TTS] Azure TTS 생성 중... (음성: ko-KR-SunHiNeural, 속도: 1.0x)
+[OK] Azure TTS 완료: 0개 단어, 0.00초
+[OK] TTS 생성 완료 (엔진: azure, 처리시간: 0.60s)
+INFO:     127.0.0.1:8975 - "POST /api/generate-tts HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8975 - "GET /output/tts_d415ee8c-f27a-43c2-91f2-38158e58bf44.mp3 HTTP/1.1" 206 Partial Content
+[SEGMENT] 서버 파일 세분화 요청: c:\Users\ongam\antigravity project\realhunalo_local\output\tts_d415ee8c-f27a-43c2-91f2-38158e58bf44.mp3
+INFO:     127.0.0.1:8975 - "POST /api/segment-audio-from-path HTTP/1.1" 200 OK
+
+============================================================
+오디오 세분화 시작: tts_d415ee8c-f27a-43c2-91f2-38158e58bf44.mp3
+최대 문자 수: 30자
+============================================================
+
+[Step 1/3] Whisper 음성 인식 중...
+[Whisper] 음성 인식 시작: tts_d415ee8c-f27a-43c2-91f2-38158e58bf44.mp3
+  - 파일 형식: .mp3
+  - 파일 크기: 0.1MB
+[Whisper] API 호출 중...
+INFO:     127.0.0.1:8975 - "GET /api/tasks/88692679-babb-4733-a169-3aeb05af71ec HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8975 - "GET /api/tasks/88692679-babb-4733-a169-3aeb05af71ec HTTP/1.1" 200 OK
+[Whisper] API 응답 수신 완료
+[Whisper] 완료: 30개 타임스탬프 추출
+[Whisper] 전체 텍스트: 은행에서 청천벽력 같은 연락이 왔습니다. 고객님의 계좌가 금융사기에 연루되어 모든 거래가 정지되었습니다. 김씨는 당황했습니다. 내가 내 물건을 정당하게 팔고 돈을 받았는데 왜 내 ...
+[OK] 전체 텍스트: 125자
+[OK] 단어 수: 30개
+
+[Step 2/3] 30자 이하로 그룹화 중...
+[OK] 4개 구간으로 분할됨
+  #001: 29자 (0.00s ~ 5.60s)
+  #002: 28자 (5.60s ~ 11.18s)
+  #003: 28자 (11.18s ~ 16.08s)
+  #004: 7자 (16.08s ~ 17.18s)
+
+[Step 3/3] 오디오 파일 분할 및 저장 중...
+저장 위치: c:\Users\ongam\antigravity project\realhunalo_local\output\segments\56d236a1
+[ERROR] Segmentation Path Task Failed: pydub 라이브러리가 필요합니다. pip install pydub 후 ffmpeg를 설치하세요.
+INFO:     127.0.0.1:8975 - "GET /api/tasks/88692679-babb-4733-a169-3aeb05af71ec HTTP/1.1" 200 OK
+[SEGMENT] 서버 파일 세분화 요청: c:\Users\ongam\antigravity project\realhunalo_local\output\tts_d415ee8c-f27a-43c2-91f2-38158e58bf44.mp3
+INFO:     127.0.0.1:3047 - "POST /api/segment-audio-from-path HTTP/1.1" 200 OK
+
+============================================================
+오디오 세분화 시작: tts_d415ee8c-f27a-43c2-91f2-38158e58bf44.mp3
+최대 문자 수: 30자
+============================================================
+
+[Step 1/3] Whisper 음성 인식 중...
+[Whisper] 음성 인식 시작: tts_d415ee8c-f27a-43c2-91f2-38158e58bf44.mp3
+  - 파일 형식: .mp3
+  - 파일 크기: 0.1MB
+[Whisper] API 호출 중...
+INFO:     127.0.0.1:3047 - "GET /api/tasks/a6fc3e8d-0cd3-4d0e-b014-bc2cbbeb4308 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3047 - "GET /api/tasks/a6fc3e8d-0cd3-4d0e-b014-bc2cbbeb4308 HTTP/1.1" 200 OK
+[Whisper] API 응답 수신 완료
+[Whisper] 완료: 30개 타임스탬프 추출
+[Whisper] 전체 텍스트: 은행에서 청천벽력 같은 연락이 왔습니다. 고객님의 계좌가 금융사기에 연루되어 모든 거래가 정지되었습니다. 김씨는 당황했습니다. 내가 내 물건을 정당하게 팔고 돈을 받았는데 왜 내 ...
+[OK] 전체 텍스트: 125자
+[OK] 단어 수: 30개
+
+[Step 2/3] 30자 이하로 그룹화 중...
+[OK] 4개 구간으로 분할됨
+  #001: 29자 (0.00s ~ 5.60s)
+  #002: 28자 (5.60s ~ 11.18s)
+  #003: 28자 (11.18s ~ 16.08s)
+  #004: 7자 (16.08s ~ 17.18s)
+
+[Step 3/3] 오디오 파일 분할 및 저장 중...
+저장 위치: c:\Users\ongam\antigravity project\realhunalo_local\output\segments\6e4318fc
+[ERROR] Segmentation Path Task Failed: pydub 라이브러리가 필요합니다. pip install pydub 후 ffmpeg를 설치하세요.
+INFO:     127.0.0.1:3047 - "GET /api/tasks/a6fc3e8d-0cd3-4d0e-b014-bc2cbbeb4308 HTTP/1.1" 200 OK
+[SEGMENT] 서버 파일 세분화 요청: c:\Users\ongam\antigravity project\realhunalo_local\output\tts_d415ee8c-f27a-43c2-91f2-38158e58bf44.mp3
+INFO:     127.0.0.1:6112 - "POST /api/segment-audio-from-path HTTP/1.1" 200 OK
+
+============================================================
+오디오 세분화 시작: tts_d415ee8c-f27a-43c2-91f2-38158e58bf44.mp3
+최대 문자 수: 30자
+============================================================
+
+[Step 1/3] Whisper 음성 인식 중...
+[Whisper] 음성 인식 시작: tts_d415ee8c-f27a-43c2-91f2-38158e58bf44.mp3
+  - 파일 형식: .mp3
+  - 파일 크기: 0.1MB
+[Whisper] API 호출 중...
+INFO:     127.0.0.1:6112 - "GET /api/tasks/388e70b8-5557-48e6-a617-6c70c83f362d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6112 - "GET /api/tasks/388e70b8-5557-48e6-a617-6c70c83f362d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6112 - "GET /api/tasks/388e70b8-5557-48e6-a617-6c70c83f362d HTTP/1.1" 200 OK
+[Whisper] API 응답 수신 완료
+[Whisper] 완료: 30개 타임스탬프 추출
+[Whisper] 전체 텍스트: 은행에서 청천벽력 같은 연락이 왔습니다. 고객님의 계좌가 금융사기에 연루되어 모든 거래가 정지되었습니다. 김씨는 당황했습니다. 내가 내 물건을 정당하게 팔고 돈을 받았는데 왜 내 ...
+[OK] 전체 텍스트: 125자
+[OK] 단어 수: 30개
+
+[Step 2/3] 30자 이하로 그룹화 중...
+[OK] 4개 구간으로 분할됨
+  #001: 29자 (0.00s ~ 5.60s)
+  #002: 28자 (5.60s ~ 11.18s)
+  #003: 28자 (11.18s ~ 16.08s)
+  #004: 7자 (16.08s ~ 17.18s)
+
+[Step 3/3] 오디오 파일 분할 및 저장 중...
+저장 위치: c:\Users\ongam\antigravity project\realhunalo_local\output\segments\f8fd6972
+[ERROR] Segmentation Path Task Failed: pydub 라이브러리가 필요합니다. pip install pydub 후 ffmpeg를 설치하세요.
+INFO:     127.0.0.1:6112 - "GET /api/tasks/388e70b8-5557-48e6-a617-6c70c83f362d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6112 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6112 - "GET /assets/style.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4193 - "GET /assets/js/app.js?v=20250210-2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4193 - "GET /assets/js/state.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6112 - "GET /assets/js/lightbox.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6112 - "GET /assets/js/cache.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4193 - "GET /assets/js/utils.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4193 - "GET /assets/js/modules/DashboardModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6112 - "GET /assets/js/modules/ProjectModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4193 - "GET /assets/js/modules/TrendModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6112 - "GET /assets/js/modules/YoutubeModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4193 - "GET /assets/js/modules/ScriptModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6112 - "GET /assets/js/modules/ImageModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4193 - "GET /assets/js/modules/MotionModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6112 - "GET /assets/js/modules/TTSModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4193 - "GET /assets/js/modules/VideoModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6112 - "GET /assets/js/modules/ShortsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4193 - "GET /assets/js/modules/ShortsEditModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6112 - "GET /assets/js/modules/BatchVrewModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4193 - "GET /assets/js/modules/AudioSegmentationModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6112 - "GET /assets/js/modules/IntegratedWorkflowModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4193 - "GET /assets/js/modules/SettingsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6112 - "GET /assets/js/Module.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4193 - "GET /assets/js/config.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6112 - "GET /assets/js/utils/download.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4193 - "GET /assets/js/guides.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4193 - "GET /api/check-saved-keys HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4193 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6112 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4193 - "GET /api/motion/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4193 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:4193 - "GET /api/tts/voices?engine=azure HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4193 - "GET /uploads/tts_d415ee8c-f27a-43c2-91f2-38158e58bf44.mp3 HTTP/1.1" 404 Not Found
+[TTS] TTS 생성 시도 1/3
+[TTS] 생성 시작 (Scene: full_script, 엔진: azure, 글자수: 129)
+[TTS] 음성 'ko-KR-SunHiNeural' 사용: 선희 (SunHi) (밝고 친근함)
+[TTS] Azure TTS 생성 중... (음성: ko-KR-SunHiNeural, 속도: 1.0x)
+[OK] Azure TTS 완료: 0개 단어, 0.00초
+[OK] TTS 생성 완료 (엔진: azure, 처리시간: 0.31s)
+INFO:     127.0.0.1:4193 - "POST /api/generate-tts HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4193 - "GET /output/tts_fdeb4ed5-c957-4f27-8a84-05304cfe5ebd.mp3 HTTP/1.1" 206 Partial Content
+[SEGMENT] 서버 파일 세분화 요청: c:\Users\ongam\antigravity project\realhunalo_local\output\tts_fdeb4ed5-c957-4f27-8a84-05304cfe5ebd.mp3
+INFO:     127.0.0.1:4193 - "POST /api/segment-audio-from-path HTTP/1.1" 200 OK
+
+============================================================
+오디오 세분화 시작: tts_fdeb4ed5-c957-4f27-8a84-05304cfe5ebd.mp3
+최대 문자 수: 30자
+============================================================
+
+[Step 1/3] Whisper 음성 인식 중...
+[Whisper] 음성 인식 시작: tts_fdeb4ed5-c957-4f27-8a84-05304cfe5ebd.mp3
+  - 파일 형식: .mp3
+  - 파일 크기: 0.1MB
+[Whisper] API 호출 중...
+INFO:     127.0.0.1:4193 - "GET /api/tasks/dfcc9c73-1be8-4472-bbeb-0464dd72a69a HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4193 - "GET /api/tasks/dfcc9c73-1be8-4472-bbeb-0464dd72a69a HTTP/1.1" 200 OK
+[Whisper] API 응답 수신 완료
+[Whisper] 완료: 30개 타임스탬프 추출
+[Whisper] 전체 텍스트: 은행에서 청천벽력 같은 연락이 왔습니다. 고객님의 계좌가 금융사기에 연루되어 모든 거래가 정지되었습니다. 김씨는 당황했습니다. 내가 내 물건을 정당하게 팔고 돈을 받았는데 왜 내 ...
+[OK] 전체 텍스트: 125자
+[OK] 단어 수: 30개
+
+[Step 2/3] 30자 이하로 그룹화 중...
+[OK] 4개 구간으로 분할됨
+  #001: 29자 (0.00s ~ 5.60s)
+  #002: 28자 (5.60s ~ 11.18s)
+  #003: 28자 (11.18s ~ 16.08s)
+  #004: 7자 (16.08s ~ 17.18s)
+
+[Step 3/3] 오디오 파일 분할 및 저장 중...
+저장 위치: c:\Users\ongam\antigravity project\realhunalo_local\output\segments\de118974
+[ERROR] Segmentation Path Task Failed: pydub 라이브러리가 필요합니다. pip install pydub 후 ffmpeg를 설치하세요.
+INFO:     127.0.0.1:4193 - "GET /api/tasks/dfcc9c73-1be8-4472-bbeb-0464dd72a69a HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4193 - "GET /api/tts/voices?engine=azure HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4193 - "GET /uploads/tts_fdeb4ed5-c957-4f27-8a84-05304cfe5ebd.mp3 HTTP/1.1" 404 Not Found
+[TTS] TTS 생성 시도 1/3
+[TTS] 생성 시작 (Scene: full_script, 엔진: azure, 글자수: 129)
+[TTS] 음성 'ko-KR-JiMinNeural' 사용: 지민 (JiMin) (차분하고 부드러움)
+[TTS] Azure TTS 생성 중... (음성: ko-KR-JiMinNeural, 속도: 1.0x)
+[OK] Azure TTS 완료: 0개 단어, 0.00초
+[OK] TTS 생성 완료 (엔진: azure, 처리시간: 0.64s)
+INFO:     127.0.0.1:4197 - "POST /api/generate-tts HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4197 - "GET /output/tts_1ca630e3-e429-426c-841a-a0baf0e196b4.mp3 HTTP/1.1" 206 Partial Content
+[SEGMENT] 서버 파일 세분화 요청: c:\Users\ongam\antigravity project\realhunalo_local\output\tts_1ca630e3-e429-426c-841a-a0baf0e196b4.mp3
+INFO:     127.0.0.1:4197 - "POST /api/segment-audio-from-path HTTP/1.1" 200 OK
+
+============================================================
+오디오 세분화 시작: tts_1ca630e3-e429-426c-841a-a0baf0e196b4.mp3
+최대 문자 수: 30자
+============================================================
+
+[Step 1/3] Whisper 음성 인식 중...
+[Whisper] 음성 인식 시작: tts_1ca630e3-e429-426c-841a-a0baf0e196b4.mp3
+  - 파일 형식: .mp3
+  - 파일 크기: 0.1MB
+[Whisper] API 호출 중...
+INFO:     127.0.0.1:4197 - "GET /api/tasks/42b0f799-a9a3-4796-9971-9a9e3f5b28f1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4197 - "GET /api/tasks/42b0f799-a9a3-4796-9971-9a9e3f5b28f1 HTTP/1.1" 200 OK
+[Whisper] API 응답 수신 완료
+[Whisper] 완료: 29개 타임스탬프 추출
+[Whisper] 전체 텍스트: 은행에서 청천벽력 같은 연락이 왔습니다. 고객님의 계좌가 금융사기에 연루되어 모든 거래가 정지되었습니다. 김씨는 당황했습니다. 내가 내 물건을 정당하게 팔고 돈을 받았는데 왜 내 ...
+[OK] 전체 텍스트: 124자
+[OK] 단어 수: 29개
+
+[Step 2/3] 30자 이하로 그룹화 중...
+[OK] 4개 구간으로 분할됨
+  #001: 29자 (0.00s ~ 5.42s)
+  #002: 28자 (5.42s ~ 10.98s)
+  #003: 28자 (10.98s ~ 15.40s)
+  #004: 7자 (15.40s ~ 16.50s)
+
+[Step 3/3] 오디오 파일 분할 및 저장 중...
+저장 위치: c:\Users\ongam\antigravity project\realhunalo_local\output\segments\e2bd2bc8
+[ERROR] Segmentation Path Task Failed: pydub 라이브러리가 필요합니다. pip install pydub 후 ffmpeg를 설치하세요.
+INFO:     127.0.0.1:4197 - "GET /api/tasks/42b0f799-a9a3-4796-9971-9a9e3f5b28f1 HTTP/1.1" 200 OK

@@ -4,13 +4,14 @@
 
 import { Module } from '../Module.js';
 import { AppState } from '../state.js';
-import { CONFIG } from '../config.js';
+import { CONFIG, API_BASE_URL } from '../config.js';
 import { processInBatches } from '../utils.js';
 import { motionCache } from '../cache.js';
+import { DownloadHelper } from '../utils/download.js';
 
 export class MotionModule extends Module {
     constructor() {
-        super('motion', '모션 작업실', 'video', '정적인 이미지를 역동적인 영상으로 변환합니다.');
+        super('motion', '4-1. 모션 생성', 'video', '정적인 이미지를 역동적인 영상으로 변환합니다.');
 
         // Motion settings (default values)
         this.motionSettings = {
@@ -31,29 +32,29 @@ export class MotionModule extends Module {
         this.showSettings = false;
         this.showStats = false;
 
-        // 다양한 모션 프롬프트 (자동 할당용) - 4-Section 구조
-        // Camera Movement + Subject Action + Environment Effect + Tone & Speed
+        // 다양한 모션 프롬프트 (자동 할당용 & 백업용) - VEO3/GROK Natural Style
+        // Priority: Character Action > Environment > Camera (Subtle)
         this.motionPromptLibrary = [
-            "Slowly zoom in, stickman nods gently, background subtly glows, smooth and calm at slow pace",
-            "Smooth pan left, stickman smiles slightly, soft light shifts across scene, calming atmosphere with smooth motion",
-            "Dolly-in smoothly, stickman points with gentle gesture, chart numbers gently pulse, slow motion with peaceful tone",
-            "Gentle pan right, stickman tilts head thoughtfully, background elements softly float, very smooth and serene movement",
-            "Slow zoom out, stickman waves hand subtly, ambient particles drift slowly, calm and steady pacing",
-            "Static with slight drift, stickman breathes naturally, soft shadows move gently, minimal movement with tranquil feel",
-            "Smooth tracking right, stickman turns head slightly, background blur shifts softly, slow and elegant motion",
-            "Subtle dolly-out, stickman adjusts stance gently, light flickers softly, smooth camera with calming speed",
-            "Slow push in, stickman blinks and smiles, background shapes pulse gently, very smooth with peaceful atmosphere",
-            "Gentle arc movement, stickman gestures with one hand, soft reflections shimmer, slow motion with serene tone",
-            "Smooth pan up, stickman looks up slightly, clouds drift in background, calm and smooth pacing",
-            "Slow tilt down, stickman lowers gaze thoughtfully, ground shadows shift, smooth motion with tranquil feel",
-            "Dolly-in slowly, stickman nods twice gently, background lights twinkle softly, calm atmosphere at slow pace",
-            "Gentle zoom in, stickman raises eyebrows slightly, ambient glow intensifies, very smooth and peaceful motion",
-            "Smooth horizontal pan, stickman turns body gradually, scene elements float gently, slow and calming movement",
-            "Static with subtle sway, stickman breathes and blinks, soft wind effect in background, minimal motion with serene tone",
-            "Slow circular orbit, stickman stays centered with gentle expression, environment rotates smoothly, calm and steady pacing",
-            "Gentle push forward, stickman steps slightly, background perspective shifts softly, smooth motion with peaceful atmosphere",
-            "Smooth pull back, stickman waves goodbye gently, scene expands with soft blur, slow and elegant pacing",
-            "Subtle crane up, stickman looks upward slightly, sky background brightens gently, very smooth with calming tone"
+            "The character nods gently in agreement while soft light shifts across their face, camera holding steady.",
+            "Wind blows through the character's hair as they gaze into the distance, with a slow and subtle push in.",
+            "The character types furiously on the keyboard, screen light flickering on their face, camera circling slowly to build tension.",
+            "The character slumps into the chair with a heavy sigh, dust floating in the light beams, capturing a moment of defeat.",
+            "The character points excitedly at the chart, their face beaming with joy, while the camera follows their hand movement.",
+            "A peaceful moment as the character sips coffee, steam rising gently, with the background blurring softly.",
+            "The character paces nervously back and forth, shadows stretching across the floor, camera tracking their movement.",
+            "The character laughs uncontrollably, head thrown back, as the environment brightens with warm lighting.",
+            "The character wipes a tear from their cheek, rain falling softly in the background, camera drifting closer.",
+            "The character stands triumphant with arms raised, confetti falling around them, camera slowly pulling back to reveal the scene.",
+            "The character looks around in confusion, browsing through papers, with a handheld camera feel adding urgency.",
+            "The character shakes hands firmly with another person, confident smile, as the camera focuses on the handshake.",
+            "The character walks confidently towards the camera, coat tail flapping in the wind, with a low angle shot.",
+            "The character meditates in silence, chest rising and falling rhythmically, soft particles drifting in the air.",
+            "The character checks their watch impatiently, tapping their foot, while the background city moves in a blur.",
+            "The character presents the product with a welcoming gesture, spotlight focusing on them, camera gliding smoothly.",
+            "The character reads a book intently, turning a page, while leaves fall gently outside the window.",
+            "The character adjusts their glasses and looks directly at the lens, a serious expression, with a slow zoom in.",
+            "The character celebrates a victory, jumping in the air, freeze frame effect for a split second before landing.",
+            "The character walks away into the sunset, silhouette defined against the light, camera remaining static."
         ];
     }
 
@@ -386,161 +387,85 @@ export class MotionModule extends Module {
     }
 
     /**
-     * Auto-generate motion prompts for all scenes missing them
+     * Auto-generate motion prompts for all scenes missing them using Backend API
      */
-    autoGenerateMotionPrompts() {
+    async autoGenerateMotionPrompts() {
         const scenes = AppState.getScenes();
-        let generatedCount = 0;
+        const scenesToUpdate = scenes.filter(s => !s.motionPrompt || s.motionPrompt.trim() === '');
 
-        scenes.forEach(scene => {
-            if (!scene.motionPrompt || scene.motionPrompt.trim() === '') {
-                scene.motionPrompt = this.getRandomMotionPrompt();
-                generatedCount++;
+        if (scenesToUpdate.length === 0) return 0;
+
+        console.log(`📡 Requesting motion prompts for ${scenesToUpdate.length} scenes...`);
+
+        try {
+            // Prepare payload
+            const payload = {
+                scenes: scenesToUpdate.map(s => ({
+                    index: s.sceneId,
+                    text: s.originalScript,
+                    imagePrompt: s.imagePrompt
+                }))
+            };
+
+            const response = await fetch(CONFIG.endpoints.motionPromptsBatch, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) throw new Error(`Server Error: ${response.status}`);
+
+            const result = await response.json();
+
+            if (result.success && result.prompts) {
+                let updatedCount = 0;
+                result.prompts.forEach(p => {
+                    const scene = scenes.find(s => s.sceneId == p.index);
+                    if (scene) {
+                        scene.motionPrompt = p.motionPrompt;
+                        updatedCount++;
+                    }
+                });
+
+                if (updatedCount > 0) {
+                    AppState.setScenes([...scenes]);
+                    console.log(`✅ Backend generated ${updatedCount} motion prompts`);
+                    return updatedCount;
+                }
             }
-        });
-
-        if (generatedCount > 0) {
-            AppState.setScenes([...scenes]);
-            console.log(`✅ Auto-generated ${generatedCount} motion prompts`);
-            return generatedCount;
+        } catch (error) {
+            console.error("❌ Failed to auto-generate motion prompts:", error);
+            alert("모션 프롬프트 생성 중 오류가 발생했습니다. 백엔드 로그를 확인하세요.");
         }
         return 0;
     }
 
-    /**
-     * Update motion settings from UI inputs
-     */
-    updateSettings() {
-        const modelSelect = document.getElementById('motion-model');
-        const durationInput = document.getElementById('motion-duration');
-        const aspectRatioSelect = document.getElementById('motion-aspect-ratio');
-        const qualitySelect = document.getElementById('motion-quality');
-
-        if (modelSelect) this.motionSettings.model = modelSelect.value;
-        if (durationInput) this.motionSettings.duration = parseInt(durationInput.value);
-        if (aspectRatioSelect) this.motionSettings.aspectRatio = aspectRatioSelect.value;
-        if (qualitySelect) this.motionSettings.quality = qualitySelect.value;
-
-        console.log('Motion settings updated:', this.motionSettings);
-    }
-
-    /**
-     * Toggle settings panel visibility
-     */
-    toggleSettings() {
-        this.showSettings = !this.showSettings;
-        this.refreshModule();
-    }
-
-    /**
-     * Toggle stats panel visibility
-     */
-    toggleStats() {
-        this.showStats = !this.showStats;
-        this.refreshModule();
-    }
-
-    /**
-     * Update statistics UI
-     */
-    updateStatsUI() {
-        const avgTime = this.stats.totalGenerated > 0
-            ? (this.stats.totalProcessingTime / this.stats.totalGenerated / 1000).toFixed(1)
-            : 0;
-
-        const totalEl = document.getElementById('stat-total-generated-motion');
-        const successEl = document.getElementById('stat-success-count-motion');
-        const errorEl = document.getElementById('stat-error-count-motion');
-        const avgTimeEl = document.getElementById('stat-avg-time-motion');
-
-        if (totalEl) totalEl.textContent = this.stats.totalGenerated;
-        if (successEl) successEl.textContent = this.stats.successCount;
-        if (errorEl) errorEl.textContent = this.stats.errorCount;
-        if (avgTimeEl) avgTimeEl.textContent = `${avgTime}s`;
-    }
-
-    /**
-     * Show batch progress indicator
-     */
-    showBatchProgress(current, total, startTime) {
-        const elapsed = ((Date.now() - startTime) / 1000).toFixed(0);
-        const percentage = Math.round((current / total) * 100);
-
-        const btnGenVideoBatch = document.getElementById('btn-gen-motion-video-batch');
-        if (btnGenVideoBatch) {
-            btnGenVideoBatch.innerHTML = `
-                <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
-                생성 중 (${current}/${total}) - ${percentage}% - ${elapsed}초 경과
-            `;
-            lucide.createIcons();
-        }
-    }
+    // ...
 
     onMount() {
-        const scenes = AppState.getScenes();
-
-        // Setup guide button
-        this.setupGuideButton();
-
-        // Reset button
-        const btnResetMotion = document.getElementById('btn-reset-motion');
-        if (btnResetMotion) {
-            btnResetMotion.addEventListener('click', () => {
-                if (confirm('⚠️ 모든 작업 내용이 삭제됩니다.\n\n정말 초기화하시겠습니까?')) {
-                    AppState.startNewProject();
-                    location.reload();
-                }
-            });
-        }
-
-        // Setup video drag & drop handler
-        window.handleMotionVideoDrop = (event, element) => {
-            event.preventDefault();
-            element.classList.remove('border-purple-500', 'ring-2', 'ring-purple-500/50');
-
-            const files = event.dataTransfer.files;
-            if (files.length > 0) {
-                const file = files[0];
-                if (!file.type.startsWith('video/')) {
-                    alert('비디오 파일만 업로드할 수 있습니다.');
-                    return;
-                }
-
-                const sceneId = element.getAttribute('data-scene-id');
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const videoUrl = e.target.result;
-                    const scene = AppState.getScenes().find(s => s.sceneId == sceneId);
-                    if (scene) {
-                        scene.videoUrl = videoUrl;
-                        AppState.setScenes([...AppState.getScenes()]);
-                        element.innerHTML = `
-                            <video src="${videoUrl}" class="w-full h-full object-cover" muted
-                                  onclick="window.openLightbox('${videoUrl}', 'video')"></video>
-                            <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                                <i data-lucide="maximize-2" class="w-6 h-6 text-white"></i>
-                            </div>
-                        `;
-                        if (typeof lucide !== 'undefined') {
-                            lucide.createIcons();
-                        }
-                        console.log(`✅ Motion video updated for scene #${sceneId}`);
-                    }
-                };
-                reader.readAsDataURL(file);
-            }
-        };
+        // ... (previous code)
 
         // Auto-generate motion prompts for all scenes
         const btnAutoGenPrompts = document.getElementById('btn-auto-gen-prompts');
         if (btnAutoGenPrompts) {
-            btnAutoGenPrompts.addEventListener('click', () => {
-                const count = this.autoGenerateMotionPrompts();
-                if (count > 0) {
-                    alert(`✅ ${count}개 장면에 모션 프롬프트가 자동 생성되었습니다.`);
-                    this.refreshModule();
-                } else {
-                    alert('모든 장면에 이미 모션 프롬프트가 있습니다.');
+            btnAutoGenPrompts.addEventListener('click', async () => {
+                const originalText = btnAutoGenPrompts.innerHTML;
+                btnAutoGenPrompts.disabled = true;
+                btnAutoGenPrompts.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> 생성 중...`;
+                lucide.createIcons();
+
+                try {
+                    const count = await this.autoGenerateMotionPrompts();
+                    if (count > 0) {
+                        alert(`✅ ${count}개 장면에 모션 프롬프트가 (VEO3/GROK 스타일로) 자동 생성되었습니다.`);
+                        this.refreshModule();
+                    } else {
+                        alert('모든 장면에 이미 모션 프롬프트가 있거나 생성에 실패했습니다.');
+                    }
+                } finally {
+                    btnAutoGenPrompts.disabled = false;
+                    btnAutoGenPrompts.innerHTML = originalText;
+                    lucide.createIcons();
                 }
             });
         }
@@ -614,7 +539,7 @@ export class MotionModule extends Module {
                 lucide.createIcons();
 
                 try {
-                    const response = await fetch(CONFIG.endpoints.motion, {
+                    const response = await fetch(`${CONFIG.endpoints.motion}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -732,7 +657,7 @@ export class MotionModule extends Module {
                         console.log(`📦 Using cached motion for scene #${sceneId}`);
                     } else {
                         // Make API call
-                        const response = await fetch(CONFIG.endpoints.motion, {
+                        const response = await fetch(`${CONFIG.endpoints.motion}`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
@@ -903,27 +828,43 @@ export class MotionModule extends Module {
             });
         }
 
-        // Batch download videos
+        // Batch download videos (improved with ZIP)
         const btnDownVideos = document.getElementById('btn-down-motion-videos');
         if (btnDownVideos) {
-            btnDownVideos.addEventListener('click', () => {
+            btnDownVideos.addEventListener('click', async () => {
                 const scenesWithVideo = scenes.filter(s => s.videoUrl);
                 if (scenesWithVideo.length === 0) return alert("생성된 영상이 없습니다.");
 
-                if (!confirm(`총 ${scenesWithVideo.length}개의 영상을 다운로드 하시겠습니까?`)) return;
+                if (!confirm(`총 ${scenesWithVideo.length}개의 영상을 ZIP으로 다운로드 하시겠습니까?`)) return;
 
-                scenesWithVideo.forEach((s, i) => {
-                    setTimeout(() => {
-                        const link = document.createElement('a');
-                        link.href = s.videoUrl;
-                        link.download = `scene_${s.sceneId}.mp4`;
-                        link.click();
-                    }, i * 1000);
-                });
+                try {
+                    btnDownVideos.disabled = true;
+                    btnDownVideos.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> ZIP 생성 중...`;
+                    lucide.createIcons();
+
+                    const files = [];
+                    for (const scene of scenesWithVideo) {
+                        files.push({
+                            filename: `scene_${String(scene.sceneId).padStart(3, '0')}_motion.mp4`,
+                            url: scene.videoUrl
+                        });
+                    }
+
+                    await DownloadHelper.downloadAsZip(files, `motion_videos_${Date.now()}.zip`);
+                    alert(`✅ ${scenesWithVideo.length}개 영상이 ZIP으로 다운로드되었습니다.`);
+
+                } catch (error) {
+                    console.error('ZIP 다운로드 실패:', error);
+                    alert(`❌ 다운로드 실패: ${error.message}`);
+                } finally {
+                    btnDownVideos.disabled = false;
+                    btnDownVideos.innerHTML = `<i data-lucide="download-cloud" class="w-4 h-4"></i> 영상 일괄 다운로드`;
+                    lucide.createIcons();
+                }
             });
         }
 
-        // Download all motion prompts as text file
+        // Download all motion prompts as JSON file (improved)
         const btnDownMotionPrompts = document.getElementById('btn-down-motion-prompts');
         if (btnDownMotionPrompts) {
             btnDownMotionPrompts.addEventListener('click', () => {
@@ -933,21 +874,16 @@ export class MotionModule extends Module {
                 const scenesWithPrompts = allScenes.filter(s => s.motionPrompt);
                 if (scenesWithPrompts.length === 0) return alert("모션 프롬프트가 없습니다.");
 
-                // 프롬프트만 한 줄씩 추출 (프롬프트 사이에 빈 줄 추가)
-                const txtContent = scenesWithPrompts
-                    .map(scene => scene.motionPrompt)
-                    .join('\n\n');
+                // JSON 형식으로 저장
+                const promptsData = scenesWithPrompts.map(scene => ({
+                    sceneId: scene.sceneId,
+                    motionPrompt: scene.motionPrompt,
+                    imagePrompt: scene.imagePrompt,
+                    originalScript: scene.originalScript
+                }));
 
-                const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
-                const url = URL.createObjectURL(blob);
-
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `motion_prompts_${Date.now()}.txt`;
-                link.click();
-
-                URL.revokeObjectURL(url);
-                alert(`✅ 모션 프롬프트 파일이 다운로드되었습니다.\n총 ${scenesWithPrompts.length}개 프롬프트 포함`);
+                DownloadHelper.downloadJSON(promptsData, `motion_prompts_${Date.now()}.json`);
+                alert(`✅ 모션 프롬프트 JSON 파일이 다운로드되었습니다.\n총 ${scenesWithPrompts.length}개 프롬프트 포함`);
             });
         }
 

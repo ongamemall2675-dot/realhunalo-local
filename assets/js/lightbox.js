@@ -17,6 +17,10 @@ export function openLightbox(content, type = 'auto') {
     }
 
     lightboxOverlay.classList.remove('hidden');
+    // Allow browser to render removing hidden before changing opacity
+    setTimeout(() => {
+        lightboxContent.classList.remove('opacity-0', 'scale-95');
+    }, 10);
     document.body.style.overflow = 'hidden';
 }
 
@@ -31,9 +35,12 @@ export function openVideoLightbox(src) {
 }
 
 function closeLightbox() {
-    lightboxOverlay.classList.add('hidden');
-    lightboxContent.innerHTML = '';
-    document.body.style.overflow = '';
+    lightboxContent.classList.add('opacity-0', 'scale-95');
+    setTimeout(() => {
+        lightboxOverlay.classList.add('hidden');
+        lightboxContent.innerHTML = '';
+        document.body.style.overflow = '';
+    }, 300); // Wait for transition
 }
 
 // Event Listeners

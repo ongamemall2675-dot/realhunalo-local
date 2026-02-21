@@ -4,12 +4,29 @@ import shutil
 import requests
 import base64
 import gdown
+import tempfile
 from datetime import datetime
 from dotenv import load_dotenv
 
 # .env 파일 로드 (프로젝트 루트 디렉토리에서)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-load_dotenv(os.path.join(BASE_DIR, ".env"))
+env_path = os.path.join(BASE_DIR, ".env")
+load_dotenv(dotenv_path=env_path, override=True)
+
+# 환경변수 로딩 검증
+print(f"\n{'='*60}")
+print(f"[ENV] .env 파일 로드: {env_path}")
+print(f"   파일 존재: {os.path.exists(env_path)}")
+if os.path.exists(env_path):
+    required_keys = ['OPENAI_API_KEY', 'GEMINI_API_KEY', 'ANTHROPIC_API_KEY', 'DEEPSEEK_API_KEY', 'REPLICATE_API_TOKEN']
+    for key in required_keys:
+        value = os.getenv(key)
+        if value:
+            masked = f"{value[:8]}...{value[-4:]}" if len(value) > 12 else "***"
+            print(f"   {key}: 설정됨 ({masked})")
+        else:
+            print(f"   {key}: 누락됨")
+print(f"{'='*60}\n")
 
 # --- 설정 및 경로 ---
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -17,20 +34,32 @@ OUTPUT_DIR = os.path.join(BASE_DIR, "output")
 TEMP_DIR = os.path.join(BASE_DIR, "temp")
 ASSETS_DIR = os.path.join(BASE_DIR, "assets")
 
+# Vrew 전용 출력 경로
+# - 환경변수 VREW_OUTPUT_DIR 설정 시 해당 경로 사용 (예: D:\vrew project)
+# - 미설정 시 output/vrew_projects 폴더 사용
+_vrew_env = os.getenv("VREW_OUTPUT_DIR", "").strip()
+VREW_OUTPUT_DIR = _vrew_env if _vrew_env else os.path.join(OUTPUT_DIR, "vrew_projects")
+
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 os.makedirs(TEMP_DIR, exist_ok=True)
 os.makedirs(ASSETS_DIR, exist_ok=True)
+os.makedirs(VREW_OUTPUT_DIR, exist_ok=True)
+
+print(f"[ENV] VREW_OUTPUT_DIR: {VREW_OUTPUT_DIR}")
+
+# 로그 파일 경로 (uvicorn reload 방지를 위해 시스템 임시 폴더 사용)
+LOG_BASE = tempfile.gettempdir()
 
 def log_debug(msg):
     try:
-        with open(os.path.join(BASE_DIR, "debug_download.log"), "a", encoding="utf-8") as f:
+        with open(os.path.join(LOG_BASE, "realhunalo_debug_download.log"), "a", encoding="utf-8") as f:
             f.write(f"{datetime.now().isoformat()} - {msg}\n")
     except:
         pass
 
 def log_error(msg):
     try:
-        with open(os.path.join(BASE_DIR, "error.log"), "a", encoding="utf-8") as f:
+        with open(os.path.join(LOG_BASE, "realhunalo_error.log"), "a", encoding="utf-8") as f:
             f.write(f"{datetime.now().isoformat()} - {msg}\n")
     except:
         pass

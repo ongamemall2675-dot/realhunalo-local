@@ -1,0 +1,149 @@
+/* Shorts Module Styles */
+
+/* 메인 컨테이너 */
+.shorts-container {
+    display: flex;
+    gap: 2rem;
+    height: calc(100vh - 120px);
+    overflow: hidden;
+}
+
+/* 왼쪽 패널 (설정 및 입력) */
+.shorts-left-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+/* 오른쪽 패널 (미리보기) */
+.shorts-right-panel {
+    width: 400px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #0f172a;
+    border-radius: 2rem;
+    padding: 1rem;
+    border: 4px solid #334155;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    height: fit-content;
+    max-height: 100%;
+}
+
+/* 9:16 미리보기 프레임 */
+.phone-frame {
+    width: 360px;
+    /* 9 */
+    height: 640px;
+    /* 16 */
+    background: #000;
+    border-radius: 1.5rem;
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.05);
+}
+
+.phone-screen {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.phone-screen img,
+.phone-screen video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* 오버레이 (자막 등) */
+.phone-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: 5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+/* 자막 스타일 (기본) */
+.shorts-subtitle {
+    text-align: center;
+    color: white;
+    font-weight: 800;
+    font-size: 1.5rem;
+    text-shadow:
+        -2px -2px 0 #000,
+        2px -2px 0 #000,
+        -2px 2px 0 #000,
+        2px 2px 0 #000;
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* 탭 네비게이션 */
+.shorts-tabs {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 2px solid #334155;
+    padding-bottom: 1px;
+}
+
+.shorts-tab-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem 0.75rem 0 0;
+    font-weight: 700;
+    color: #94a3b8;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.shorts-tab-btn:hover {
+    color: #cbd5e1;
+    background: #1e293b;
+}
+
+.shorts-tab-btn.active {
+    color: #f472b6;
+    /* pink-400 */
+    background: #1e293b;
+    border-bottom: 2px solid #f472b6;
+    margin-bottom: -2px;
+}
+
+/* 리퍼퍼징 옵션 카드 */
+.repurpose-card {
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.repurpose-card:hover {
+    transform: translateY(-2px);
+    border-color: #f472b6;
+}
+
+.repurpose-card.selected {
+    border-color: #f472b6;
+    background: rgba(244, 114, 182, 0.1);
+    box-shadow: 0 0 0 2px #f472b6;
+}

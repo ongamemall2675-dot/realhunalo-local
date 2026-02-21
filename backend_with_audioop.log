@@ -1,0 +1,351 @@
+C:\Users\ongam\antigravity project\realhunalo_local\backend.py:63: DeprecationWarning: 
+        on_event is deprecated, use lifespan event handlers instead.
+
+        Read more about it in the
+        [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+        
+  @app.on_event("startup")
+INFO:     Will watch for changes in these directories: ['C:\\Users\\ongam\\antigravity project\\realhunalo_local']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [864] using StatReload
+INFO:     Started server process [47172]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+
+============================================================
+[ENV] .env 파일 로드: C:\Users\ongam\antigravity project\realhunalo_local\.env
+   파일 존재: True
+   OPENAI_API_KEY: 설정됨
+   GEMINI_API_KEY: 설정됨
+   ANTHROPIC_API_KEY: 설정됨
+   DEEPSEEK_API_KEY: 설정됨
+   REPLICATE_API_TOKEN: 설정됨
+============================================================
+
+[OK] Script Service 초기화 완료 (timeout: 90s)
+[OK] Character Anchor Mode: FIXED
+[OK] Image Service 초기화 완료
+[OK] Motion Service 초기화 완료
+[OK] TTS Service 초기화 완료
+   - Primary Engine: elevenlabs
+   - Available Engines: ['azure', 'elevenlabs']
+[OK] FFmpeg 확인: ffmpeg version 8.0.1-full_build-www.gyan.dev Copyright (c) 2000-2025 the FFmpeg developers
+[OK] Video Service 초기화 완료
+[OK] Vrew Service (New) 초기화 완료
+[OK] Vrew Batch Service 초기화 완료
+[OK] Trend Service 초기화 완료
+[OK] YouTube API 초기화 완료
+
+[AI] AI Service 초기화
+  [OK] openai: sk-proj-...Dj0A
+  [OK] anthropic: sk-ant-a...qQAA
+  [OK] gemini: AIzaSyBt...DALo
+  [OK] deepseek: sk-b6458...d65e
+  [OK] perplexity: pplx-Znk...8e76
+[OK] Google Drive Service 초기화 완료
+[OK] Shorts Service 초기화 완료 (timeout: 60s)
+[OK] Audio Segmentation Service 초기화 완료
+
+============================================================
+[ENV] .env 파일 로드: C:\Users\ongam\antigravity project\realhunalo_local\.env
+   파일 존재: True
+   OPENAI_API_KEY: 설정됨
+   GEMINI_API_KEY: 설정됨
+   ANTHROPIC_API_KEY: 설정됨
+   DEEPSEEK_API_KEY: 설정됨
+   REPLICATE_API_TOKEN: 설정됨
+============================================================
+
+
+============================================================
+[OK] RealHunalo Backend Started - Version: 2026.02.12.01
+[OK] /api/generate-script endpoint confirmed
+[OK] /api/analyze-shorts endpoint confirmed
+============================================================
+
+INFO:     127.0.0.1:7819 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7819 - "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:7819 - "GET /assets/style.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5942 - "GET /assets/js/app.js?v=20250210-2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7819 - "GET /assets/js/lightbox.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5942 - "GET /assets/js/state.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:2460 - "GET /assets/js/utils.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5942 - "GET /assets/js/modules/DashboardModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7819 - "GET /assets/js/cache.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:2460 - "GET /assets/js/modules/ProjectModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:2460 - "GET /assets/js/modules/TrendModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5942 - "GET /assets/js/modules/YoutubeModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7819 - "GET /assets/js/modules/ScriptModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5942 - "GET /assets/js/modules/ImageModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:2460 - "GET /assets/js/modules/MotionModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7819 - "GET /assets/js/modules/TTSModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5942 - "GET /assets/js/modules/VideoModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7819 - "GET /assets/js/modules/ShortsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5942 - "GET /assets/js/modules/ShortsEditModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:2460 - "GET /assets/js/modules/BatchVrewModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7819 - "GET /assets/js/modules/AudioSegmentationModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5942 - "GET /assets/js/modules/IntegratedWorkflowModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7819 - "GET /assets/js/Module.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:2460 - "GET /assets/js/modules/SettingsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5942 - "GET /assets/js/config.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:2460 - "GET /assets/js/utils/download.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5942 - "GET /assets/js/guides.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5942 - "GET /api/check-saved-keys HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5942 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:2460 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7819 - "GET /api/motion/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7819 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:4913 - "GET /api/tts/voices?engine=azure HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4913 - "GET /uploads/tts_0c0ad2c7-05b7-4c8f-826f-9d21965721bf.mp3 HTTP/1.1" 404 Not Found
+[TTS] TTS 생성 시도 1/3
+[TTS] 생성 시작 (Scene: full_script, 엔진: azure, 글자수: 138)
+[TTS] 음성 'ko-KR-JiMinNeural' 사용: 지민 (JiMin) (차분하고 부드러움)
+[TTS] Azure TTS 생성 중... (음성: ko-KR-JiMinNeural, 속도: 1.0x)
+[OK] Azure TTS 완료: 0개 단어, 0.00초
+[OK] TTS 생성 완료 (엔진: azure, 처리시간: 0.68s)
+INFO:     127.0.0.1:6188 - "POST /api/generate-tts HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4908 - "GET /output/tts_d4fa0b8e-3fdd-4aaa-8060-bbd7c30b4f1c.mp3 HTTP/1.1" 206 Partial Content
+[SEGMENT] 서버 파일 세분화 요청: C:\Users\ongam\antigravity project\realhunalo_local\output\tts_d4fa0b8e-3fdd-4aaa-8060-bbd7c30b4f1c.mp3
+INFO:     127.0.0.1:4908 - "POST /api/segment-audio-from-path HTTP/1.1" 200 OK
+
+============================================================
+오디오 세분화 시작: tts_d4fa0b8e-3fdd-4aaa-8060-bbd7c30b4f1c.mp3
+최대 문자 수: 30자
+============================================================
+
+[Step 1/3] Whisper 음성 인식 중...
+[Whisper] 음성 인식 시작: tts_d4fa0b8e-3fdd-4aaa-8060-bbd7c30b4f1c.mp3
+  - 파일 형식: .mp3
+  - 파일 크기: 0.1MB
+[Whisper] API 호출 중...
+INFO:     127.0.0.1:4908 - "GET /api/tasks/ca1d3adc-13c9-4316-a95c-aba0bc5eecd8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4908 - "GET /api/tasks/ca1d3adc-13c9-4316-a95c-aba0bc5eecd8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4908 - "GET /api/tasks/ca1d3adc-13c9-4316-a95c-aba0bc5eecd8 HTTP/1.1" 200 OK
+[Whisper] API 응답 수신 완료
+[Whisper] 완료: 30개 타임스탬프 추출
+[Whisper] 전체 텍스트: 김씨는 이달 중순 입주할 새 아파트 잔금을 마련하기 위해 그동안 수중히 모아뒀던 금 15돈을 중고거래 앱에 내놨습니다. 판매금액은 870만원, 입주 잔금으로는 턱없이 부족하지만 대...
+[OK] 전체 텍스트: 132자
+[OK] 단어 수: 30개
+
+[Step 2/3] 30자 이하로 그룹화 중...
+[OK] 4개 구간으로 분할됨
+  #001: 29자 (0.00s ~ 4.38s)
+  #002: 30자 (4.38s ~ 10.38s)
+  #003: 29자 (10.58s ~ 15.12s)
+  #004: 12자 (15.12s ~ 16.84s)
+
+[Step 3/3] 오디오 파일 분할 및 저장 중...
+저장 위치: C:\Users\ongam\antigravity project\realhunalo_local\output\segments\83f9f452
+[ERROR] Segmentation Path Task Failed: 'cp949' codec can't encode character '\u2713' in position 2: illegal multibyte sequence
+INFO:     127.0.0.1:4908 - "GET /api/tasks/ca1d3adc-13c9-4316-a95c-aba0bc5eecd8 HTTP/1.1" 200 OK
+WARNING:  StatReload detected changes in 'services\audio_segmentation_service.py'. Reloading...
+
+============================================================
+[ENV] .env 파일 로드: C:\Users\ongam\antigravity project\realhunalo_local\.env
+   파일 존재: True
+   OPENAI_API_KEY: 설정됨
+   GEMINI_API_KEY: 설정됨
+   ANTHROPIC_API_KEY: 설정됨
+   DEEPSEEK_API_KEY: 설정됨
+   REPLICATE_API_TOKEN: 설정됨
+============================================================
+
+[OK] Script Service 초기화 완료 (timeout: 90s)
+[OK] Character Anchor Mode: FIXED
+[OK] Image Service 초기화 완료
+[OK] Motion Service 초기화 완료
+[OK] TTS Service 초기화 완료
+   - Primary Engine: elevenlabs
+   - Available Engines: ['azure', 'elevenlabs']
+[OK] FFmpeg 확인: ffmpeg version 8.0.1-full_build-www.gyan.dev Copyright (c) 2000-2025 the FFmpeg developers
+[OK] Video Service 초기화 완료
+[OK] Vrew Service (New) 초기화 완료
+[OK] Vrew Batch Service 초기화 완료
+[OK] Trend Service 초기화 완료
+[OK] YouTube API 초기화 완료
+
+[AI] AI Service 초기화
+  [OK] openai: sk-proj-...Dj0A
+  [OK] anthropic: sk-ant-a...qQAA
+  [OK] gemini: AIzaSyBt...DALo
+  [OK] deepseek: sk-b6458...d65e
+  [OK] perplexity: pplx-Znk...8e76
+[OK] Google Drive Service 초기화 완료
+[OK] Shorts Service 초기화 완료 (timeout: 60s)
+[OK] Audio Segmentation Service 초기화 완료
+ INFO:     127.0.0.1:1536 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1536 - "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:1536 - "GET /assets/style.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6287 - "GET /assets/js/app.js?v=20250210-2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6287 - "GET /assets/js/state.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9995 - "GET /assets/js/utils.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1536 - "GET /assets/js/lightbox.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6287 - "GET /assets/js/cache.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9995 - "GET /assets/js/modules/DashboardModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1536 - "GET /assets/js/modules/ProjectModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6287 - "GET /assets/js/modules/TrendModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9995 - "GET /assets/js/modules/YoutubeModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1536 - "GET /assets/js/modules/ScriptModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6287 - "GET /assets/js/modules/ImageModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9995 - "GET /assets/js/modules/MotionModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1536 - "GET /assets/js/modules/TTSModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9995 - "GET /assets/js/modules/VideoModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6287 - "GET /assets/js/modules/ShortsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1536 - "GET /assets/js/modules/ShortsEditModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6287 - "GET /assets/js/modules/BatchVrewModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9995 - "GET /assets/js/modules/AudioSegmentationModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1536 - "GET /assets/js/modules/IntegratedWorkflowModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6287 - "GET /assets/js/modules/SettingsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9995 - "GET /assets/js/Module.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1536 - "GET /assets/js/config.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6287 - "GET /assets/js/utils/download.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6287 - "GET /assets/js/guides.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6287 - "GET /api/check-saved-keys HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6287 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9995 - "GET /api/motion/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1536 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1536 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:5069 - "GET /api/tts/voices?engine=azure HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5069 - "GET /uploads/tts_d4fa0b8e-3fdd-4aaa-8060-bbd7c30b4f1c.mp3 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:4217 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4217 - "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:4091 - "GET /assets/js/app.js?v=20250210-2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4217 - "GET /assets/style.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4091 - "GET /assets/js/lightbox.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4217 - "GET /assets/js/state.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:11428 - "GET /assets/js/utils.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4091 - "GET /assets/js/cache.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4217 - "GET /assets/js/modules/DashboardModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:11428 - "GET /assets/js/modules/ProjectModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4091 - "GET /assets/js/modules/TrendModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4217 - "GET /assets/js/modules/YoutubeModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:11428 - "GET /assets/js/modules/ScriptModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4217 - "GET /assets/js/modules/ImageModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:11428 - "GET /assets/js/modules/TTSModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4091 - "GET /assets/js/modules/MotionModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4217 - "GET /assets/js/modules/VideoModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4091 - "GET /assets/js/modules/ShortsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:11428 - "GET /assets/js/modules/ShortsEditModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4091 - "GET /assets/js/modules/BatchVrewModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4217 - "GET /assets/js/modules/IntegratedWorkflowModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:11428 - "GET /assets/js/modules/AudioSegmentationModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4217 - "GET /assets/js/modules/SettingsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4217 - "GET /assets/js/utils/download.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:11428 - "GET /assets/js/Module.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4091 - "GET /assets/js/config.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:11428 - "GET /assets/js/guides.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:11428 - "GET /api/check-saved-keys HTTP/1.1" 200 OK
+INFO:     127.0.0.1:11428 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4217 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4091 - "GET /api/motion/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4091 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:2993 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:11102 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7038 - "GET /api/motion/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7791 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1231 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4133 - "GET /api/motion/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1337 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1337 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1337 - "GET /api/motion/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8858 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9206 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8858 - "GET /api/motion/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5897 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5897 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5897 - "GET /api/motion/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13419 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1868 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13419 - "GET /api/motion/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9108 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9108 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9108 - "GET /api/motion/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6683 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10691 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6683 - "GET /api/motion/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13288 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13288 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13288 - "GET /api/motion/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9490 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10577 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5582 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5582 - "GET /api/motion/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4454 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3109 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4454 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3109 - "GET /api/motion/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3109 - "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:3109 - "GET /assets/style.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4454 - "GET /assets/js/app.js?v=20250210-2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4454 - "GET /assets/js/state.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3109 - "GET /assets/js/lightbox.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9537 - "GET /assets/js/cache.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6405 - "GET /assets/js/utils.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6855 - "GET /assets/js/modules/DashboardModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4454 - "GET /assets/js/modules/ProjectModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3109 - "GET /assets/js/modules/TrendModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6855 - "GET /assets/js/modules/YoutubeModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6405 - "GET /assets/js/modules/ScriptModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9537 - "GET /assets/js/modules/ImageModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3109 - "GET /assets/js/modules/TTSModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4454 - "GET /assets/js/modules/MotionModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6855 - "GET /assets/js/modules/VideoModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6405 - "GET /assets/js/modules/ShortsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4454 - "GET /assets/js/modules/ShortsEditModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9537 - "GET /assets/js/modules/BatchVrewModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3109 - "GET /assets/js/modules/AudioSegmentationModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6405 - "GET /assets/js/modules/IntegratedWorkflowModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4454 - "GET /assets/js/Module.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9537 - "GET /assets/js/config.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6855 - "GET /assets/js/modules/SettingsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3109 - "GET /assets/js/utils/download.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6855 - "GET /assets/js/guides.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6855 - "GET /api/check-saved-keys HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6855 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3109 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4454 - "GET /api/motion/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4454 - "GET /assets/placeholder.png HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4454 - "GET /api/tts/voices?engine=azure HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4454 - "GET /output/tts_d4fa0b8e-3fdd-4aaa-8060-bbd7c30b4f1c.mp3 HTTP/1.1" 206 Partial Content
+[TTS] TTS 생성 시도 1/3
+[TTS] 생성 시작 (Scene: full_script, 엔진: azure, 글자수: 138)
+[TTS] 음성 'ko-KR-SunHiNeural' 사용: 선희 (SunHi) (밝고 친근함)
+[TTS] Azure TTS 생성 중... (음성: ko-KR-SunHiNeural, 속도: 1.0x)
+[OK] Azure TTS 완료: 0개 단어, 0.00초
+[OK] TTS 생성 완료 (엔진: azure, 처리시간: 0.61s)
+INFO:     127.0.0.1:8170 - "POST /api/generate-tts HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8170 - "GET /output/tts_8eb78a07-3762-46fb-807a-f048bd932fd9.mp3 HTTP/1.1" 206 Partial Content
+[SEGMENT] 서버 파일 세분화 요청: C:\Users\ongam\antigravity project\realhunalo_local\output\tts_8eb78a07-3762-46fb-807a-f048bd932fd9.mp3
+INFO:     127.0.0.1:8170 - "POST /api/segment-audio-from-path HTTP/1.1" 200 OK
+
+============================================================
+오디오 세분화 시작: tts_8eb78a07-3762-46fb-807a-f048bd932fd9.mp3
+최대 문자 수: 30자
+============================================================
+
+[Step 1/3] Whisper 음성 인식 중...
+[Whisper] 음성 인식 시작: tts_8eb78a07-3762-46fb-807a-f048bd932fd9.mp3
+  - 파일 형식: .mp3
+  - 파일 크기: 0.1MB
+[Whisper] API 호출 중...
+INFO:     127.0.0.1:8170 - "GET /api/tasks/1b320e82-655d-4279-ab98-ffd4f5b2ddd8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8170 - "GET /api/tasks/1b320e82-655d-4279-ab98-ffd4f5b2ddd8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8170 - "GET /api/tasks/1b320e82-655d-4279-ab98-ffd4f5b2ddd8 HTTP/1.1" 200 OK
+[Whisper] API 응답 수신 완료
+[Whisper] 완료: 30개 타임스탬프 추출
+[Whisper] 전체 텍스트: 김씨는 이달 중순 입주할 새 아파트 잔금을 마련하기 위해 그동안 소중히 모아뒀던 금 15돈을 중고거래 앱에 내놨습니다. 판매금액은 870만원 입주 잔금으로는 턱없이 부족하지만 대출...
+[OK] 전체 텍스트: 131자
+[OK] 단어 수: 30개
+
+[Step 2/3] 30자 이하로 그룹화 중...
+[OK] 4개 구간으로 분할됨
+  #001: 29자 (0.00s ~ 4.76s)
+  #002: 30자 (4.76s ~ 11.48s)
+  #003: 29자 (11.48s ~ 16.62s)
+  #004: 12자 (16.62s ~ 18.58s)
+
+[Step 3/3] 오디오 파일 분할 및 저장 중...
+저장 위치: C:\Users\ongam\antigravity project\realhunalo_local\output\segments\3bc51b2f
+[ERROR] Segmentation Path Task Failed: 'cp949' codec can't encode character '\u2713' in position 2: illegal multibyte sequence
+INFO:     127.0.0.1:8170 - "GET /api/tasks/1b320e82-655d-4279-ab98-ffd4f5b2ddd8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13784 - "GET /api/tts/status HTTP/1.1" 200 OK

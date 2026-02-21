@@ -11,6 +11,23 @@ export const AppState = {
     resolution: '2K',
     masterCharacterPrompt: '', // 주인공 마스터 이미지 프롬프트
 
+    // ProjectService Reference
+    projectService: null,
+    setProjectService(service) {
+        this.projectService = service;
+    },
+
+    _notifyChange() {
+        if (this.projectService) {
+            this.projectService.notifyChange();
+        }
+    },
+
+    // 워크플로우 단계별 결과 저장
+    audioPath: null,           // TTS 생성된 전체 음성 파일 경로
+    youtubeMetadata: null,     // YouTube 메타데이터 (제목, 설명, 태그 등)
+    segmentationData: null,    // 오디오 세분화 결과
+
     currentProjectId: null, // 현재 작업 중인 프로젝트 ID
     generatedShorts: [],   // 생성된 Shorts 목록
 
@@ -33,9 +50,13 @@ export const AppState = {
                 ratio: this.ratio,
                 resolution: this.resolution,
                 masterCharacterPrompt: this.masterCharacterPrompt,
+                audioPath: this.audioPath,
+                youtubeMetadata: this.youtubeMetadata,
+                segmentationData: this.segmentationData,
                 currentProjectId: this.currentProjectId,
                 generatedShorts: this.generatedShorts,
                 automation: this.automation,
+                finalVideoUrl: this.finalVideoUrl, // 최종 영상 URL 저장
                 savedAt: new Date().toISOString()
             };
             localStorage.setItem('appState', JSON.stringify(stateToSave));
@@ -56,13 +77,19 @@ export const AppState = {
                 this.ratio = state.ratio || '16:9';
                 this.resolution = state.resolution || '2K';
                 this.masterCharacterPrompt = state.masterCharacterPrompt || '';
+                this.audioPath = state.audioPath || null;
+                this.youtubeMetadata = state.youtubeMetadata || null;
+                this.segmentationData = state.segmentationData || null;
                 this.currentProjectId = state.currentProjectId || null;
                 this.generatedShorts = state.generatedShorts || [];
                 this.automation = { ...this.automation, ...state.automation };
+                this.finalVideoUrl = state.finalVideoUrl || null; // 최종 영상 URL 복원
 
                 console.log('📂 AppState 복원 완료:', {
                     scenes: this.scenes.length,
                     hasScript: !!this.script,
+                    hasAudioPath: !!this.audioPath,
+                    hasMetadata: !!this.youtubeMetadata,
                     generatedShorts: this.generatedShorts.length,
                     savedAt: state.savedAt
                 });
@@ -93,6 +120,9 @@ export const AppState = {
         this.ratio = '16:9';
         this.resolution = '2K';
         this.masterCharacterPrompt = '';
+        this.audioPath = null;
+        this.youtubeMetadata = null;
+        this.segmentationData = null;
         this.currentProjectId = null;
         this.generatedShorts = [];
         this.clearLocalStorage();
@@ -120,12 +150,14 @@ export const AppState = {
         this.scenes = normalizedScenes;
         console.log("📦 AppState: Scenes updated (Normalized)", this.scenes.length);
         this.saveToLocalStorage(); // 자동 저장
+        this._notifyChange();
     },
     getScenes() { return this.scenes; },
 
     setScript(text) {
         this.script = text;
         this.saveToLocalStorage(); // 자동 저장
+        this._notifyChange();
     },
     getScript() { return this.script; },
 
@@ -133,20 +165,24 @@ export const AppState = {
         this.masterCharacterPrompt = prompt;
         console.log("👤 Master Character Prompt Set");
         this.saveToLocalStorage(); // 자동 저장
+        this._notifyChange();
     },
     getMasterCharacterPrompt() { return this.masterCharacterPrompt; },
 
     setStyle(style) {
         this.style = style;
         this.saveToLocalStorage(); // 자동 저장
+        this._notifyChange();
     },
     setRatio(ratio) {
         this.ratio = ratio;
         this.saveToLocalStorage(); // 자동 저장
+        this._notifyChange();
     },
     setResolution(res) {
         this.resolution = res;
         this.saveToLocalStorage(); // 자동 저장
+        this._notifyChange();
     },
 
     // 자동화 모드 설정
@@ -163,5 +199,44 @@ export const AppState = {
         if (saved) {
             this.automation = { ...this.automation, ...JSON.parse(saved) };
         }
+    },
+
+    // 워크플로우 단계별 결과 관리
+    setAudioPath(path) {
+        this.audioPath = path;
+        console.log('🎵 Audio Path Set:', path);
+        this.saveToLocalStorage();
+    },
+    getAudioPath() {
+        return this.audioPath;
+    },
+
+    setYoutubeMetadata(metadata) {
+        this.youtubeMetadata = metadata;
+        console.log('📺 YouTube Metadata Set');
+        this.saveToLocalStorage();
+    },
+    getYoutubeMetadata() {
+        return this.youtubeMetadata;
+    },
+
+    setSegmentationData(data) {
+        this.segmentationData = data;
+        console.log('✂️ Segmentation Data Set:', data?.segments?.length || 0, 'segments');
+        this.saveToLocalStorage();
+    },
+    getSegmentationData() {
+        return this.segmentationData;
+    },
+
+    // 최종 영상 URL 관리
+    finalVideoUrl: null,
+    setFinalVideoUrl(url) {
+        this.finalVideoUrl = url;
+        console.log('🎥 Final Video URL Set:', url);
+        this.saveToLocalStorage();
+    },
+    getFinalVideoUrl() {
+        return this.finalVideoUrl;
     }
 };

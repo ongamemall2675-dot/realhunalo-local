@@ -4,8 +4,9 @@
 
 import { Module } from '../Module.js';
 import { AppState } from '../state.js';
-import { CONFIG } from '../config.js';
+import { CONFIG, API_BASE_URL } from '../config.js';
 import { processInBatches } from '../utils.js';
+import { DownloadHelper } from '../utils/download.js';
 
 // ================================================================
 // SRT 타임스탬프 파싱 유틸리티
@@ -63,70 +64,259 @@ function getSRTTotalDuration(srtContent) {
 
 export class TTSModule extends Module {
     constructor() {
-        super('tts', 'TTS 녹음실', 'mic-2', 'ElevenLabs 및 Azure 음성 합성');
+        super('tts', '2. 음성 생성 (TTS)', 'mic-2', 'Azure 및 ElevenLabs 음성 합성');
         this.voiceSettings = {
-            engine: 'elevenlabs',
-            voiceId: 'zcAOhNBS3c14rBihAFp1',
+            engine: 'azure',  // Azure를 기본값으로 설정
+            voiceId: 'ko-KR-SunHiNeural',  // Azure 한국어 기본 음성
             stability: 0.5,
             speed: 1.0
         };
+        this.voices = { azure: [], elevenlabs: [], google: [] }; // 성우 리스트 캐시
+    }
+
+    // onMount moved to line ~544 to avoid duplication
+
+
+    async loadVoices() {
+        try {
+            console.log('[TTSModule] Loading voices...');
+            const voiceSelect = document.getElementById('tts-voice-id');
+            const engineSelect = document.getElementById('tts-engine-id');
+
+            if (!voiceSelect || !engineSelect) {
+                console.error('[TTSModule] Select elements not found!');
+                return;
+            }
+
+            // 로딩 상태 표시
+            voiceSelect.innerHTML = '<option>성우 리스트 로딩 중...</option>';
+            voiceSelect.disabled = true;
+
+            const response = await fetch(`${API_BASE_URL}/api/tts/voices`);
+            if (!response.ok) throw new Error('성우 리스트를 불러오는데 실패했습니다.');
+
+            const data = await response.json();
+            console.log('[TTSModule] API Response:', data);
+
+            if (data.success) {
+                this.voices = data.voices;
+
+                if (!this.voices.elevenlabs || this.voices.elevenlabs.length === 0) {
+                    console.info('[TTSModule] ElevenLabs API list is empty.');
+                }
+
+                console.log('[TTSModule] Voices loaded:', this.voices);
+                this.updateVoiceList(); // 현재 선택된 엔진에 맞춰 리스트 업데이트
+            } else {
+                throw new Error(data.error || '성우 리스트 로드 실패');
+            }
+
+        } catch (error) {
+            console.error('[TTSModule] Failed to load voices:', error);
+            const voiceSelect = document.getElementById('tts-voice-id');
+            if (voiceSelect) {
+                voiceSelect.innerHTML = '<option>성우 리스트 로드 실패</option>';
+            }
+        } finally {
+            const voiceSelect = document.getElementById('tts-voice-id');
+            if (voiceSelect) voiceSelect.disabled = false;
+        }
+    }
+
+    updateVoiceList() {
+        const engineSelect = document.getElementById('tts-engine-id');
+        const voiceSelect = document.getElementById('tts-voice-id');
+        if (!engineSelect || !voiceSelect) return;
+
+        const engine = engineSelect.value;
+        const voices = this.voices[engine] || [];
+
+        console.log(`[TTSModule] Updating list for engine: ${engine}, count: ${voices.length}`);
+
+        voiceSelect.innerHTML = '';
+
+        if (voices.length === 0) {
+            voiceSelect.innerHTML = '<option value="">사용 가능한 성우가 없습니다</option>';
+            return;
+        }
+
+        // [Feature] 성별로 성우 분류 (남성 / 여성 / 기타)
+        const groups = {
+            '여성': [],
+            '남성': [],
+            '기타': []
+        };
+
+        voices.forEach(voice => {
+            const gender = voice.gender || '기타';
+            if (gender.includes('여성') || gender === 'Female') {
+                groups['여성'].push(voice);
+            } else if (gender.includes('남성') || gender === 'Male') {
+                groups['남성'].push(voice);
+            } else {
+                groups['기타'].push(voice);
+            }
+        });
+
+        // 그룹별로 그룹핑하여 추가
+        const groupConfigs = [
+            { key: '여성', label: '👩 여성 성우 (Female)' },
+            { key: '남성', label: '👨 남성 성우 (Male)' },
+            { key: '기타', label: '👥 기타 (Others)' }
+        ];
+
+        groupConfigs.forEach(config => {
+            const list = groups[config.key];
+            if (list && list.length > 0) {
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = config.label;
+
+                list.forEach(voice => {
+                    const option = document.createElement('option');
+                    option.value = voice.id;
+
+                    let label = voice.name || voice.id;
+                    try {
+                        if (engine === 'azure') {
+                            const style = voice.style || 'General';
+                            label = `${voice.display_name || voice.name} (${style})`;
+                        } else if (engine === 'google') {
+                            const nameKo = voice.name_ko || voice.name || voice.id;
+                            const instruction = voice.base_instruction || '';
+                            const shortInstr = instruction.length > 40 ? instruction.substring(0, 40) + '...' : instruction;
+                            label = `${nameKo} - ${shortInstr}`;
+                        } else if (engine === 'elevenlabs') {
+                            const desc = voice.description || '';
+                            label = `${voice.name} (${desc})`;
+                        }
+                    } catch (e) {
+                        label = voice.name || voice.id;
+                    }
+
+                    option.textContent = label;
+                    option.title = voice.description || '';
+                    optgroup.appendChild(option);
+                });
+                voiceSelect.appendChild(optgroup);
+            }
+        });
+
+        // 이전에 선택한 성우가 있다면 복원, 없으면 첫 번째 선택
+        if (this.voiceSettings.voiceId && voices.some(v => v.id === this.voiceSettings.voiceId)) {
+            voiceSelect.value = this.voiceSettings.voiceId;
+        } else if (voiceSelect.options.length > 0) {
+            // optgroup 안의 첫 번째 option 선택
+            const firstOption = voiceSelect.querySelector('option');
+            if (firstOption) {
+                voiceSelect.value = firstOption.value;
+                this.voiceSettings.voiceId = firstOption.value;
+            }
+        }
+    }
+
+    setupEventListeners() {
+        // 엔진 변경 시 성우 리스트 업데이트
+        const engineSelect = document.getElementById('tts-engine-id');
+        if (engineSelect) {
+            engineSelect.addEventListener('change', (e) => {
+                this.voiceSettings.engine = e.target.value;
+                this.updateVoiceList();
+            });
+        }
+
+        // 성우 변경 시 설정 업데이트
+        const voiceSelect = document.getElementById('tts-voice-id');
+        if (voiceSelect) {
+            voiceSelect.addEventListener('change', (e) => {
+                this.voiceSettings.voiceId = e.target.value;
+            });
+        }
+
+        // 속도, 안정성 슬라이더 이벤트 등...
+        const rngSpeed = document.getElementById('rng-speed');
+        const valSpeed = document.getElementById('val-speed');
+        if (rngSpeed && valSpeed) {
+            rngSpeed.addEventListener('input', (e) => {
+                this.voiceSettings.speed = parseFloat(e.target.value);
+                valSpeed.textContent = `${this.voiceSettings.speed}x`;
+            });
+        }
+
+        const rngStability = document.getElementById('rng-stability');
+        const valStability = document.getElementById('val-stability');
+        if (rngStability && valStability) {
+            rngStability.addEventListener('input', (e) => {
+                this.voiceSettings.stability = parseFloat(e.target.value);
+                valStability.textContent = e.target.value;
+            });
+        }
+
+        // 미리듣기 버튼
+        const btnPreview = document.getElementById('btn-preview-voice');
+        if (btnPreview) {
+            btnPreview.addEventListener('click', () => this.previewVoice());
+        }
+
+        // ... (기존 이벤트 리스너들)
+    }
+
+    async previewVoice() {
+        const voiceId = this.voiceSettings.voiceId;
+        const engine = this.voiceSettings.engine;
+        const text = "안녕하세요, 제 목소리는 이렇게 들립니다.";
+
+        if (!voiceId) return alert('성우를 선택해주세요.');
+
+        try {
+            const btnPreview = document.getElementById('btn-preview-voice');
+            const originalIcon = btnPreview.innerHTML;
+            btnPreview.disabled = true;
+            btnPreview.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>';
+            lucide.createIcons();
+
+            const response = await fetch(`${API_BASE_URL}/api/generate-tts`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sceneId: 'preview',
+                    text: text,
+                    settings: this.voiceSettings
+                })
+            });
+
+            const result = await response.json();
+            if (result.success && (result.audioBase64 || result.audio_base64)) {
+                const base64Data = result.audioBase64 || result.audio_base64;
+                const audio = new Audio(`data:audio/mp3;base64,${base64Data}`);
+                audio.play();
+
+            } else {
+                throw new Error(result.error || '미리듣기 생성 실패');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('미리듣기 실패: ' + e.message);
+        } finally {
+            const btnPreview = document.getElementById('btn-preview-voice');
+            if (btnPreview) {
+                btnPreview.disabled = false;
+                btnPreview.innerHTML = `<i data-lucide="volume-2" class="w-4 h-4"></i><span>미리듣기</span>`;
+                lucide.createIcons();
+            }
+        }
     }
 
     render() {
         const scenes = AppState.getScenes();
+        const fullScript = AppState.getScript(); // 전역 스크립트 가져오기
 
-        const standalonePanel = `
-            <div class="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-500/30 rounded-2xl p-6 mb-6">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="p-2 bg-blue-500/20 rounded-lg text-blue-400">
-                        <i data-lucide="zap" class="w-5 h-5"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-white">🚀 독립 실행 모드</h3>
-                    <span class="ml-auto text-xs text-blue-400 bg-blue-500/20 px-3 py-1 rounded-full">분석 없이 바로 TTS</span>
-                </div>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">대본 직접 입력</label>
-                        <textarea id="standalone-tts-input" 
-                            class="w-full h-32 bg-slate-900 border border-slate-700 rounded-xl p-4 text-sm text-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none scrollbar-hide"
-                            placeholder="여기에 대본을 직접 입력하세요."></textarea>
-                    </div>
-                    
-                    <div class="flex gap-3">
-                        <button id="btn-standalone-add-items" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white px-4 py-3 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2">
-                            <i data-lucide="plus-circle" class="w-4 h-4"></i> 목록에 추가
-                        </button>
-                        <button id="btn-standalone-tts-gen" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white px-4 py-3 rounded-xl text-sm font-bold shadow-lg shadow-blue-600/20 transition flex items-center justify-center gap-2">
-                            <i data-lucide="mic" class="w-4 h-4"></i> 즉시 TTS 생성
-                        </button>
-                    </div>
-
-                    <!-- Audio Player & Download Section (initially hidden) -->
-                    <div id="standalone-audio-result" class="hidden mt-4 p-4 bg-slate-900/50 border border-green-500/30 rounded-xl space-y-3">
-                        <div class="flex items-center gap-2 text-green-400 text-sm font-semibold">
-                            <i data-lucide="check-circle" class="w-5 h-5"></i>
-                            <span>TTS 생성 완료!</span>
-                            <span id="standalone-tts-info" class="ml-auto text-xs text-slate-400"></span>
-                        </div>
-                        <audio id="standalone-audio-player" controls class="w-full h-10"></audio>
-                        <button id="btn-standalone-download" class="w-full bg-gradient-to-r from-green-600/20 to-blue-600/20 hover:from-green-600/30 hover:to-blue-600/30 border border-green-500/30 text-green-300 px-4 py-2 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
-                            <i data-lucide="download" class="w-4 h-4"></i>
-                            <span>오디오 다운로드</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        // Voice Settings Panel - 씬 유무와 관계없이 항상 표시
         const voiceSettingsPanel = `
-            <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
-                <div class="flex items-center gap-3 mb-4 border-b border-slate-700 pb-4">
-                    <div class="p-2 bg-blue-500/20 rounded-lg text-blue-400">
+            <div class="glass-card rounded-3xl p-8 border border-white/5 space-y-6">
+                <div class="flex items-center gap-3 border-b border-white/5 pb-4">
+                    <div class="p-2 bg-blue-500/10 rounded-xl text-blue-400">
                         <i data-lucide="sliders" class="w-5 h-5"></i>
                     </div>
-                    <h3 class="text-lg font-bold text-white">보이스 설정 (Global Settings)</h3>
+                    <h3 class="text-lg font-black text-white uppercase tracking-tight">보이스 프로젝트 설정</h3>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -137,12 +327,14 @@ export class TTSModule extends Module {
                             <span class="bg-indigo-500/20 text-indigo-400 text-[10px] px-1.5 rounded border border-indigo-500/30">Dual</span>
                         </div>
                         <select id="tts-engine-id" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm text-yellow-400 font-bold focus:ring-2 focus:ring-blue-500 outline-none">
-                            <option value="elevenlabs" selected>ElevenLabs (Premium)</option>
-                            <option value="azure">Azure (Basic/Free)</option>
+                            <option value="azure">Azure (기본/무료) ⭐</option>
+                            <option value="google">Google Gemini 2.5 (Generative)</option>
+                            <option value="elevenlabs">ElevenLabs (프리미엄/유료)</option>
                         </select>
                         <p class="text-[10px] text-slate-500 leading-tight">
-                            * ElevenLabs: 감성적/고품질<br>
-                            * Azure: 빠르고 안정적 (무료)
+                            * Azure: 빠르고 안정적 (권장)<br>
+                            * Gemini 2.5: 30인 페르소나와 감정 표현 (Generative)<br>
+                            * ElevenLabs: 감성적/고품질 (유료)
                         </p>
                     </div>
 
@@ -181,16 +373,77 @@ export class TTSModule extends Module {
             </div>
         `;
 
-        if (scenes.length === 0) {
+        // 🟢 ALWAYS use Full Script Mode - forced to true (new workflow)
+        if (true) { // Previously: scenes.length === 0
             return `
                 <div class="max-w-4xl mx-auto slide-up space-y-6">
                     ${voiceSettingsPanel}
-                    ${standalonePanel}
 
-                    <div class="text-center p-10 text-slate-500 border border-dashed border-slate-700 rounded-2xl">
-                        <i data-lucide="list-plus" class="w-12 h-12 mx-auto mb-4 opacity-50"></i>
-                        <h3 class="text-lg font-bold">TTS 항목이 없습니다</h3>
-                        <p class="text-sm mt-2">위 입력창에서 대본을 입력하고 "목록에 추가" 버튼을 누르세요.</p>
+                    <div class="bg-gradient-to-r from-indigo-900/30 to-purple-900/30 border border-indigo-500/30 rounded-2xl p-6 mb-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="p-2 bg-indigo-500/20 rounded-lg text-indigo-400">
+                                <i data-lucide="file-audio" class="w-5 h-5"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-white">📜 전체 대본 오디오 생성</h3>
+                            <span class="ml-auto text-xs text-indigo-400 bg-indigo-500/20 px-3 py-1 rounded-full">Step 2: Voice Generation</span>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">전체 대본 (수정 가능)</label>
+                                <textarea id="full-script-input" 
+                                    class="w-full h-64 bg-slate-900 border border-slate-700 rounded-xl p-4 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition resize-none scrollbar-hide leading-relaxed"
+                                    placeholder="대본을 입력하거나 자동으로 불러옵니다...">${fullScript || ''}</textarea>
+                                <div class="flex justify-end mt-2 text-xs text-slate-500">
+                                    <span id="full-script-char-count">${(fullScript || '').length}자</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Progress Bar (Hidden by default) -->
+                            <div id="tts-progress-container" class="hidden mb-4 bg-slate-900 border border-blue-500/30 rounded-lg p-4">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <i data-lucide="loader" class="w-5 h-5 text-blue-400 animate-spin"></i>
+                                    <div class="flex-1">
+                                        <h4 class="text-sm font-bold text-white">TTS 생성 중...</h4>
+                                        <p class="text-xs text-slate-400" id="tts-progress-status">API 호출 중...</p>
+                                    </div>
+                                </div>
+                                <div class="w-full bg-slate-700 rounded-full h-2.5 overflow-hidden">
+                                    <div id="tts-progress-bar" class="bg-gradient-to-r from-blue-500 to-purple-500 h-full transition-all duration-500" style="width: 0%"></div>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-2 text-right" id="tts-progress-time">예상 시간: --</p>
+                            </div>
+                            
+                             <div class="flex gap-4 pt-6">
+                                <button id="btn-generate-full-audio" class="btn-primary-cinematic w-full px-8 py-5 rounded-2xl text-xl flex items-center justify-center gap-3">
+                                    <i data-lucide="mic-2" class="w-6 h-6"></i> 
+                                    <span>시네마틱 보이스 생성 시작</span>
+                                </button>
+                            </div>
+
+                            <!-- Result Section (Hidden initially) -->
+                            <div id="full-audio-result" class="hidden mt-6 p-6 bg-slate-900/80 border border-green-500/30 rounded-2xl space-y-4 animate-in fade-in zoom-in duration-300">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3 text-green-400 text-lg font-bold">
+                                        <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+                                        <span>오디오 생성 완료!</span>
+                                    </div>
+                                    <span id="full-audio-info" class="text-xs text-slate-400 font-mono bg-slate-800 px-2 py-1 rounded"></span>
+                                </div>
+                                
+                                <audio id="full-audio-player" controls class="w-full h-12 rounded-lg"></audio>
+                                
+                                <div class="grid grid-cols-2 gap-3 pt-2">
+                                    <button id="btn-download-full-audio" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-3 rounded-xl font-bold transition flex items-center justify-center gap-2">
+                                        <i data-lucide="download" class="w-4 h-4"></i> 다운로드
+                                    </button>
+                                    <button id="btn-go-segmentation" class="bg-green-600 hover:bg-green-500 text-white px-4 py-3 rounded-xl font-bold transition flex items-center justify-center gap-2 shadow-lg shadow-green-600/20">
+                                        <span>다음: 오디오 세분화</span>
+                                        <i data-lucide="arrow-right-circle" class="w-5 h-5"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             `;
@@ -238,7 +491,7 @@ export class TTSModule extends Module {
                         <i data-lucide="${scene.audioUrl ? 'refresh-cw' : 'mic'}" class="w-3.5 h-3.5"></i> ${scene.audioUrl ? '재생성' : '생성'}
                     </button>
                     ${scene.audioUrl ? `
-                    <button onclick="const a = document.createElement('a'); a.href='${scene.audioUrl}'; a.download='voice_${scene.sceneId}.mp3'; a.click();"
+                    <button onclick="(async function(){ try { const resp = await fetch('${scene.audioUrl}'); const blob = await resp.blob(); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'voice_${scene.sceneId}.mp3'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); } catch(e) { console.error('다운로드 실패:', e); } })();"
                         class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-lg text-[10px] font-bold transition flex items-center justify-center gap-2">
                         <i data-lucide="download" class="w-3 h-3"></i> 다운로드
                     </button>` : ''}
@@ -284,6 +537,9 @@ export class TTSModule extends Module {
                         <button id="btn-download-all-audio" class="bg-slate-700 hover:bg-indigo-600 text-white px-6 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2">
                             <i data-lucide="download-cloud" class="w-4 h-4"></i> 오디오 일괄 다운로드
                         </button>
+                        <button id="btn-load-whisper" class="bg-orange-600 hover:bg-orange-500 text-white px-6 py-2 rounded-xl text-sm font-bold shadow-lg shadow-orange-600/20 transition flex items-center gap-2">
+                            <i data-lucide="file-audio" class="w-4 h-4"></i> Whisper 타임스탬프 불러오기
+                        </button>
                     </div>
                 </div>
 
@@ -310,12 +566,23 @@ export class TTSModule extends Module {
         `;
     }
 
-    onMount() {
+    async onMount() {
         const scenes = AppState.getScenes();
         const self = this;
 
+        // Initialize Call
+        this.setupEventListeners();
+        await this.loadVoices(); // Load voices immediately
+
+
         // Setup guide button
         this.setupGuideButton();
+
+        // Restore saved TTS result
+        const savedAudioPath = AppState.getAudioPath();
+        if (savedAudioPath) {
+            this.restoreTTSResult(savedAudioPath);
+        }
 
         // Reset button
         const btnResetTTS = document.getElementById('btn-reset-tts');
@@ -584,7 +851,7 @@ export class TTSModule extends Module {
                         settings: self.voiceSettings
                     };
 
-                    const response = await fetch(CONFIG.endpoints.tts, {
+                    const response = await fetch(`${CONFIG.endpoints.tts}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
@@ -615,13 +882,23 @@ export class TTSModule extends Module {
                             audioPlayer.src = audioUrl;
                             audioInfo.textContent = `엔진: ${engine} · ${elapsed}초`;
 
-                            // Setup download button
+                            // Setup download button (Blob 방식으로 전체화면 전환 방지)
                             if (btnDownload) {
-                                btnDownload.onclick = () => {
-                                    const link = document.createElement('a');
-                                    link.href = audioUrl;
-                                    link.download = `standalone_tts_${Date.now()}.mp3`;
-                                    link.click();
+                                btnDownload.onclick = async () => {
+                                    try {
+                                        const resp = await fetch(audioUrl);
+                                        const blob = await resp.blob();
+                                        const blobUrl = URL.createObjectURL(blob);
+                                        const link = document.createElement('a');
+                                        link.href = blobUrl;
+                                        link.download = `standalone_tts_${Date.now()}.mp3`;
+                                        document.body.appendChild(link);
+                                        link.click();
+                                        document.body.removeChild(link);
+                                        URL.revokeObjectURL(blobUrl);
+                                    } catch (e) {
+                                        console.error('다운로드 실패:', e);
+                                    }
                                 };
                             }
 
@@ -655,208 +932,146 @@ export class TTSModule extends Module {
             });
         }
 
-        // Voice settings
-        const updateSetting = (key, val, displayId) => {
-            if (key === 'voiceId' || key === 'engine') val = String(val);
-            else val = parseFloat(val);
+        // Full Script Generation
+        const btnGenFull = document.getElementById('btn-generate-full-audio');
+        if (btnGenFull) {
+            btnGenFull.addEventListener('click', async () => {
+                const scriptInput = document.getElementById('full-script-input');
+                const text = scriptInput?.value.trim();
 
-            this.voiceSettings[key] = val;
-            if (displayId) {
-                const el = document.getElementById(displayId);
-                if (el) el.innerText = key === 'speed' ? val + 'x' : val;
-            }
-        };
+                if (!text) return alert('생성할 대본이 없습니다.');
 
-        const selEngine = document.getElementById('tts-engine-id');
-        const selVoice = document.getElementById('tts-voice-id');
-
-        const voices = {
-            elevenlabs: [
-                { id: "pNInz6obpgDQGcFmaJgB", name: "아담 (Adam) - 남성 · 다국어 · 깊고 신뢰감" },
-                { id: "21m00Tcm4TlvDq8ikWAM", name: "레이첼 (Rachel) - 여성 · 다국어 · 차분하고 전문적" },
-                { id: "AZnzlk1XvdvUeBnXmlld", name: "도미 (Domi) - 여성 · 다국어 · 밝고 친근함" },
-                { id: "EXAVITQu4vr4xnSDxMaL", name: "벨라 (Bella) - 여성 · 다국어 · 세련되고 우아함" },
-                { id: "ErXwobaYiN019PkySvjV", name: "안토니 (Antoni) - 남성 · 다국어 · 명랑하고 젊음" },
-                { id: "MF3mGyEYCl7XYWbV9V6O", name: "엔조 (Enzo) - 남성 · 다국어 · 부드럽고 나레이션" },
-                { id: "TxGEqnHWrfWFTfGW9XjX", name: "조쉬 (Josh) - 남성 · 다국어 · 활기차고 뉴스 스타일" },
-                { id: "VR6AewLTigWG4xSOukaG", name: "아놀드 (Arnold) - 남성 · 다국어 · 강인하고 웅장함" }
-            ],
-            azure: [] // Will be loaded from API
-        };
-
-        // Fetch Azure voices from API
-        const fetchAzureVoices = async () => {
-            try {
-                const response = await fetch('/api/tts/voices?engine=azure');
-                const data = await response.json();
-                if (data.success && data.voices) {
-                    voices.azure = data.voices;
-                    console.log(`[TTS] Loaded ${data.voices.length} Azure voices`);
-                }
-            } catch (error) {
-                console.error('[TTS] Failed to fetch Azure voices:', error);
-                // Fallback to basic voice
-                voices.azure = [{
-                    name: "ko-KR-SunHiNeural",
-                    display_name: "선희 (SunHi)",
-                    gender: "여성",
-                    type: "Neural",
-                    style: "밝고 친근함"
-                }];
-            }
-        };
-
-        const updateVoiceOptions = async (engine) => {
-            if (!selVoice) return;
-            selVoice.innerHTML = '';
-
-            // Fetch Azure voices if needed
-            if (engine === 'azure' && voices.azure.length === 0) {
-                await fetchAzureVoices();
-            }
-
-            const engineVoices = voices[engine] || voices['elevenlabs'];
-            const group = document.createElement('optgroup');
-            group.label = engine === 'azure' ? 'Azure Voices' : 'ElevenLabs Voices';
-
-            engineVoices.forEach(v => {
-                const opt = document.createElement('option');
-
-                // Format based on engine
-                if (engine === 'azure' && v.gender) {
-                    // Azure: use 'name' field (e.g., "ko-KR-SunHiNeural") as value
-                    opt.value = v.name;
-                    // Display as: "선희 (SunHi) - 여성 · Neural · 밝고 친근함"
-                    opt.textContent = `${v.display_name} - ${v.gender} · ${v.type} · ${v.style}`;
-                    // Add description as tooltip
-                    if (v.description) {
-                        opt.title = v.description;
-                    }
-                } else {
-                    // ElevenLabs: keep original format
-                    opt.value = v.id;
-                    opt.textContent = v.name;
-                }
-
-                group.appendChild(opt);
-            });
-
-            selVoice.appendChild(group);
-
-            // Set first option as default and update settings
-            if (engineVoices.length > 0) {
-                const firstVoice = engineVoices[0];
-                const voiceId = engine === 'azure' ? firstVoice.name : firstVoice.id;
-                selVoice.value = voiceId;
-                updateSetting('voiceId', voiceId);
-            }
-        };
-
-        if (selEngine) {
-            selEngine.value = this.voiceSettings.engine || 'elevenlabs';
-            selEngine.addEventListener('change', async (e) => {
-                const engine = e.target.value;
-                updateSetting('engine', engine);
-                await updateVoiceOptions(engine);
-            });
-            // Init voice list (if voiceSettings has engine) - must await
-            (async () => {
-                await updateVoiceOptions(this.voiceSettings.engine || 'elevenlabs');
-                // After voices are loaded, set the voiceId
-                if (selVoice) {
-                    const currentEngine = this.voiceSettings.engine || 'elevenlabs';
-                    const engineVoices = voices[currentEngine] || [];
-
-                    // Check if current voiceId exists in the engine's voice list
-                    const voiceExists = engineVoices.some(v =>
-                        (currentEngine === 'azure' ? v.name : v.id) === this.voiceSettings.voiceId
-                    );
-
-                    if (voiceExists) {
-                        selVoice.value = this.voiceSettings.voiceId;
-                    } else {
-                        // If voiceId doesn't exist, use first voice
-                        if (engineVoices.length > 0) {
-                            const firstVoiceId = currentEngine === 'azure' ? engineVoices[0].name : engineVoices[0].id;
-                            selVoice.value = firstVoiceId;
-                            updateSetting('voiceId', firstVoiceId);
-                        }
-                    }
-
-                    selVoice.addEventListener('change', (e) => updateSetting('voiceId', e.target.value));
-                }
-            })();
-        }
-
-        const rngStability = document.getElementById('rng-stability');
-        if (rngStability) rngStability.addEventListener('input', (e) => updateSetting('stability', e.target.value, 'val-stability'));
-
-        const rngSpeed = document.getElementById('rng-speed');
-        if (rngSpeed) rngSpeed.addEventListener('input', (e) => updateSetting('speed', e.target.value, 'val-speed'));
-
-        // Preview voice button
-        const btnPreview = document.getElementById('btn-preview-voice');
-        if (btnPreview) {
-            btnPreview.addEventListener('click', async () => {
-                const voiceId = this.voiceSettings.voiceId;
-
-                if (!voiceId) {
-                    alert('성우를 선택해주세요.');
-                    return;
-                }
-
-                const originalHtml = btnPreview.innerHTML;
-                btnPreview.disabled = true;
-                btnPreview.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> <span>생성 중...</span>`;
+                btnGenFull.disabled = true;
+                const originalText = btnGenFull.innerHTML;
+                const startTime = Date.now();
+                btnGenFull.innerHTML = `<i data-lucide="loader-2" class="w-6 h-6 animate-spin"></i> 생성 중... (0:00)`;
                 lucide.createIcons();
 
-                try {
-                    const sampleText = '안녕하세요. 이 음성으로 녹음됩니다.';
+                // Declare outside try block for cleanup
+                let controller = new AbortController();
+                let timeoutId = setTimeout(() => controller.abort(), 20 * 60 * 1000); // 20 minutes
+                let elapsedInterval = null;
 
+                // Update elapsed time every second
+                elapsedInterval = setInterval(() => {
+                    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                    const minutes = Math.floor(elapsed / 60);
+                    const seconds = elapsed % 60;
+                    btnGenFull.innerHTML = `<i data-lucide="loader-2" class="w-6 h-6 animate-spin"></i> 생성 중... (${minutes}:${seconds.toString().padStart(2, '0')})`;
+                    lucide.createIcons();
+                }, 1000);
+
+                try {
+                    // 서버로 요청
                     const payload = {
-                        sceneId: 0, // Preview scene
-                        text: sampleText,
+                        sceneId: 'full_script',
+                        text: text,
                         settings: this.voiceSettings
                     };
 
-                    const response = await fetch(CONFIG.endpoints.tts, {
+                    const response = await fetch(`${CONFIG.endpoints.tts}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
+                        body: JSON.stringify(payload),
+                        signal: controller.signal
                     });
 
-                    if (!response.ok) {
-                        throw new Error(`서버 오류: ${response.status}`);
-                    }
+                    // Clear timeout and interval
+                    clearTimeout(timeoutId);
+                    clearInterval(elapsedInterval);
+
+                    if (!response.ok) throw new Error(`서버 오류: ${response.status}`);
 
                     const result = await response.json();
+                    const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+                    console.log('[TTS] Full Audio Generated:', result);
 
-                    if (!result.success) {
-                        throw new Error(result.error || 'TTS 생성 실패');
+                    if (result.success) {
+                        const audioUrl = result.audioUrl || (result.audioBase64 ? `data:audio/mp3;base64,${result.audioBase64}` : null);
+                        const audioPath = result.audioPath;
+
+                        if (audioUrl) {
+                            // UI 표시
+                            const resDiv = document.getElementById('full-audio-result');
+                            const player = document.getElementById('full-audio-player');
+                            const info = document.getElementById('full-audio-info');
+                            const btnDownload = document.getElementById('btn-download-full-audio');
+                            const btnGoSeg = document.getElementById('btn-go-segmentation');
+
+                            if (resDiv && player) {
+                                resDiv.classList.remove('hidden');
+                                player.src = audioUrl;
+                                if (info) info.textContent = `${result.usedEngine || 'Engine'} · ${elapsed}s`;
+
+                                // AppState 저장
+                                AppState.setScript(text); // 수정된 대본 저장
+                                AppState.setAudioPath(audioPath); // 서버 경로 저장 (세분화용)
+
+                                console.log(`💾 Audio Path Saved: ${audioPath}`);
+
+                                if (btnDownload) {
+                                    btnDownload.onclick = async () => {
+                                        try {
+                                            const resp = await fetch(audioUrl);
+                                            const blob = await resp.blob();
+                                            const blobUrl = URL.createObjectURL(blob);
+                                            const a = document.createElement('a');
+                                            a.href = blobUrl;
+                                            a.download = `full_script_${Date.now()}.mp3`;
+                                            document.body.appendChild(a);
+                                            a.click();
+                                            document.body.removeChild(a);
+                                            URL.revokeObjectURL(blobUrl);
+                                        } catch (e) {
+                                            console.error('다운로드 실패:', e);
+                                        }
+                                    };
+                                }
+
+                                if (btnGoSeg) {
+                                    btnGoSeg.onclick = () => {
+                                        console.log('➡️ Moving to Audio Segmentation Module');
+                                        if (window.app) window.app.route('audio-segmentation');
+                                    };
+                                }
+                            }
+                        } else {
+                            throw new Error("오디오 URL을 받지 못했습니다.");
+                        }
+                    } else {
+                        throw new Error(result.error || "생성 실패");
                     }
 
-                    // Play preview audio
-                    const audioUrl = result.audioBase64
-                        ? `data:audio/mp3;base64,${result.audioBase64}`
-                        : result.audioUrl;
+                } catch (e) {
+                    console.error('[TTS] Error:', e);
 
-                    if (audioUrl) {
-                        const audio = new Audio(audioUrl);
-                        audio.volume = 0.8;
-                        await audio.play();
-                        console.log('[Preview] Playing voice preview');
-                    }
+                    // Check if this is a timeout error
+                    const isTimeout = e.name === 'AbortError';
+                    const errorMsg = isTimeout
+                        ? '⏱️ TTS 생성 시간이 20분을 초과했습니다.\n\n대본이 너무 길 수 있습니다. 대본을 짧게 분할하거나 Azure TTS로 전환해보세요.'
+                        : `생성 실패: ${e.message}`;
 
-                } catch (error) {
-                    console.error('[Preview] Error:', error);
-                    alert(`미리듣기 실패: ${error.message}`);
+                    alert(`❌ ${errorMsg}`);
+                    this.hideTTSProgress();
                 } finally {
-                    btnPreview.disabled = false;
-                    btnPreview.innerHTML = originalHtml;
+                    // Cleanup: Clear timeout and interval
+                    if (timeoutId) clearTimeout(timeoutId);
+                    if (elapsedInterval) clearInterval(elapsedInterval);
+
+                    btnGenFull.disabled = false;
+                    btnGenFull.innerHTML = originalText;
                     lucide.createIcons();
+                    // Hide progress bar after 2 seconds
+                    setTimeout(() => this.hideTTSProgress(), 2000);
                 }
             });
         }
+
+        // ---------------------------------------------------------
+        // Legacy code removed: Conflicting voice/engine selection logic
+        // Handled by TTSModule.setupEventListeners() and updateVoiceList()
+        // ---------------------------------------------------------
+
 
         // Generate TTS helper
         const generateTTS = async (sceneId, btn, isInternal = false) => {
@@ -879,6 +1094,7 @@ export class TTSModule extends Module {
 
             const audioContainer = document.getElementById(`audio-container-${sceneId}`);
             let originalBtnHtml = "";
+            let elapsedInterval = null;  // Declare outside try block for cleanup
 
             if (btn) {
                 originalBtnHtml = btn.innerHTML;
@@ -896,13 +1112,37 @@ export class TTSModule extends Module {
 
                 console.log(`🎤 TTS 요청 시작 (Scene ${sceneId})`, payload);
 
-                const response = await fetch(CONFIG.endpoints.tts, {
+                // Create AbortController for 20-minute timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 20 * 60 * 1000); // 20 minutes
+
+                // Track elapsed time
+                const startTime = Date.now();
+
+                // Update button with elapsed time every second (if button exists)
+                if (btn && !isInternal) {
+                    elapsedInterval = setInterval(() => {
+                        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                        const minutes = Math.floor(elapsed / 60);
+                        const seconds = elapsed % 60;
+                        btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> 생성 중 (${minutes}:${seconds.toString().padStart(2, '0')})`;
+                        lucide.createIcons();
+                    }, 1000);
+                }
+
+                const response = await fetch(`${CONFIG.endpoints.tts}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(payload),
+                    signal: controller.signal
                 });
 
-                console.log(`📡 TTS 응답 수신 (Status: ${response.status})`);
+                // Clear timeout and interval
+                clearTimeout(timeoutId);
+                if (elapsedInterval) clearInterval(elapsedInterval);
+
+                const totalElapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+                console.log(`📡 TTS 응답 수신 (Status: ${response.status}, Elapsed: ${totalElapsed}s)`);
 
                 if (!response.ok) {
                     const errorText = await response.text();
@@ -995,17 +1235,25 @@ export class TTSModule extends Module {
                 }
             } catch (e) {
                 console.error(e);
+
+                // Check if this is an abort error (timeout)
+                const isTimeout = e.name === 'AbortError';
+
                 if (!isInternal) {
-                    const errorMsg = e.message || '알 수 없는 오류';
+                    const errorMsg = isTimeout
+                        ? '⏱️ TTS 생성 시간이 20분을 초과했습니다.'
+                        : (e.message || '알 수 없는 오류');
                     const errorLower = errorMsg.toLowerCase();
 
                     let helpText = '\n\n💡 해결 방법:\n';
-                    if (errorLower.includes('timeout') || errorLower.includes('시간 초과')) {
-                        helpText += '• 음성 합성은 시간이 걸릴 수 있습니다. 잠시 후 다시 시도하세요.\n• 대본 길이를 줄이거나 분할해보세요.';
+                    if (isTimeout || errorLower.includes('timeout') || errorLower.includes('시간 초과') || errorLower.includes('abort')) {
+                        helpText += '• 대본이 너무 길 수 있습니다. 대본을 짧게 분할해보세요.\n';
+                        helpText += '• Google TTS의 경우 긴 대본은 처리 시간이 오래 걸립니다.\n';
+                        helpText += '• Azure TTS로 전환하거나 대본 길이를 줄여보세요.';
                     } else if (errorLower.includes('network') || errorLower.includes('fetch')) {
                         helpText += '• 인터넷 연결을 확인하세요.\n• 백엔드 서버가 실행 중인지 확인하세요 (localhost:8000).';
                     } else if (errorLower.includes('api 키') || errorLower.includes('api key') || errorLower.includes('인증')) {
-                        helpText += '• 설정 메뉴에서 ElevenLabs 또는 Azure API 키를 확인하세요.\n• Azure TTS는 무료로 사용 가능합니다.';
+                        helpText += '• 설정 메뉴에서 TTS API 키를 확인하세요.\n• Azure TTS는 무료로 사용 가능합니다.';
                     } else if (errorLower.includes('rate limit') || errorLower.includes('한도')) {
                         helpText += '• API 사용 한도를 초과했습니다.\n• Azure TTS로 전환하거나 잠시 후 다시 시도하세요.';
                     } else if (errorLower.includes('text') || errorLower.includes('대본')) {
@@ -1018,6 +1266,10 @@ export class TTSModule extends Module {
                 }
                 return false;
             } finally {
+                // Cleanup: Clear interval and restore button
+                if (elapsedInterval) {
+                    clearInterval(elapsedInterval);
+                }
                 if (btn) {
                     btn.disabled = false;
                     btn.innerHTML = originalBtnHtml;
@@ -1077,7 +1329,7 @@ export class TTSModule extends Module {
                     // Update after generation
                     btnGenAll.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> ${completed}개 생성 / 총 ${btns.length}개`;
                     lucide.createIcons();
-                }, () => {})
+                }, () => { })
 
                 const totalElapsed = ((Date.now() - batchStartTime) / 1000).toFixed(1);
                 const avgTimePerTTS = successCount > 0 ? (parseFloat(totalElapsed) / successCount).toFixed(1) : 0;
@@ -1178,6 +1430,18 @@ export class TTSModule extends Module {
 
             let completed = 0;
             let failed = 0;
+            const batchStartTime = Date.now();
+
+            // Update elapsed time periodically
+            const batchInterval = setInterval(() => {
+                if (btnTTSGenAll) {
+                    const elapsed = Math.floor((Date.now() - batchStartTime) / 1000);
+                    const minutes = Math.floor(elapsed / 60);
+                    const seconds = elapsed % 60;
+                    btnTTSGenAll.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> 생성 중... (${completed + failed}/${scenesWithoutAudio.length}) - ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    lucide.createIcons();
+                }
+            }, 1000);
 
             // 순차적으로 TTS 생성 (동시 생성 시 서버 부하 방지)
             for (const scene of scenesWithoutAudio) {
@@ -1186,23 +1450,26 @@ export class TTSModule extends Module {
                     // isInternal = true로 설정하여 alert 방지하고 boolean 반환값 사용
                     const success = await generateTTS(scene.sceneId, null, true);
                     if (success) completed++;
-                    else failed++;
+                    else {
+                        failed++;
+                        console.error(`❌ Scene ${scene.sceneId} TTS 생성 실패`);
+                    }
                 } catch (e) {
                     console.error(`Scene ${scene.sceneId} TTS failed:`, e);
                     failed++;
-                }
-
-                // 진행 상황 업데이트
-                if (btnTTSGenAll) {
-                    btnTTSGenAll.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> 생성 중... (${completed + failed}/${scenesWithoutAudio.length})`;
-                    lucide.createIcons();
                 }
 
                 // 서버 부하 방지를 위한 딜레이
                 await new Promise(resolve => setTimeout(resolve, 1000));
             }
 
+            // Cleanup interval
+            clearInterval(batchInterval);
+
             // 완료
+            const totalElapsed = ((Date.now() - batchStartTime) / 1000).toFixed(1);
+            const avgTime = completed > 0 ? (parseFloat(totalElapsed) / completed).toFixed(1) : '0.0';
+
             if (btnTTSGenAll) {
                 btnTTSGenAll.disabled = false;
                 btnTTSGenAll.innerHTML = `<i data-lucide="zap" class="w-4 h-4"></i> TTS 일괄 생성`;
@@ -1210,9 +1477,26 @@ export class TTSModule extends Module {
             }
 
             if (!auto) {
-                alert(`✅ TTS 일괄 생성 완료!\n\n성공: ${completed}개\n실패: ${failed}개`);
+                if (failed === 0) {
+                    alert(`✅ TTS 일괄 생성 완료!\n\n` +
+                        `📊 통계:\n` +
+                        `• 성공: ${completed}/${scenesWithoutAudio.length}개\n` +
+                        `• 총 처리 시간: ${totalElapsed}초\n` +
+                        `• 평균 생성 시간: ${avgTime}초/TTS`);
+                } else {
+                    alert(`⚠️ TTS 일괄 생성 완료 (일부 실패)\n\n` +
+                        `📊 통계:\n` +
+                        `• 성공: ${completed}개\n` +
+                        `• 실패: ${failed}개\n` +
+                        `• 총 처리 시간: ${totalElapsed}초\n` +
+                        `• 평균 생성 시간: ${avgTime}초/TTS\n\n` +
+                        `💡 해결 방법:\n` +
+                        `• 실패한 장면은 개별적으로 다시 시도해보세요.\n` +
+                        `• Azure TTS로 전환하거나 대본을 짧게 수정해보세요.\n` +
+                        `• 긴 대본의 경우 20분 타임아웃이 발생할 수 있습니다.`);
+                }
             } else {
-                console.log(`✅ Auto TTS batch completed. Success: ${completed}, Failed: ${failed}`);
+                console.log(`✅ Auto TTS batch completed. Success: ${completed}, Failed: ${failed}, Elapsed: ${totalElapsed}s`);
                 // 다음 단계 자동 이동 로직 (Video)
                 if (window.app) window.app.route('video');
             }
@@ -1236,46 +1520,228 @@ export class TTSModule extends Module {
             }, 1000);
         }
 
-        // Batch download all audio
+        // Batch download all audio (improved with ZIP + timestamps)
         const btnDownloadAll = document.getElementById('btn-download-all-audio');
         if (btnDownloadAll) {
-            btnDownloadAll.addEventListener('click', () => {
+            btnDownloadAll.addEventListener('click', async () => {
                 const scenesWithAudio = AppState.getScenes().filter(s => s.audioUrl && !s.audioUrl.startsWith('data:'));
 
                 if (scenesWithAudio.length === 0) {
                     return alert("다운로드할 오디오 파일이 없습니다.\n(Base64 인코딩된 오디오는 제외됩니다)");
                 }
 
-                if (!confirm(`총 ${scenesWithAudio.length}개의 오디오 파일을 다운로드하시겠습니까?`)) return;
+                if (!confirm(`총 ${scenesWithAudio.length}개의 오디오를 ZIP으로 다운로드하시겠습니까?`)) return;
 
-                btnDownloadAll.disabled = true;
-                btnDownloadAll.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> 다운로드 중...`;
-                lucide.createIcons();
+                try {
+                    btnDownloadAll.disabled = true;
+                    btnDownloadAll.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> ZIP 생성 중...`;
+                    lucide.createIcons();
 
-                // 순차적으로 다운로드 (브라우저 제한 방지)
-                scenesWithAudio.forEach((scene, index) => {
-                    setTimeout(() => {
-                        const link = document.createElement('a');
-                        link.href = scene.audioUrl;
-                        link.download = `tts_scene_${scene.sceneId}_${Date.now()}.mp3`;
-                        link.click();
+                    const files = [];
 
-                        // 마지막 다운로드 후 버튼 복원
-                        if (index === scenesWithAudio.length - 1) {
-                            setTimeout(() => {
-                                btnDownloadAll.disabled = false;
-                                btnDownloadAll.innerHTML = `<i data-lucide="download-cloud" class="w-4 h-4"></i> 오디오 일괄 다운로드`;
-                                lucide.createIcons();
-                            }, 500);
+                    for (const scene of scenesWithAudio) {
+                        // MP3 파일
+                        files.push({
+                            filename: `scene_${String(scene.sceneId).padStart(3, '0')}.mp3`,
+                            url: scene.audioUrl
+                        });
+
+                        // 타임스탬프 JSON (SRT → JSON 변환)
+                        if (scene.srtData) {
+                            const timestamps = parseSRTTimestamps(scene.srtData);
+                            files.push({
+                                filename: `scene_${String(scene.sceneId).padStart(3, '0')}_timestamps.json`,
+                                content: JSON.stringify(timestamps, null, 2)
+                            });
                         }
-                    }, index * 800); // 800ms 간격으로 다운로드
-                });
+                    }
 
-                // 사용자 피드백
-                alert(`${scenesWithAudio.length}개 오디오 파일 다운로드를 시작합니다.\n잠시만 기다려주세요.`);
+                    await DownloadHelper.downloadAsZip(files, `tts_audio_${Date.now()}.zip`);
+                    alert(`✅ ${scenesWithAudio.length}개 오디오가 ZIP으로 다운로드되었습니다.`);
+
+                } catch (error) {
+                    console.error('ZIP 다운로드 실패:', error);
+                    alert(`❌ 다운로드 실패: ${error.message}`);
+                } finally {
+                    btnDownloadAll.disabled = false;
+                    btnDownloadAll.innerHTML = `<i data-lucide="download-cloud" class="w-4 h-4"></i> 오디오 일괄 다운로드`;
+                    lucide.createIcons();
+                }
+            });
+        }
+
+        // Whisper 타임스탬프 불러오기
+        const btnLoadWhisper = document.getElementById('btn-load-whisper');
+        if (btnLoadWhisper) {
+            btnLoadWhisper.addEventListener('click', async () => {
+                // 파일 선택 다이얼로그
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'audio/mp3,audio/wav,audio/m4a,audio/*';
+
+                input.onchange = async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+
+                    try {
+                        btnLoadWhisper.disabled = true;
+                        btnLoadWhisper.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Whisper 분석 중...`;
+                        lucide.createIcons();
+
+                        // FormData로 파일 업로드
+                        const formData = new FormData();
+                        formData.append('file', file);
+
+                        const response = await fetch(`${CONFIG.endpoints.transcribeWhisper}`, {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(`Whisper API 오류 (${response.status}): ${errorText}`);
+                        }
+
+                        const result = await response.json();
+
+                        if (!result.success || !result.timestamps) {
+                            throw new Error('타임스탬프를 받지 못했습니다.');
+                        }
+
+                        // 타임스탬프를 씬에 적용
+                        const scenes = AppState.getScenes();
+                        const timestamps = result.timestamps;
+
+                        console.log(`[Whisper] ${timestamps.length}개 타임스탬프 로드됨`);
+                        console.log('[Whisper] 전체 텍스트:', result.fullText);
+
+                        // 각 타임스탬프를 씬으로 분리 (간단한 1:1 매핑)
+                        // 만약 씬 개수보다 타임스탬프가 많으면 새 씬 생성
+                        for (let i = 0; i < timestamps.length; i++) {
+                            const ts = timestamps[i];
+
+                            if (i < scenes.length) {
+                                // 기존 씬에 적용
+                                scenes[i].scriptText = ts.text;
+                                scenes[i].whisperStart = ts.start;
+                                scenes[i].whisperEnd = ts.end;
+                                scenes[i].whisperDuration = ts.end - ts.start;
+                            } else {
+                                // 새 씬 생성
+                                scenes.push({
+                                    sceneId: i + 1,
+                                    scriptText: ts.text,
+                                    whisperStart: ts.start,
+                                    whisperEnd: ts.end,
+                                    whisperDuration: ts.end - ts.start
+                                });
+                            }
+                        }
+
+                        AppState.setScenes(scenes);
+
+                        alert(`✅ Whisper 타임스탬프 로드 완료!\n\n총 ${timestamps.length}개 구간\n\n전체 텍스트:\n${result.fullText.substring(0, 200)}...`);
+
+                        // 모듈 새로고침
+                        if (window.app) {
+                            window.app.route('tts');
+                        }
+
+                    } catch (error) {
+                        console.error('[Whisper] 오류:', error);
+                        alert(`❌ Whisper 타임스탬프 로드 실패:\n${error.message}`);
+                    } finally {
+                        btnLoadWhisper.disabled = false;
+                        btnLoadWhisper.innerHTML = `<i data-lucide="file-audio" class="w-4 h-4"></i> Whisper 타임스탬프 불러오기`;
+                        lucide.createIcons();
+                    }
+                };
+
+                input.click();
             });
         }
 
         lucide.createIcons();
+    }
+
+    // Restore TTS result from saved state
+    restoreTTSResult(audioPath) {
+        const resDiv = document.getElementById('full-audio-result');
+        const player = document.getElementById('full-audio-player');
+        const info = document.getElementById('full-audio-info');
+        const btnDownload = document.getElementById('btn-download-full-audio');
+        const btnGoSeg = document.getElementById('btn-go-segmentation');
+
+        if (resDiv && player) {
+            resDiv.classList.remove('hidden');
+
+            // Convert server path to URL
+            const filename = audioPath.split(/[/\\]/).pop();
+            const baseUrl = API_BASE_URL || 'http://localhost:8000';
+            const normalizedPath = String(audioPath).replace(/\\/g, '/');
+            const outputMarker = '/output/';
+            const outputIdx = normalizedPath.indexOf(outputMarker);
+            const audioUrl = outputIdx !== -1
+                ? `${baseUrl}/output/${normalizedPath.substring(outputIdx + outputMarker.length)}`
+                : `${baseUrl}/output/${filename}`;
+            player.src = audioUrl;
+
+            if (info) info.textContent = 'TTS 저장됨 · 이전 세션';
+
+            // Set up download button (Blob 방식으로 전체화면 전환 방지)
+            if (btnDownload) {
+                btnDownload.onclick = async () => {
+                    try {
+                        const resp = await fetch(audioUrl);
+                        const blob = await resp.blob();
+                        const blobUrl = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = blobUrl;
+                        a.download = `full_script_${Date.now()}.mp3`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(blobUrl);
+                    } catch (e) {
+                        console.error('다운로드 실패:', e);
+                    }
+                };
+            }
+
+            // Set up go to segmentation button
+            if (btnGoSeg) {
+                btnGoSeg.onclick = () => {
+                    console.log('➡️ Moving to Audio Segmentation Module');
+                    if (window.app) window.app.route('audio-segmentation');
+                };
+            }
+
+            console.log('✅ TTS Result Restored:', audioPath);
+            lucide.createIcons();
+        }
+    }
+
+    // Show TTS progress bar
+    showTTSProgress(status = 'API 호출 중...', progress = 10) {
+        const container = document.getElementById('tts-progress-container');
+        const bar = document.getElementById('tts-progress-bar');
+        const statusEl = document.getElementById('tts-progress-status');
+        const timeEl = document.getElementById('tts-progress-time');
+
+        if (container) {
+            container.classList.remove('hidden');
+            if (bar) bar.style.width = `${progress}%`;
+            if (statusEl) statusEl.textContent = status;
+            if (timeEl) timeEl.textContent = progress < 100 ? '예상 시간: 30-60초' : '완료!';
+            lucide.createIcons();
+        }
+    }
+
+    // Hide TTS progress bar
+    hideTTSProgress() {
+        const container = document.getElementById('tts-progress-container');
+        if (container) {
+            container.classList.add('hidden');
+        }
     }
 }

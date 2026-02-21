@@ -1,580 +1,507 @@
-// ================================================================
-// SHORTS MODULE - Shorts 변환실
-// AI 기반 Shorts 추천 및 생성
-// ================================================================
-
 import { Module } from '../Module.js';
 import { AppState } from '../state.js';
 import { CONFIG } from '../config.js';
+import { STYLE_CATEGORIES } from '../styles.js';
 
 export class ShortsModule extends Module {
     constructor() {
-        super('shorts', 'Shorts 변환', 'smartphone', 'AI 기반 Shorts 추천 및 생성');
+        super('shorts', 'Shorts 변환', 'smartphone', 'AI 기반 숏폼 영상 제작 (듀얼 모드)');
 
-        // 추천 목록
-        this.recommendations = [];
+        // 상태 관리
+        this.activeTab = 'new'; // 'new' | 'repurpose'
+        this.scriptInput = '';
+        this.selectedProject = null;
+        this.analysisResult = null; // 리퍼퍼징 분석 결과
+        this.selectedHighlightType = null; // 'summary' | 'hook_first' | 'qna'
+        this.selectedStyle = 'stickman'; // 기본 스타일
+        this.projects = [];
+        this.projectsLoaded = false;
 
-        // 선택된 Shorts
-        this.selectedShorts = new Set();
+        // 미리보기 데이터
+        this.previewScenes = [];
+        this.currentPreviewIndex = 0;
+        this.isPlaying = false;
+        this.previewInterval = null;
+        this.currentVideoUrl = null; // 생성된 최종 영상 URL
+    }
 
-        // 생성된 Shorts 결과물
-        this.generatedShorts = [];
+    async onMount() {
+        // 탭 전환 이벤트
+        this.addEvent('click', '.shorts-tab-btn', (e) => {
+            this.activeTab = e.target.dataset.tab;
+            if (this.activeTab === 'repurpose' && !this.projectsLoaded) {
+                this.loadProjects();
+            }
+            this.refreshModule();
+        });
+
+        // [Mode A] 대본 입력 이벤트
+        this.addEvent('input', '#shorts-script-input', (e) => {
+            this.scriptInput = e.target.value;
+        });
+
+        // [Mode A] 스타일 선택 이벤트
+        this.addEvent('change', '#shorts-style-select', (e) => {
+            this.selectedStyle = e.target.value;
+            this.updateStyleDescription();
+        });
+
+        // [Mode A] 생성 버튼
+        this.addEvent('click', '#btn-create-new-shorts', () => this.createNewShorts());
+
+        // [Mode B] 프로젝트 선택
+        this.addEvent('change', '#project-select', (e) => {
+            this.selectedProject = e.target.value;
+            this.analysisResult = null;
+            this.selectedHighlightType = null;
+            this.refreshModule();
+        });
+
+        // [Mode B] 분석 버튼
+        this.addEvent('click', '#btn-analyze-project', () => this.analyzeProject());
+
+        // [Mode B] 하이라이트 선택 카드
+        this.addEvent('click', '.repurpose-card', (e) => {
+            const card = e.target.closest('.repurpose-card');
+            if (card) {
+                this.selectedHighlightType = card.dataset.type;
+                this.refreshModule();
+            }
+        });
+
+        // [Mode B] 생성 버튼
+        this.addEvent('click', '#btn-create-repurpose', () => this.createRepurposedShorts());
+
+        // 미리보기 컨트롤
+        this.addEvent('click', '#btn-preview-play', () => this.togglePreview());
+        this.addEvent('click', '#btn-download-video', () => this.downloadVideo());
+
+        // 초기 스타일 설명 업데이트
+        this.updateStyleDescription();
+    }
+
+    updateStyleDescription() {
+        const style = STYLE_CATEGORIES[this.selectedStyle];
+        const descEl = this.container.querySelector('#style-desc-text');
+        const nameEl = this.container.querySelector('#style-desc-name');
+
+        if (style && descEl && nameEl) {
+            nameEl.textContent = style.name;
+            descEl.textContent = style.description || style.style;
+        }
+    }
+
+    async loadProjects() {
+        try {
+            const res = await fetch('/api/projects');
+            if (!res.ok) throw new Error('Failed to load projects');
+            const projects = await res.json();
+
+            this.projects = projects;
+            this.projectsLoaded = true;
+            this.refreshModule();
+        } catch (e) {
+            console.error("Failed to load projects", e);
+            this.showToast("프로젝트 목록 로드 실패", "error");
+        }
     }
 
     render() {
-        const scenes = AppState.getScenes();
-        const script = AppState.getScript();
-
-        const hasAnalysis = this.recommendations.length > 0;
-        const hasSelection = this.selectedShorts.size > 0;
-
-        // 단계 상태 결정
-        const step1Complete = scenes.length > 0;
-        const step2Complete = hasAnalysis;
-        const step3Complete = hasSelection;
-
         return `
-            <div class="max-w-6xl mx-auto slide-up space-y-6">
-                <!-- User Guide Button -->
-                ${this.renderGuideButton()}
-
-                <!-- Process Flow Guide -->
-                <div class="bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 rounded-2xl p-6">
-                    <h3 class="text-sm font-bold text-slate-400 mb-4 flex items-center gap-2">
-                        <i data-lucide="route" class="w-4 h-4"></i>
-                        Shorts 생성 프로세스
-                    </h3>
-                    <div class="flex items-center gap-3">
-                        <!-- Step 1 -->
-                        <div class="flex-1 relative">
-                            <div class="flex items-center gap-3 p-4 rounded-xl ${step1Complete ? 'bg-green-500/10 border-2 border-green-500/50' : 'bg-slate-800/50 border-2 border-slate-700'}">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full ${step1Complete ? 'bg-green-500' : 'bg-slate-700'} flex items-center justify-center text-white font-bold">
-                                    ${step1Complete ? '<i data-lucide="check" class="w-5 h-5"></i>' : '1'}
-                                </div>
-                                <div>
-                                    <div class="font-bold text-white text-sm">AI 대본 분석</div>
-                                    <div class="text-xs ${step1Complete ? 'text-green-400' : 'text-slate-500'}">
-                                        ${step1Complete ? '분석 완료' : '대본 준비 필요'}
-                                    </div>
-                                </div>
-                            </div>
-                            ${!step1Complete ? '<div class="absolute -bottom-6 left-0 right-0 text-center"><div class="text-xs text-yellow-400 bg-yellow-400/10 border border-yellow-400/30 rounded px-2 py-1 inline-block">← 먼저 완료하세요</div></div>' : ''}
-                        </div>
-
-                        <!-- Arrow -->
-                        <i data-lucide="arrow-right" class="w-6 h-6 text-slate-600 flex-shrink-0"></i>
-
-                        <!-- Step 2 -->
-                        <div class="flex-1 relative">
-                            <div class="flex items-center gap-3 p-4 rounded-xl ${step2Complete ? 'bg-green-500/10 border-2 border-green-500/50' : step1Complete ? 'bg-blue-500/10 border-2 border-blue-500/50' : 'bg-slate-800/50 border-2 border-slate-700'}">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full ${step2Complete ? 'bg-green-500' : step1Complete ? 'bg-blue-500 animate-pulse' : 'bg-slate-700'} flex items-center justify-center text-white font-bold">
-                                    ${step2Complete ? '<i data-lucide="check" class="w-5 h-5"></i>' : '2'}
-                                </div>
-                                <div>
-                                    <div class="font-bold text-white text-sm">Shorts 선택</div>
-                                    <div class="text-xs ${step2Complete ? 'text-green-400' : step1Complete ? 'text-blue-400' : 'text-slate-500'}">
-                                        ${step2Complete ? `${this.recommendations.length}개 추천됨` : step1Complete ? 'AI 분석 시작 →' : '대기 중'}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Arrow -->
-                        <i data-lucide="arrow-right" class="w-6 h-6 text-slate-600 flex-shrink-0"></i>
-
-                        <!-- Step 3 -->
-                        <div class="flex-1 relative">
-                            <div class="flex items-center gap-3 p-4 rounded-xl ${step3Complete ? 'bg-green-500/10 border-2 border-green-500/50' : step2Complete ? 'bg-purple-500/10 border-2 border-purple-500/50' : 'bg-slate-800/50 border-2 border-slate-700'}">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full ${step3Complete ? 'bg-green-500' : step2Complete ? 'bg-purple-500 animate-pulse' : 'bg-slate-700'} flex items-center justify-center text-white font-bold">
-                                    ${step3Complete ? '<i data-lucide="check" class="w-5 h-5"></i>' : '3'}
-                                </div>
-                                <div>
-                                    <div class="font-bold text-white text-sm">영상 생성</div>
-                                    <div class="text-xs ${step3Complete ? 'text-green-400' : step2Complete ? 'text-purple-400' : 'text-slate-500'}">
-                                        ${step3Complete ? `${this.selectedShorts.size}개 선택됨` : step2Complete ? 'Shorts 선택 →' : '대기 중'}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Analysis Section -->
-                <div class="bg-gradient-to-r from-pink-900/30 to-purple-900/30 border border-pink-500/30 rounded-2xl p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center gap-3">
-                            <div class="p-3 bg-pink-500/20 rounded-lg text-pink-400">
-                                <i data-lucide="sparkles" class="w-6 h-6"></i>
-                            </div>
-                            <div>
-                                <h2 class="text-xl font-bold text-white">📊 Shorts 분석</h2>
-                                <p class="text-sm text-slate-400">AI가 최적의 Shorts 후보 5개를 자동 추천합니다</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    ${scenes.length === 0 ? `
-                        <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 text-center">
-                            <i data-lucide="alert-triangle" class="w-8 h-8 text-yellow-400 mx-auto mb-2"></i>
-                            <p class="text-yellow-300">먼저 대본 분석을 완료하세요.</p>
-                        </div>
-                    ` : `
-                        <div class="flex items-center justify-between bg-slate-800/40 rounded-lg p-4">
-                            <div class="flex items-center gap-4">
-                                <div class="text-sm text-slate-400">
-                                    <span class="font-bold text-white">${scenes.length}</span>개 씬 분석 가능
-                                </div>
-                                <div class="text-xs text-slate-500">|</div>
-                                <div class="text-sm text-slate-400">
-                                    대본 길이: <span class="font-bold text-white">${script.length}</span>자
-                                </div>
-                            </div>
-                            <button id="btn-analyze-shorts" class="bg-pink-600 hover:bg-pink-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-pink-600/20 transition flex items-center gap-2">
-                                <i data-lucide="cpu" class="w-5 h-5"></i>
-                                AI 분석 시작
+            <div class="shorts-container slide-up flex h-full gap-6">
+                <!-- Left Panel: Controls -->
+                <div class="shorts-left-panel flex-1 min-w-[350px] overflow-y-auto pr-2 custom-scrollbar">
+                    <div class="bg-slate-800/50 border border-slate-700 rounded-2xl p-6">
+                        <div class="shorts-tabs mb-6 flex bg-slate-900/50 p-1 rounded-xl">
+                            <button class="shorts-tab-btn flex-1 py-2 px-4 rounded-lg text-sm font-bold transition ${this.activeTab === 'new' ? 'bg-slate-700 text-white shadow' : 'text-slate-400 hover:text-white'}" data-tab="new">
+                                ✨ 새로 만들기
+                            </button>
+                            <button class="shorts-tab-btn flex-1 py-2 px-4 rounded-lg text-sm font-bold transition ${this.activeTab === 'repurpose' ? 'bg-slate-700 text-white shadow' : 'text-slate-400 hover:text-white'}" data-tab="repurpose">
+                                ♻️ 리퍼퍼징 (재활용)
                             </button>
                         </div>
-                    `}
-                </div>
 
-                <!-- Recommendations List -->
-                ${hasAnalysis ? this.renderRecommendations() : ''}
-
-                <!-- Creation Panel -->
-                ${this.selectedShorts.size > 0 ? this.renderCreationPanel() : ''}
-
-                <!-- Generated Shorts Results -->
-                ${this.generatedShorts.length > 0 ? this.renderGeneratedShorts() : ''}
-            </div>
-        `;
-    }
-
-    renderRecommendations() {
-        if (this.recommendations.length === 0) {
-            return '';
-        }
-
-        return `
-            <div class="bg-slate-800/40 border border-slate-700 rounded-2xl p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                            <i data-lucide="trophy" class="w-5 h-5 text-yellow-400"></i>
-                            추천 Shorts 목록
-                        </h3>
-                        <p class="text-xs text-slate-500 mt-1">후킹 포인트 기반으로 선정된 5개 후보</p>
-                    </div>
-                    <div class="text-sm text-slate-400">
-                        <span class="font-bold text-pink-400">${this.selectedShorts.size}</span>개 선택됨
+                        ${this.activeTab === 'new' ? this.renderNewMode() : this.renderRepurposeMode()}
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 gap-4">
-                    ${this.recommendations.map((rec, index) => this.renderRecommendationCard(rec, index)).join('')}
-                </div>
-            </div>
-        `;
-    }
-
-    renderRecommendationCard(rec, index) {
-        const isSelected = this.selectedShorts.has(rec.rank);
-        const viralIcon = rec.viralPotential === 'high' ? '🔥' : rec.viralPotential === 'medium' ? '⭐' : '💡';
-
-        return `
-            <div class="bg-slate-900/50 border ${isSelected ? 'border-pink-500 ring-2 ring-pink-500/50' : 'border-slate-700'} rounded-xl p-4 transition hover:border-pink-500/50 cursor-pointer"
-                 id="short-card-${rec.rank}"
-                 data-rank="${rec.rank}">
-                <div class="flex items-start gap-4">
-                    <!-- Selection Checkbox -->
-                    <div class="pt-1">
-                        <input type="checkbox"
-                               class="short-checkbox w-5 h-5 rounded border-slate-600 bg-slate-800 text-pink-600 focus:ring-pink-500 cursor-pointer"
-                               data-rank="${rec.rank}"
-                               ${isSelected ? 'checked' : ''}>
-                    </div>
-
-                    <!-- Rank Badge -->
-                    <div class="flex-shrink-0">
-                        <div class="w-12 h-12 bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-lg flex items-center justify-center border border-pink-500/30">
-                            <span class="text-2xl font-bold text-pink-400">#${rec.rank}</span>
+                <!-- Right Panel: Preview -->
+                <div class="shorts-right-panel w-[320px] flex-shrink-0 flex flex-col">
+                    <h3 class="text-slate-400 font-bold mb-4 flex items-center gap-2">
+                        <i data-lucide="smartphone" class="w-5 h-5"></i> 
+                        미리보기 (9:16)
+                    </h3>
+                    
+                    <div class="phone-frame aspect-[9/16] bg-black border-8 border-slate-800 rounded-[2rem] overflow-hidden relative shadow-2xl ring-1 ring-slate-700">
+                        <div class="phone-screen w-full h-full bg-slate-900 flex items-center justify-center relative">
+                            ${this.renderScreenContent()}
+                        </div>
+                        <div class="phone-overlay absolute inset-0 pointer-events-none p-4 flex flex-col justify-end pb-12 bg-gradient-to-t from-black/80 via-transparent to-transparent">
+                            ${this.renderOverlayContent()}
                         </div>
                     </div>
 
-                    <!-- Content -->
-                    <div class="flex-1">
-                        <div class="flex items-start justify-between mb-2">
-                            <div>
-                                <h4 class="font-bold text-white text-lg">${rec.title}</h4>
-                                <div class="flex items-center gap-3 mt-1">
-                                    <span class="text-xs bg-slate-700/50 px-2 py-1 rounded text-slate-300">
-                                        <i data-lucide="film" class="w-3 h-3 inline-block mr-1"></i>
-                                        씬 ${rec.startSceneId}-${rec.endSceneId}
-                                    </span>
-                                    <span class="text-xs bg-slate-700/50 px-2 py-1 rounded text-slate-300">
-                                        <i data-lucide="clock" class="w-3 h-3 inline-block mr-1"></i>
-                                        약 ${rec.estimatedDuration}초
-                                    </span>
-                                    <span class="text-xs">
-                                        ${viralIcon} ${rec.viralPotential}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <p class="text-sm text-slate-400 mb-2">
-                            <strong class="text-pink-400">후킹 이유:</strong> ${rec.hookReason}
-                        </p>
-
-                        <details class="text-xs text-slate-500">
-                            <summary class="cursor-pointer hover:text-slate-300 transition">스크립트 미리보기</summary>
-                            <p class="mt-2 p-3 bg-slate-800/50 rounded italic">${rec.extractedScript}</p>
-                        </details>
+                    <div class="mt-4 flex gap-2 justify-center">
+                        <button id="btn-preview-play" class="p-3 rounded-full bg-pink-600 hover:bg-pink-500 text-white transition shadow-lg shadow-pink-600/20">
+                            <i data-lucide="${this.isPlaying ? 'pause' : 'play'}" class="w-6 h-6"></i>
+                        </button>
+                         ${this.currentVideoUrl ? `
+                            <button id="btn-download-video" class="p-3 rounded-full bg-slate-700 hover:bg-blue-600 text-white transition shadow-lg">
+                                <i data-lucide="download" class="w-6 h-6"></i>
+                            </button>
+                        ` : ''}
                     </div>
                 </div>
             </div>
         `;
     }
 
-    renderCreationPanel() {
-        const selectedCount = this.selectedShorts.size;
+    renderNewMode() {
+        const styleOptions = Object.entries(STYLE_CATEGORIES).map(([key, val]) =>
+            `<option value="${key}" ${this.selectedStyle === key ? 'selected' : ''}>${val.name}</option>`
+        ).join('');
 
         return `
-            <div class="bg-gradient-to-r from-purple-900/30 to-blue-900/30 border border-purple-500/30 rounded-2xl p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <div>
-                        <h3 class="text-lg font-bold text-white">선택한 Shorts 생성</h3>
-                        <p class="text-sm text-slate-400">${selectedCount}개의 Shorts가 선택되었습니다</p>
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-bold text-slate-400 mb-2">쇼츠 대본 입력</label>
+                    <textarea id="shorts-script-input" 
+                        class="w-full h-40 bg-slate-900 border border-slate-700 rounded-xl p-4 text-white resize-none focus:ring-2 focus:ring-pink-500 outline-none text-sm leading-relaxed scrollbar-hide"
+                        placeholder="여기에 대본을 입력하세요. 1분 이내 (약 300자) 권장...&#10;예: 서울 아파트 가격이 또 올랐습니다. 도대체 언제까지 오를까요? 전문가들의 의견을 종합해봤습니다.">${this.scriptInput}</textarea>
+                    <div class="text-right text-xs text-slate-500 mt-1">
+                        ${this.scriptInput.length}자 / 권장 300자
                     </div>
                 </div>
 
-                <div class="bg-slate-800/40 rounded-lg p-4 mb-4">
-                    <h4 class="text-sm font-bold text-slate-300 mb-3">📱 Shorts 설정</h4>
-                    <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-bold text-slate-400 mb-2">비주얼 스타일</label>
+                    <select id="shorts-style-select" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-pink-500 text-sm">
+                        ${styleOptions}
+                    </select>
+                    <div class="mt-2 p-3 bg-slate-900/50 rounded-lg border border-slate-700/50 flex gap-3 items-start">
+                        <i data-lucide="info" class="w-4 h-4 text-slate-500 mt-0.5 shrink-0"></i>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">화면 비율</label>
-                            <select id="shorts-aspect-ratio" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
-                                <option value="9:16">9:16 (세로 - Shorts 표준)</option>
-                                <option value="1:1">1:1 (정사각)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">자막</label>
-                            <select id="shorts-subtitle" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
-                                <option value="auto">자동 (권장)</option>
-                                <option value="none">없음</option>
-                            </select>
+                             <p class="text-xs font-bold text-slate-300" id="style-desc-name">스타일 이름</p>
+                             <p class="text-xs text-slate-500 mt-1 leading-relaxed" id="style-desc-text">스타일 설명이 여기에 표시됩니다.</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex items-center justify-between bg-slate-900/50 rounded-lg p-4">
-                    <div class="text-sm text-slate-400">
-                        각 Shorts는 기존 씬의 에셋(이미지, 음성)을 재사용합니다
-                    </div>
-                    <button id="btn-create-selected-shorts" class="bg-purple-600 hover:bg-purple-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-purple-600/20 transition flex items-center gap-2">
-                        <i data-lucide="rocket" class="w-5 h-5"></i>
-                        선택한 Shorts 생성
+                <div class="pt-2">
+                    <button id="btn-create-new-shorts" class="w-full py-4 bg-gradient-to-r from-pink-600 to-purple-600 rounded-xl font-bold text-white text-lg shadow-lg hover:shadow-pink-500/20 transition transform hover:scale-[1.02] flex items-center justify-center gap-2">
+                        <i data-lucide="sparkles" class="w-5 h-5"></i>
+                        <span>AI 쇼츠 원클릭 생성</span>
                     </button>
+                    <p class="text-center text-[10px] text-slate-500 mt-2">대본 분석, 이미지 생성, 더빙, 영상 편집이 자동으로 진행됩니다.</p>
                 </div>
             </div>
         `;
     }
 
-    renderGeneratedShorts() {
+    renderRepurposeMode() {
         return `
-            <div class="bg-gradient-to-r from-green-900/30 to-emerald-900/30 border border-green-500/30 rounded-2xl p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center gap-3">
-                        <div class="p-3 bg-green-500/20 rounded-lg text-green-400">
-                            <i data-lucide="check-circle-2" class="w-6 h-6"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-bold text-white">생성된 Shorts</h3>
-                            <p class="text-sm text-slate-400">${this.generatedShorts.length}개의 Shorts가 생성되었습니다</p>
-                        </div>
+            <div class="space-y-6">
+                <!-- 1. 프로젝트 선택 -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-400 mb-2">기존 프로젝트 선택</label>
+                    <div class="flex gap-2">
+                        <select id="project-select" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none text-sm">
+                            <option value="">프로젝트를 선택하세요...</option>
+                            ${(this.projects || []).map(p => `<option value="${p.id}" ${this.selectedProject === p.id ? 'selected' : ''}>${p.name}</option>`).join('')}
+                        </select>
+                        <button id="btn-analyze-project" class="px-6 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-bold text-sm transition shadow-lg truncate whitespace-nowrap" ${!this.selectedProject ? 'disabled' : ''}>
+                            분석
+                        </button>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    ${this.generatedShorts.map((short, index) => `
-                        <div class="bg-slate-800/40 border border-slate-700 rounded-xl p-4 hover:border-green-500/50 transition">
-                            <div class="flex items-center justify-between mb-3">
-                                <h4 class="font-bold text-white text-sm">${short.title}</h4>
-                                <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded border border-green-500/30">
-                                    #${index + 1}
-                                </span>
+                <!-- 2. 분석 결과 (옵션 선택) -->
+                ${this.analysisResult ? `
+                    <div class="space-y-3 slide-up">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">추천 하이라이트</h4>
+                        
+                        <div class="repurpose-card ${this.selectedHighlightType === 'summary' ? 'selected ring-2 ring-blue-500 bg-blue-900/20' : 'bg-slate-900 hover:bg-slate-800'} border border-slate-700 rounded-xl p-4 cursor-pointer transition relative" data-type="summary">
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="bg-blue-500/20 text-blue-400 px-2 py-1 rounded text-xs font-bold">요약형</span>
+                                <h5 class="font-bold text-white text-sm">핵심 내용 1분 요약</h5>
+                                <span class="ml-auto text-xs text-slate-500">${this.analysisResult.summary ? this.analysisResult.summary.length + ' Scenes' : ''}</span>
                             </div>
-
-                            <div class="space-y-2 text-xs text-slate-400 mb-4">
-                                <div class="flex items-center gap-2">
-                                    <i data-lucide="film" class="w-3 h-3"></i>
-                                    씬 ${short.startSceneId} ~ ${short.endSceneId} (${short.sceneCount}개 씬)
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <i data-lucide="clock" class="w-3 h-3"></i>
-                                    약 ${short.estimatedDuration}초
-                                </div>
-                                ${short.videoUrl ? `
-                                    <div class="flex items-center gap-2 text-green-400">
-                                        <i data-lucide="video" class="w-3 h-3"></i>
-                                        영상 생성 완료
-                                    </div>
-                                ` : ''}
-                            </div>
-
-                            ${short.videoUrl ? `
-                                <div class="aspect-[9/16] bg-black rounded-lg overflow-hidden mb-3">
-                                    <video src="${short.videoUrl}" controls class="w-full h-full object-cover"></video>
-                                </div>
-                                <div class="flex gap-2">
-                                    <a href="${short.videoUrl}" download="${short.title}.mp4" class="flex-1 bg-green-600 hover:bg-green-500 text-white text-xs px-3 py-2 rounded-lg font-bold transition flex items-center justify-center gap-1">
-                                        <i data-lucide="download" class="w-3 h-3"></i> 다운로드
-                                    </a>
-                                    <button onclick="navigator.clipboard.writeText('${short.videoUrl}')" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-2 rounded-lg transition">
-                                        <i data-lucide="link" class="w-3 h-3"></i>
-                                    </button>
-                                </div>
-                            ` : `
-                                <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-center">
-                                    <div class="text-xs text-yellow-400 flex items-center justify-center gap-2">
-                                        <i data-lucide="alert-triangle" class="w-3 h-3"></i>
-                                        씬 추출만 완료. 영상 생성은 최종 편집실에서 진행하세요.
-                                    </div>
-                                </div>
-                            `}
+                            <p class="text-xs text-slate-500 line-clamp-2">전체 영상의 중요 포인트만 빠르게 짚어줍니다.</p>
                         </div>
-                    `).join('')}
-                </div>
 
-                <div class="mt-6 bg-slate-900/50 rounded-lg p-4 flex items-center justify-between">
-                    <div class="text-sm text-slate-400">
-                        <i data-lucide="info" class="w-4 h-4 inline-block mr-1"></i>
-                        쇼츠 편집실에서 9:16 세로 포맷으로 렌더링하세요
+                        <div class="repurpose-card ${this.selectedHighlightType === 'hook_first' ? 'selected ring-2 ring-red-500 bg-red-900/20' : 'bg-slate-900 hover:bg-slate-800'} border border-slate-700 rounded-xl p-4 cursor-pointer transition relative" data-type="hook_first">
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="bg-red-500/20 text-red-400 px-2 py-1 rounded text-xs font-bold">반전형</span>
+                                <h5 class="font-bold text-white text-sm">충격적인 결말부터</h5>
+                                <span class="ml-auto text-xs text-slate-500">${this.analysisResult.hook_first ? this.analysisResult.hook_first.length + ' Scenes' : ''}</span>
+                            </div>
+                            <p class="text-xs text-slate-500 line-clamp-2">가장 자극적인 부분을 앞에 배치하여 시선을 끕니다.</p>
+                        </div>
+
+                        <div class="repurpose-card ${this.selectedHighlightType === 'qna' ? 'selected ring-2 ring-green-500 bg-green-900/20' : 'bg-slate-900 hover:bg-slate-800'} border border-slate-700 rounded-xl p-4 cursor-pointer transition relative" data-type="qna">
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="bg-green-500/20 text-green-400 px-2 py-1 rounded text-xs font-bold">Q&A형</span>
+                                <h5 class="font-bold text-white text-sm">질문과 답변 스타일</h5>
+                                <span class="ml-auto text-xs text-slate-500">${this.analysisResult.qna ? this.analysisResult.qna.length + ' Scenes' : ''}</span>
+                            </div>
+                            <p class="text-xs text-slate-500 line-clamp-2">시청자와 소통하는 느낌의 질의응답 포맷입니다.</p>
+                        </div>
+
+                        <button id="btn-create-repurpose" class="w-full py-4 mt-4 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-xl font-bold text-white text-lg shadow-lg hover:shadow-blue-500/20 transition transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed" ${!this.selectedHighlightType ? 'disabled' : ''}>
+                            <i data-lucide="video" class="w-5 h-5 inline-block mr-2"></i>
+                            선택한 옵션으로 생성
+                        </button>
                     </div>
-                    <button id="btn-go-to-shorts-edit" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2">
-                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                        쇼츠 편집실로 이동
-                    </button>
-                </div>
+                ` : `
+                    <div class="text-center py-10 text-slate-600 bg-slate-900/30 rounded-xl border border-dashed border-slate-800">
+                        <i data-lucide="search" class="w-10 h-10 mx-auto mb-3 opacity-50"></i>
+                        <p class="text-xs">프로젝트를 선택하고 분석 버튼을 눌러주세요.</p>
+                    </div>
+                `}
             </div>
         `;
     }
 
-    onMount() {
-        // Setup guide button
-        this.setupGuideButton();
-
-        // AI 분석 버튼
-        const btnAnalyze = document.getElementById('btn-analyze-shorts');
-        if (btnAnalyze) {
-            btnAnalyze.addEventListener('click', () => this.analyzeForShorts());
+    renderScreenContent() {
+        if (this.currentVideoUrl) {
+            return `<video src="${this.currentVideoUrl}" class="w-full h-full object-cover" controls autoplay loop></video>`;
         }
 
-        // Shorts 체크박스 이벤트 (카드 클릭 시에도 체크)
-        document.querySelectorAll('.short-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', (e) => {
-                const rank = parseInt(e.target.dataset.rank);
-                if (e.target.checked) {
-                    this.selectedShorts.add(rank);
-                } else {
-                    this.selectedShorts.delete(rank);
-                }
-                this.refreshModule();
-            });
-        });
-
-        // 카드 클릭 시 체크박스 토글
-        document.querySelectorAll('[id^="short-card-"]').forEach(card => {
-            card.addEventListener('click', (e) => {
-                // 체크박스 자체를 클릭한 경우는 제외
-                if (e.target.classList.contains('short-checkbox')) return;
-                if (e.target.tagName === 'SUMMARY') return;
-
-                const rank = parseInt(card.dataset.rank);
-                const checkbox = card.querySelector('.short-checkbox');
-
-                if (this.selectedShorts.has(rank)) {
-                    this.selectedShorts.delete(rank);
-                    checkbox.checked = false;
-                } else {
-                    this.selectedShorts.add(rank);
-                    checkbox.checked = true;
-                }
-
-                this.refreshModule();
-            });
-        });
-
-        // Shorts 생성 버튼
-        const btnCreate = document.getElementById('btn-create-selected-shorts');
-        if (btnCreate) {
-            btnCreate.addEventListener('click', () => this.createSelectedShorts());
+        if (this.previewScenes.length === 0) {
+            return `
+                <div class="text-center p-4">
+                    <i data-lucide="clapperboard" class="w-8 h-8 text-slate-700 mx-auto mb-2"></i>
+                    <p class="text-slate-600 text-xs">미리보기 없음</p>
+                </div>
+            `;
         }
-
-        // 쇼츠 편집실로 이동 버튼
-        const btnGoToShortsEdit = document.getElementById('btn-go-to-shorts-edit');
-        if (btnGoToShortsEdit) {
-            btnGoToShortsEdit.addEventListener('click', () => {
-                // 생성된 쇼츠 데이터를 AppState에 저장
-                AppState.generatedShorts = this.generatedShorts;
-                // 쇼츠 편집 모듈로 이동
-                window.app.route('shorts-edit');
-            });
+        const scene = this.previewScenes[this.currentPreviewIndex];
+        // 이미지 또는 비디오 표시
+        if (!scene.visualUrl) {
+            return `
+                <div class="text-center p-4 animate-pulse">
+                     <i data-lucide="image" class="w-8 h-8 text-slate-700 mx-auto mb-2"></i>
+                    <p class="text-slate-600 text-xs">생성 중 (${this.currentPreviewIndex + 1}/${this.previewScenes.length})...</p>
+                </div>
+            `;
         }
+        return `<img src="${scene.visualUrl}" class="w-full h-full object-cover animate-fade-in">`;
     }
 
-    async analyzeForShorts() {
-        const script = AppState.getScript();
-        const scenes = AppState.getScenes();
+    renderOverlayContent() {
+        if (this.previewScenes.length === 0) return '';
+        const scene = this.previewScenes[this.currentPreviewIndex];
 
-        if (!script || scenes.length === 0) {
-            alert('먼저 대본 분석을 완료하세요.');
+        // 리퍼퍼징 재사용 표시 (선택적)
+        const reuseBadge = scene.reused_visual ? `<span class="absolute top-2 right-2 bg-green-500/80 text-white text-[10px] px-2 py-0.5 rounded-full">♻️ Reused</span>` : '';
+
+        return `
+            ${reuseBadge}
+            <div class="shorts-subtitle text-center px-4">
+                <span class="bg-black/50 text-yellow-300 font-bold text-lg px-2 py-1 rounded box-decoration-clone leading-[1.6]">
+                    ${scene.text || ''}
+                </span>
+            </div>
+        `;
+    }
+
+    // --- Actions ---
+
+    async createNewShorts() {
+        if (!this.scriptInput.trim()) {
+            alert("대본을 입력해주세요.");
             return;
         }
 
-        const btnAnalyze = document.getElementById('btn-analyze-shorts');
+        const btn = this.container.querySelector('#btn-create-new-shorts');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin mr-2"></i> 생성 중...`;
 
         try {
-            btnAnalyze.disabled = true;
-            btnAnalyze.innerHTML = '<i data-lucide="loader" class="w-5 h-5 animate-spin"></i> AI 분석 중...';
-            if (window.lucide) window.lucide.createIcons();
+            // 스타일 정보 가져오기
+            const selectedStyleConfig = STYLE_CATEGORIES[this.selectedStyle];
 
-            console.log(`[Shorts] Analyzing script with ${scenes.length} scenes`);
-            const response = await fetch(`http://localhost:8000${CONFIG.endpoints.shortsAnalyze}`, {
+            this.showToast("쇼츠 생성을 시작합니다... (약 1-2분 소요)", "info");
+
+            const res = await fetch('/api/shorts/create/script', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    fullScript: script,
-                    scenes: scenes
+                    script: this.scriptInput,
+                    options: {
+                        style_context: selectedStyleConfig
+                    }
                 })
             });
+            const data = await res.json();
 
-            console.log(`[Shorts] Analysis response status: ${response.status}`);
+            if (data.success) {
+                this.previewScenes = data.scenes || [];
+                this.currentPreviewIndex = 0;
+                this.currentVideoUrl = data.video_url; // 최종 영상 URL 저장
 
-            const result = await response.json();
+                this.showToast("쇼츠 영상이 완성되었습니다!", "success");
 
-            if (result.success) {
-                this.recommendations = result.recommendations || [];
-                this.selectedShorts.clear();
+                // 미리보기 재생 시작
+                if (this.currentVideoUrl) {
+                    this.isPlaying = true;
+                } else {
+                    this.togglePreview();
+                }
 
-                alert(`✅ Shorts 분석 완료!\n${this.recommendations.length}개의 후보를 발견했습니다.`);
                 this.refreshModule();
             } else {
-                alert(`❌ 분석 실패: ${result.error}`);
+                throw new Error(data.error || "Unknown error");
             }
-
-        } catch (error) {
-            console.error('Shorts analysis error:', error);
-            alert(`❌ 오류 발생: ${error.message}`);
+        } catch (e) {
+            console.error(e);
+            this.showToast("생성 실패: " + e.message, "error");
         } finally {
-            btnAnalyze.disabled = false;
-            btnAnalyze.innerHTML = '<i data-lucide="cpu" class="w-5 h-5"></i> AI 분석 시작';
-            if (window.lucide) window.lucide.createIcons();
+            if (this.container && this.container.querySelector('#btn-create-new-shorts')) {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
         }
     }
 
-    async createSelectedShorts() {
-        if (this.selectedShorts.size === 0) {
-            alert('생성할 Shorts를 선택하세요.');
+    async analyzeProject() {
+        if (!this.selectedProject) {
+            alert("프로젝트를 선택해주세요.");
             return;
         }
 
-        const scenes = AppState.getScenes();
-        const selectedRecs = this.recommendations.filter(rec => this.selectedShorts.has(rec.rank));
-
-        if (!confirm(`선택한 ${selectedRecs.length}개의 Shorts를 생성하시겠습니까?`)) {
-            return;
-        }
-
-        const btnCreate = document.getElementById('btn-create-selected-shorts');
-        if (btnCreate) {
-            btnCreate.disabled = true;
-            btnCreate.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> 생성 중...';
-            if (window.lucide) window.lucide.createIcons();
-        }
+        const btn = this.container.querySelector('#btn-analyze-project');
+        btn.disabled = true;
+        btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>`;
 
         try {
-            const createdShorts = [];
-            let successCount = 0;
-            let failCount = 0;
+            const res = await fetch('/api/shorts/analyze-project', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ project_path: this.selectedProject }) // project_path is actually project ID here
+            });
+            const data = await res.json();
 
-            for (const rec of selectedRecs) {
-                console.log(`[Shorts] Creating: ${rec.title} (Scenes ${rec.startSceneId}-${rec.endSceneId})`);
-
-                try {
-                    console.log(`[Shorts] Calling API: ${CONFIG.endpoints.shortsCreate}`);
-                    const response = await fetch(`http://localhost:8000${CONFIG.endpoints.shortsCreate}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            scenes: scenes,
-                            startSceneId: rec.startSceneId,
-                            endSceneId: rec.endSceneId,
-                            title: rec.title
-                        })
-                    });
-
-                    console.log(`[Shorts] Response status: ${response.status}`);
-
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        console.error(`[Shorts] API Error: ${errorText}`);
-                        failCount++;
-                        continue;
-                    }
-
-                    const result = await response.json();
-                    console.log(`[Shorts] Result:`, result);
-
-                    if (result.success) {
-                        console.log(`✅ ${rec.title}: ${result.sceneCount}개 씬 추출 완료`);
-
-                        // 생성된 Shorts를 배열에 추가
-                        createdShorts.push({
-                            title: rec.title,
-                            startSceneId: rec.startSceneId,
-                            endSceneId: rec.endSceneId,
-                            sceneCount: result.sceneCount,
-                            estimatedDuration: rec.estimatedDuration,
-                            videoUrl: result.videoUrl || null // 영상 URL이 있으면 저장
-                        });
-                        successCount++;
-                    } else {
-                        console.error(`❌ ${rec.title} 생성 실패:`, result.error);
-                        failCount++;
-                    }
-                } catch (fetchError) {
-                    console.error(`❌ ${rec.title} API 호출 실패:`, fetchError);
-                    failCount++;
-                }
-            }
-
-            console.log(`[Shorts] 생성 완료: 성공 ${successCount}개, 실패 ${failCount}개`);
-            console.log(`[Shorts] createdShorts:`, createdShorts);
-
-            // 생성된 Shorts를 generatedShorts 배열에 추가
-            this.generatedShorts.push(...createdShorts);
-
-            console.log(`[Shorts] Total generatedShorts:`, this.generatedShorts);
-
-            if (successCount > 0) {
-                alert(`✅ ${successCount}개 Shorts 생성 완료!\n\n생성된 Shorts 결과물을 아래에서 확인하세요.`);
+            if (data.success) {
+                this.analysisResult = data.highlights;
+                this.showToast("분석이 완료되었습니다.", "success");
+                this.refreshModule();
             } else {
-                alert(`❌ Shorts 생성 실패\n\n모든 Shorts 생성이 실패했습니다. 콘솔을 확인하세요.`);
+                throw new Error(data.error || "Analysis failed");
             }
-
-            // UI 갱신
-            this.refreshModule();
-
-        } catch (error) {
-            console.error('Shorts creation error:', error);
-            alert(`❌ 생성 실패: ${error.message}`);
+        } catch (e) {
+            console.error(e);
+            this.showToast("분석 실패: " + e.message, "error");
+            this.analysisResult = null;
         } finally {
-            if (btnCreate) {
-                btnCreate.disabled = false;
-                btnCreate.innerHTML = '<i data-lucide="rocket" class="w-5 h-5"></i> 선택한 Shorts 생성';
-                if (window.lucide) window.lucide.createIcons();
+            // 버튼 상태 복구는 refreshModule에서 처리됨
+        }
+    }
+
+    async createRepurposedShorts() {
+        if (!this.selectedHighlightType || !this.analysisResult) return;
+
+        const scenes = this.analysisResult[this.selectedHighlightType];
+        if (!scenes || scenes.length === 0) {
+            alert("선택한 타입의 장면 데이터가 없습니다.");
+            return;
+        }
+
+        const btn = this.container.querySelector('#btn-create-repurpose');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin mr-2"></i> 자산 매칭 및 생성 중...`;
+
+        try {
+            this.showToast("기존 자산을 스캔하고 부족한 부분을 생성합니다...", "info");
+
+            const res = await fetch('/api/shorts/create/highlight', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    original_project_path: this.selectedProject,
+                    highlight_type: this.selectedHighlightType,
+                    scenes: scenes
+                })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                this.previewScenes = data.scenes || [];
+                this.currentPreviewIndex = 0;
+                this.currentVideoUrl = data.video_url;
+
+                this.showToast("리퍼퍼징 쇼츠가 완성되었습니다!", "success");
+
+                if (this.currentVideoUrl) {
+                    this.isPlaying = true;
+                } else {
+                    this.togglePreview();
+                }
+
+                this.refreshModule();
+            } else {
+                throw new Error(data.error || "Generation failed");
+            }
+        } catch (e) {
+            console.error(e);
+            this.showToast("생성 실패: " + e.message, "error");
+        } finally {
+            if (this.container && this.container.querySelector('#btn-create-repurpose')) {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
             }
         }
+    }
+
+    togglePreview() {
+        if (this.currentVideoUrl) {
+            // 비디오 모드인 경우 제어는 비디오 태그가 함 or 커스텀 제어
+            const video = this.container.querySelector('video');
+            if (video) {
+                if (video.paused) video.play();
+                else video.pause();
+                this.isPlaying = !video.paused;
+                this.refreshModule(); // 아이콘 업데이트
+            }
+            return;
+        }
+
+        // 이미지 슬라이드 모드
+        if (this.isPlaying) {
+            clearInterval(this.previewInterval);
+            this.isPlaying = false;
+        } else {
+            this.isPlaying = true;
+            this.previewInterval = setInterval(() => {
+                this.currentPreviewIndex = (this.currentPreviewIndex + 1) % (this.previewScenes.length || 1);
+                this.refreshModule();
+            }, 3000);
+        }
+        this.refreshModule();
+    }
+
+    downloadVideo() {
+        if (this.currentVideoUrl) {
+            const a = document.createElement('a');
+            a.href = this.currentVideoUrl;
+            a.download = `shorts_${Date.now()}.mp4`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    }
+
+    showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-xl shadow-2xl z-50 text-white font-bold animate-slide-up flex items-center gap-3 ${type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-600' : 'bg-slate-800 border border-slate-600'
+            }`;
+        toast.innerHTML = `
+            <i data-lucide="${type === 'success' ? 'check-circle' : type === 'error' ? 'alert-circle' : 'info'}" class="w-5 h-5"></i>
+            <span>${message}</span>
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
     }
 }

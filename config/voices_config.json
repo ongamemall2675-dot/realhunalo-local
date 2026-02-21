@@ -1,0 +1,186 @@
+{
+    "project": "Antigravity",
+    "version": "2026.1",
+    "voices": [
+        {
+            "id": "Achernar",
+            "name_ko": "아케르나르",
+            "gender": "Female",
+            "base_instruction": "Analytical, calm, and professional news anchor tone."
+        },
+        {
+            "id": "Achird",
+            "name_ko": "아키르드",
+            "gender": "Male",
+            "base_instruction": "Wise, experienced advisor tone with a low, stable, and weighty voice."
+        },
+        {
+            "id": "Algenib",
+            "name_ko": "알게니브",
+            "gender": "Male",
+            "base_instruction": "Confident, sharp, and modern businessman tone."
+        },
+        {
+            "id": "Algieba",
+            "name_ko": "알기에바",
+            "gender": "Male",
+            "base_instruction": "Dry, cynical critic tone, sounding like warning about risks."
+        },
+        {
+            "id": "Alnilam",
+            "name_ko": "알닐람",
+            "gender": "Male",
+            "base_instruction": "Mechanical, objective, and fact-checking AI style."
+        },
+        {
+            "id": "Aoede",
+            "name_ko": "아오이데",
+            "gender": "Female",
+            "base_instruction": "Clear, intellectual narrator tone, optimized for education and information delivery."
+        },
+        {
+            "id": "Autonoe",
+            "name_ko": "아우토노에",
+            "gender": "Female",
+            "base_instruction": "Cautious, worried, trembling, and soft voice."
+        },
+        {
+            "id": "Callirrhoe",
+            "name_ko": "칼리로에",
+            "gender": "Female",
+            "base_instruction": "Emotional, high-pitched tone, sounding like complaining or appealing."
+        },
+        {
+            "id": "Charon",
+            "name_ko": "카론",
+            "gender": "Male",
+            "base_instruction": "Heavy, gravelly, and intimidating authoritative voice."
+        },
+        {
+            "id": "Despina",
+            "name_ko": "데스피나",
+            "gender": "Female",
+            "base_instruction": "Lethargic, flat tone, sounding as if given up on everything."
+        },
+        {
+            "id": "Enceladus",
+            "name_ko": "엔켈라두스",
+            "gender": "Male",
+            "base_instruction": "Resonant, flamboyant tone, style of a politician or high-ranking official."
+        },
+        {
+            "id": "Erinome",
+            "name_ko": "에리노메",
+            "gender": "Female",
+            "base_instruction": "Secretive, whispering tone, sounding like a trustworthy informant."
+        },
+        {
+            "id": "Fenrir",
+            "name_ko": "펜릴",
+            "gender": "Male",
+            "base_instruction": "Rough, arrogant, and mocking gambler tone."
+        },
+        {
+            "id": "Gacrux",
+            "name_ko": "가크루스",
+            "gender": "Female",
+            "base_instruction": "Intense, sharp tone, demanding justice and sounding angry."
+        },
+        {
+            "id": "Iapetus",
+            "name_ko": "이아페투스",
+            "gender": "Male",
+            "base_instruction": "Stubborn, grumpy old man tone, impatient complainer style."
+        },
+        {
+            "id": "Kore",
+            "name_ko": "코레",
+            "gender": "Female",
+            "base_instruction": "Fast-talking, panicked, and confused high-pitched tone of a beginner."
+        },
+        {
+            "id": "Laomedeia",
+            "name_ko": "라오메데이아",
+            "gender": "Female",
+            "base_instruction": "Bright, hopeful, overly optimistic salesperson style."
+        },
+        {
+            "id": "Leda",
+            "name_ko": "레다",
+            "gender": "Female",
+            "base_instruction": "Warm, soft tone, sounding like a comforting and empathetic friend."
+        },
+        {
+            "id": "Orus",
+            "name_ko": "오루스",
+            "gender": "Male",
+            "base_instruction": "Mumbling, gloomy tone, sounding low and in despair."
+        },
+        {
+            "id": "Pulcherrima",
+            "name_ko": "풀케리마",
+            "gender": "Female",
+            "base_instruction": "Polished, sophisticated commercial model tone, with artificial kindness."
+        },
+        {
+            "id": "Puck",
+            "name_ko": "퍽",
+            "gender": "Male",
+            "base_instruction": "Defensive, rushing tone, sounding like someone cornered."
+        },
+        {
+            "id": "Rasalgethi",
+            "name_ko": "라살게티",
+            "gender": "Male",
+            "base_instruction": "Sly, fast-talking, untrustworthy scammer style."
+        },
+        {
+            "id": "Sadachbia",
+            "name_ko": "사다크비아",
+            "gender": "Male",
+            "base_instruction": "Rhythmical, decisive tone, style of a field reporter."
+        },
+        {
+            "id": "Sadaltager",
+            "name_ko": "사달타게르",
+            "gender": "Male",
+            "base_instruction": "Natural, ordinary tone, voice of a common person around us."
+        },
+        {
+            "id": "Schedar",
+            "name_ko": "쉐다르",
+            "gender": "Male",
+            "base_instruction": "Benevolent, experienced tone, sounding like a trustworthy elderly man."
+        },
+        {
+            "id": "Sulafat",
+            "name_ko": "술라파트",
+            "gender": "Female",
+            "base_instruction": "Emotionless, polite guidance system voice."
+        },
+        {
+            "id": "Umbriel",
+            "name_ko": "움브리엘",
+            "gender": "Male",
+            "base_instruction": "Boring, ordinary tone, style of a passerby having a conversation."
+        },
+        {
+            "id": "Vindemiatrix",
+            "name_ko": "빈데미아트릭스",
+            "gender": "Female",
+            "base_instruction": "Alert, fast tone, style of a real-time market monitoring agent."
+        },
+        {
+            "id": "Zephyr",
+            "name_ko": "제피르",
+            "gender": "Female",
+            "base_instruction": "Light, clear tone of a teenager or a pure child."
+        },
+        {
+            "id": "Zubenelgenubi",
+            "name_ko": "주벤엘게누비",
+            "gender": "Male",
+            "base_instruction": "Sharp, formal, cold financial banker style."
+        }
+    ]
+}

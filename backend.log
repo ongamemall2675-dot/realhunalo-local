@@ -1,0 +1,340 @@
+
+============================================================
+[ENV] .env loaded: C:\Users\ongam\antigravity project\realhunalo_local\.env
+   file_exists: True
+   OPENAI_API_KEY: set
+   GEMINI_API_KEY: set
+   ANTHROPIC_API_KEY: set
+   DEEPSEEK_API_KEY: set
+   REPLICATE_API_TOKEN: set
+============================================================
+
+C:\Users\ongam\antigravity project\realhunalo_local\backend.py:109: DeprecationWarning: 
+        on_event is deprecated, use lifespan event handlers instead.
+
+        Read more about it in the
+        [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+        
+  @app.on_event("startup")
+
+============================================================
+[ENV] .env 파일 로드: C:\Users\ongam\antigravity project\realhunalo_local\.env
+   파일 존재: True
+   OPENAI_API_KEY: 설정됨 (sk-proj-...Dj0A)
+   GEMINI_API_KEY: 설정됨 (AIzaSyBt...DALo)
+   ANTHROPIC_API_KEY: 설정됨 (sk-ant-a...qQAA)
+   DEEPSEEK_API_KEY: 설정됨 (sk-b6458...d65e)
+   REPLICATE_API_TOKEN: 설정됨 (r8_RgyDU...XRmh)
+============================================================
+
+[ENV] VREW_OUTPUT_DIR: C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_projects
+[OK] DeepSeek Client 초기화 완료 (Primary, timeout: 60s)
+[OK] OpenAI Client 초기화 완료 (Backup, timeout: 30s)
+[OK] Script Service 초기화 완료 (Primary Client: DeepSeek)
+[OK] Character Anchor Mode: FIXED
+[OK] Camera Motion Guide loaded (11826 chars)
+[OK] Image Service 초기화 완료
+[OK] Motion Service 초기화 완료
+[NOTICE] Google TTS is set as PRIMARY engine (NO FALLBACK MODE)
+[OK] TTS Service 초기화 완료
+   - Primary Engine: google
+   - Available Engines: ['azure', 'elevenlabs', 'google']
+[OK] FFmpeg 확인: ffmpeg version 8.0.1-full_build-www.gyan.dev Copyright (c) 2000-2025 the FFmpeg developers
+
+============================================================
+[VideoService] 초기화 완료
+   - 해상도: 1920x1080
+   - FPS: 30
+   - 프리셋: medium
+   - 비트레이트: 8M
+============================================================
+
+[OK] Vrew Service (New) 초기화 완료
+     미디어 저장 경로: C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_projects
+[OK] Vrew Batch Service 초기화 완료
+[OK] Trend Service 초기화 완료
+[OK] YouTube API 초기화 완료
+
+[AI] AI Service 초기화
+  [OK] openai: sk-proj-...Dj0A
+  [OK] anthropic: sk-ant-a...qQAA
+  [OK] gemini: AIzaSyBt...DALo
+  [OK] deepseek: sk-b6458...d65e
+  [OK] perplexity: pplx-Znk...8e76
+[OK] Google Drive Service 초기화 완료
+[OK] Cache Service 초기화 (max_size=500, default_ttl=1800s)
+[OK] ScriptAnalyzer: DeepSeek Client 초기화 완료
+[OK] HighlightExtractor: DeepSeek Client 초기화 완료
+[OK] Audio Segmentation Service 초기화 완료
+[OK] Cache Service 초기화 (max_size=500, default_ttl=1800s)
+[INFO] Redis 캐시 비활성화, 인메모리 캐시만 사용
+[OK] Async Service 초기화 (max_workers=24)
+[OK] Memory Monitor Service 초기화 (interval=10.0s)
+[MEMORY] 모니터링 시작 (간격: 10.0초)
+[OK] 메모리 모니터링 시작됨
+[OK] 메모리 모니터링 자동 시작됨
+[OK] Large File Processing Service 초기화
+   - Max Concurrent: 4
+   - Chunk Size: 20MB
+   - Max Memory: 1024MB
+   - Temp Dir: C:\Users\Public\Documents\ESTsoft\CreatorTemp\realhunalo_file_chunks
+INFO:     Started server process [15420]
+INFO:     Waiting for application startup.
+
+============================================================
+[ENV] .env loaded: C:\Users\ongam\antigravity project\realhunalo_local\.env
+   file_exists: True
+   OPENAI_API_KEY: set
+   GEMINI_API_KEY: set
+   ANTHROPIC_API_KEY: set
+   DEEPSEEK_API_KEY: set
+   REPLICATE_API_TOKEN: set
+============================================================
+
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+
+============================================================
+[OK] RealHunalo Backend Started - Version: 2026.02.14.01
+[OK] Logic 2.0 (Master Audio) is active
+[OK] /api/generate-script endpoint confirmed
+[OK] /api/script/segment endpoint confirmed
+[OK] /api/analyze-shorts endpoint confirmed
+============================================================
+
+INFO:     127.0.0.1:8437 - "GET /health HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:8441 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4231 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8741 - "GET /assets/css/shorts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4231 - "GET /assets/style.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8741 - "GET /assets/js/app.js?v=20250214-1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8741 - "GET /assets/js/state.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9099 - "GET /assets/js/lightbox.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4231 - "GET /assets/js/config.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8741 - "GET /assets/js/utils.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4231 - "GET /assets/js/modules/DashboardModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9099 - "GET /assets/js/cache.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4231 - "GET /assets/js/modules/TrendModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9099 - "GET /assets/js/modules/ProjectModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8741 - "GET /assets/js/modules/YoutubeModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4231 - "GET /assets/js/modules/ScriptModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8741 - "GET /assets/js/modules/MotionModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9099 - "GET /assets/js/modules/ImageModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4231 - "GET /assets/js/modules/TTSModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8741 - "GET /assets/js/modules/VideoModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9099 - "GET /assets/js/modules/ShortsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4231 - "GET /assets/js/modules/ShortsEditModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9099 - "GET /assets/js/modules/BatchVrewModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8741 - "GET /assets/js/modules/AudioSegmentationModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9099 - "GET /assets/js/modules/SettingsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4231 - "GET /assets/js/modules/IntegratedWorkflowModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8741 - "GET /assets/js/services/ProjectService.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9099 - "GET /assets/js/Module.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4231 - "GET /assets/js/styles.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8741 - "GET /assets/js/utils/download.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4231 - "GET /assets/js/guides.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4231 - "GET /api/check-saved-keys HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4231 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8741 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9099 - "GET /api/motion/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9099 - "GET /assets/placeholder.png HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9099 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9099 - "GET /api/video/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9099 - "POST /api/export-vrew HTTP/1.1" 200 OK
+
+============================================================
+VREW 프로젝트 생성 시작
+============================================================
+[Vrew] 로컬 파일 복사 성공: C:\Users\ongam\antigravity project\realhunalo_local\output\segments/2ab137ee/merged_audio.mp3 -> C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_d065a69b.mp3
+[Vrew] 씬1 오디오: vrew_14596f30_grXp0SY1Ek.mp3 (18 KB)
+[Vrew] 로컬 파일 복사 성공 (상대 경로): C:\Users\ongam\antigravity project\realhunalo_local\output\grok-video-251a2bac-efd4-48d1-af1c-e541cb396f87.mp4 -> C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_14596f30_2dbf7969-097f-45c0-95ed-69ddb333973b.mp4
+[Vrew] 씬1 영상: vrew_14596f30_2dbf7969-097f-45c0-95ed-69ddb333973b.mp4 (1580 KB)
+[Vrew] 로컬 파일 복사 성공: C:\Users\ongam\antigravity project\realhunalo_local\output\segments/2ab137ee/merged_audio.mp3 -> C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_aec89881.mp3
+[Vrew] 씬2 오디오: vrew_14596f30_dV22w7niYN.mp3 (4 KB)
+[Vrew] 로컬 파일 복사 성공 (상대 경로): C:\Users\ongam\antigravity project\realhunalo_local\output\grok-video-398d01c0-8703-4ab3-b32a-a1162d6407a7.mp4 -> C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_14596f30_bd11577a-0825-41eb-b708-dae6583a398b.mp4
+[Vrew] 씬2 영상: vrew_14596f30_bd11577a-0825-41eb-b708-dae6583a398b.mp4 (2605 KB)
+[Vrew] 로컬 파일 복사 성공: C:\Users\ongam\antigravity project\realhunalo_local\output\segments/2ab137ee/merged_audio.mp3 -> C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_84092407.mp3
+[Vrew] 씬3 오디오: vrew_14596f30_dNEZqqkTSg.mp3 (13 KB)
+[Vrew] 로컬 파일 복사 성공 (상대 경로): C:\Users\ongam\antigravity project\realhunalo_local\output\grok-video-4394d29d-ec22-4e76-8fc7-f55a1c41ff6a.mp4 -> C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_14596f30_9f07be20-5023-4271-b508-d8e58ec6727b.mp4
+[Vrew] 씬3 영상: vrew_14596f30_9f07be20-5023-4271-b508-d8e58ec6727b.mp4 (2525 KB)
+[Vrew] 로컬 파일 복사 성공: C:\Users\ongam\antigravity project\realhunalo_local\output\segments/2ab137ee/merged_audio.mp3 -> C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_5140e9b5.mp3
+[Vrew] 씬4 오디오: vrew_14596f30_YYMJzKEid8.mp3 (18 KB)
+[Vrew] 로컬 파일 복사 성공 (상대 경로): C:\Users\ongam\antigravity project\realhunalo_local\output\grok-video-519d0bec-eaf0-4fbd-a225-73ac71838a08.mp4 -> C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_14596f30_aa195cf3-8f38-47a7-b680-3124112b282d.mp4
+[Vrew] 씬4 영상: vrew_14596f30_aa195cf3-8f38-47a7-b680-3124112b282d.mp4 (3010 KB)
+[Vrew] 로컬 파일 복사 성공: C:\Users\ongam\antigravity project\realhunalo_local\output\segments/2ab137ee/merged_audio.mp3 -> C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_15cbc900.mp3
+[Vrew] 씬5 오디오: vrew_14596f30_9Yk1nCnHxy.mp3 (16 KB)
+[Vrew] 로컬 파일 복사 성공 (상대 경로): C:\Users\ongam\antigravity project\realhunalo_local\output\grok-video-c2f2f720-0e6e-4937-8b7d-6d9678b7df77.mp4 -> C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_14596f30_d23dce39-d1aa-45b8-880b-aa5810b94d93.mp4
+[Vrew] 씬5 영상: vrew_14596f30_d23dce39-d1aa-45b8-880b-aa5810b94d93.mp4 (2574 KB)
+[Vrew] 로컬 파일 복사 성공: C:\Users\ongam\antigravity project\realhunalo_local\output\segments/2ab137ee/merged_audio.mp3 -> C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_2b6563b2.mp3
+[Vrew] 씬6 오디오: vrew_14596f30_o11oT0Jtqi.mp3 (8 KB)
+[Vrew] 로컬 파일 복사 성공 (상대 경로): C:\Users\ongam\antigravity project\realhunalo_local\output\grok-video-d53bce23-0773-4d4f-8d97-c20cc7521a5e.mp4 -> C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_14596f30_602c8c46-2e53-4045-85f8-8bca4cb196d3.mp4
+[Vrew] 씬6 영상: vrew_14596f30_602c8c46-2e53-4045-85f8-8bca4cb196d3.mp4 (2586 KB)
+[Vrew] 로컬 파일 복사 성공: C:\Users\ongam\antigravity project\realhunalo_local\output\segments/2ab137ee/merged_audio.mp3 -> C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_b38a7be1.mp3
+[Vrew] 씬7 오디오: vrew_14596f30_udxOQ1lRid.mp3 (14 KB)
+[Vrew] 로컬 파일 복사 성공 (상대 경로): C:\Users\ongam\antigravity project\realhunalo_local\output\grok-video-eaa54052-9b3f-47cd-a067-c7c78935f268.mp4 -> C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_14596f30_1892d04e-418c-4334-86ff-19e2453d0aa1.mp4
+[Vrew] 씬7 영상: vrew_14596f30_1892d04e-418c-4334-86ff-19e2453d0aa1.mp4 (4749 KB)
+[Vrew] 로컬 파일 복사 성공: C:\Users\ongam\antigravity project\realhunalo_local\output\segments/2ab137ee/merged_audio.mp3 -> C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_5c2ecfb8.mp3
+INFO:     127.0.0.1:9099 - "GET /api/tasks/deb08fa1-1794-4439-a5a6-67d9a6151dba HTTP/1.1" 200 OK
+[Vrew] 씬8 오디오: vrew_14596f30_K8T1cV5965.mp3 (16 KB)
+[Vrew] 로컬 파일 복사 성공 (상대 경로): C:\Users\ongam\antigravity project\realhunalo_local\output\Whisk_31a01f6c152e926bb6c492ff66aeb241dr.png -> C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_14596f30_eb70f7c0-a52b-419c-92c0-2ad8826fe604.png
+[Vrew] 씬8 이미지: vrew_14596f30_eb70f7c0-a52b-419c-92c0-2ad8826fe604.png (1597 KB)
+[Vrew] 로컬 파일 복사 성공: C:\Users\ongam\antigravity project\realhunalo_local\output\segments/2ab137ee/merged_audio.mp3 -> C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_d52ec954.mp3
+[Vrew] 씬9 오디오: vrew_14596f30_3G5bHWBImX.mp3 (10 KB)
+[Vrew] 로컬 파일 복사 성공 (상대 경로): C:\Users\ongam\antigravity project\realhunalo_local\output\Whisk_44a0b3e85e29dfabb7f48a7986e766b5dr.png -> C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_14596f30_ec19b6e7-76a1-4f1c-8395-871dedc2c9d3.png
+[Vrew] 씬9 이미지: vrew_14596f30_ec19b6e7-76a1-4f1c-8395-871dedc2c9d3.png (1262 KB)
+[Caption Style Debug] 자막 스타일 적용:
+  - enabled: True
+  - fontFamily: Pretendard-Vrew_700, fontSize: 100
+  - fontColor: #ffffff, fontWeight: 700
+  - outlineEnabled: True, outlineWidth: 6
+  - position: bottom, alignment: center, yOffset: 0
+[OK] VREW 생성 완료: vrew_14596f30.vrew (44 KB)
+     미디어 18개 → output/ 폴더 (relativePath 상대경로 참조)
+     D13 방지: .vrew와 미디어 파일을 같은 폴더로 유지하세요
+INFO:     127.0.0.1:9099 - "GET /api/tasks/deb08fa1-1794-4439-a5a6-67d9a6151dba HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9099 - "GET /output/vrew_14596f30.vrew HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9099 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5525 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5525 - "GET /assets/style.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4929 - "GET /assets/css/shorts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4929 - "GET /assets/js/app.js?v=20250214-1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4929 - "GET /assets/js/state.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5525 - "GET /assets/js/config.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7604 - "GET /assets/js/lightbox.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5525 - "GET /assets/js/utils.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4929 - "GET /assets/js/cache.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7604 - "GET /assets/js/modules/DashboardModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4929 - "GET /assets/js/modules/ProjectModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5525 - "GET /assets/js/modules/YoutubeModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7604 - "GET /assets/js/modules/TrendModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4929 - "GET /assets/js/modules/ScriptModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5525 - "GET /assets/js/modules/ImageModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7604 - "GET /assets/js/modules/MotionModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4929 - "GET /assets/js/modules/VideoModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7604 - "GET /assets/js/modules/TTSModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5525 - "GET /assets/js/modules/ShortsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5525 - "GET /assets/js/modules/ShortsEditModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7604 - "GET /assets/js/modules/BatchVrewModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4929 - "GET /assets/js/modules/AudioSegmentationModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5525 - "GET /assets/js/modules/IntegratedWorkflowModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7604 - "GET /assets/js/modules/SettingsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4929 - "GET /assets/js/services/ProjectService.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5525 - "GET /assets/js/Module.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4929 - "GET /assets/js/styles.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7604 - "GET /assets/js/utils/download.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5525 - "GET /assets/js/guides.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5525 - "GET /api/check-saved-keys HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5525 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4929 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7604 - "GET /api/motion/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7604 - "GET /assets/placeholder.png HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7604 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7604 - "GET /api/video/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7604 - "POST /api/export-vrew HTTP/1.1" 200 OK
+
+============================================================
+VREW 프로젝트 생성 시작
+============================================================
+[Vrew] 로컬 파일 복사 성공: C:\Users\ongam\antigravity project\realhunalo_local\output\segments/2ab137ee/merged_audio.mp3 -> C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_90b656f8.mp3
+[Vrew] 씬1 오디오: vrew_0c0df3a4_Qjn3aXVrbU.mp3 (18 KB)
+[Vrew] 로컬 파일 복사 성공 (상대 경로): C:\Users\ongam\antigravity project\realhunalo_local\output\grok-video-251a2bac-efd4-48d1-af1c-e541cb396f87.mp4 -> C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_0c0df3a4_53083c27-32f5-4b28-9303-72a3f70d4b8b.mp4
+[Vrew] 씬1 영상: vrew_0c0df3a4_53083c27-32f5-4b28-9303-72a3f70d4b8b.mp4 (1580 KB)
+[Vrew] 로컬 파일 복사 성공: C:\Users\ongam\antigravity project\realhunalo_local\output\segments/2ab137ee/merged_audio.mp3 -> C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_57e01b24.mp3
+[Vrew] 씬2 오디오: vrew_0c0df3a4_VueNnr4f8t.mp3 (4 KB)
+[Vrew] 로컬 파일 복사 성공 (상대 경로): C:\Users\ongam\antigravity project\realhunalo_local\output\grok-video-398d01c0-8703-4ab3-b32a-a1162d6407a7.mp4 -> C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_0c0df3a4_faa4bc8c-70ae-4509-bfeb-88989f04d93e.mp4
+[Vrew] 씬2 영상: vrew_0c0df3a4_faa4bc8c-70ae-4509-bfeb-88989f04d93e.mp4 (2605 KB)
+[Vrew] 로컬 파일 복사 성공: C:\Users\ongam\antigravity project\realhunalo_local\output\segments/2ab137ee/merged_audio.mp3 -> C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_91afa5f0.mp3
+[Vrew] 씬3 오디오: vrew_0c0df3a4_eAPZ8oOa31.mp3 (13 KB)
+[Vrew] 로컬 파일 복사 성공 (상대 경로): C:\Users\ongam\antigravity project\realhunalo_local\output\grok-video-4394d29d-ec22-4e76-8fc7-f55a1c41ff6a.mp4 -> C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_0c0df3a4_6634fb05-2bd0-4baa-be96-98c62930b875.mp4
+[Vrew] 씬3 영상: vrew_0c0df3a4_6634fb05-2bd0-4baa-be96-98c62930b875.mp4 (2525 KB)
+[Vrew] 로컬 파일 복사 성공: C:\Users\ongam\antigravity project\realhunalo_local\output\segments/2ab137ee/merged_audio.mp3 -> C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_14cef4e0.mp3
+[Vrew] 씬4 오디오: vrew_0c0df3a4_bYZJ4bbEu4.mp3 (18 KB)
+[Vrew] 로컬 파일 복사 성공 (상대 경로): C:\Users\ongam\antigravity project\realhunalo_local\output\grok-video-519d0bec-eaf0-4fbd-a225-73ac71838a08.mp4 -> C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_0c0df3a4_8a94b427-7e8f-4516-ab43-9ed2b3babe87.mp4
+[Vrew] 씬4 영상: vrew_0c0df3a4_8a94b427-7e8f-4516-ab43-9ed2b3babe87.mp4 (3010 KB)
+[Vrew] 로컬 파일 복사 성공: C:\Users\ongam\antigravity project\realhunalo_local\output\segments/2ab137ee/merged_audio.mp3 -> C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_5f18d1cc.mp3
+[Vrew] 씬5 오디오: vrew_0c0df3a4_S6lYYgXKSx.mp3 (16 KB)
+[Vrew] 로컬 파일 복사 성공 (상대 경로): C:\Users\ongam\antigravity project\realhunalo_local\output\grok-video-c2f2f720-0e6e-4937-8b7d-6d9678b7df77.mp4 -> C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_0c0df3a4_7bc4b6ec-9794-41eb-9dac-aeca788ddfc6.mp4
+[Vrew] 씬5 영상: vrew_0c0df3a4_7bc4b6ec-9794-41eb-9dac-aeca788ddfc6.mp4 (2574 KB)
+[Vrew] 로컬 파일 복사 성공: C:\Users\ongam\antigravity project\realhunalo_local\output\segments/2ab137ee/merged_audio.mp3 -> C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_b1a12fa6.mp3
+[Vrew] 씬6 오디오: vrew_0c0df3a4_XDM2SU9Frb.mp3 (8 KB)
+[Vrew] 로컬 파일 복사 성공 (상대 경로): C:\Users\ongam\antigravity project\realhunalo_local\output\grok-video-d53bce23-0773-4d4f-8d97-c20cc7521a5e.mp4 -> C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_0c0df3a4_1ef4be9f-5bde-4401-8321-111d358204ff.mp4
+[Vrew] 씬6 영상: vrew_0c0df3a4_1ef4be9f-5bde-4401-8321-111d358204ff.mp4 (2586 KB)
+[Vrew] 로컬 파일 복사 성공: C:\Users\ongam\antigravity project\realhunalo_local\output\segments/2ab137ee/merged_audio.mp3 -> C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_a4739633.mp3
+[Vrew] 씬7 오디오: vrew_0c0df3a4_BEgu83dLes.mp3 (14 KB)
+[Vrew] 로컬 파일 복사 성공 (상대 경로): C:\Users\ongam\antigravity project\realhunalo_local\output\grok-video-eaa54052-9b3f-47cd-a067-c7c78935f268.mp4 -> C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_0c0df3a4_30c211f4-e70b-491c-824f-16b5ba09814a.mp4
+[Vrew] 씬7 영상: vrew_0c0df3a4_30c211f4-e70b-491c-824f-16b5ba09814a.mp4 (4749 KB)
+[Vrew] 로컬 파일 복사 성공: C:\Users\ongam\antigravity project\realhunalo_local\output\segments/2ab137ee/merged_audio.mp3 -> C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_88ef721f.mp3
+[Vrew] 씬8 오디오: vrew_0c0df3a4_d6nKjtkuMj.mp3 (16 KB)
+[Vrew] 로컬 파일 복사 성공 (상대 경로): C:\Users\ongam\antigravity project\realhunalo_local\output\Whisk_31a01f6c152e926bb6c492ff66aeb241dr.png -> C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_0c0df3a4_e76bf519-e8e9-4c65-bf66-780dae0759bf.png
+[Vrew] 씬8 이미지: vrew_0c0df3a4_e76bf519-e8e9-4c65-bf66-780dae0759bf.png (1597 KB)
+[Vrew] 로컬 파일 복사 성공: C:\Users\ongam\antigravity project\realhunalo_local\output\segments/2ab137ee/merged_audio.mp3 -> C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_43f1eeba.mp3
+INFO:     127.0.0.1:7604 - "GET /api/tasks/7e43c999-b5be-4823-81ce-8a786f246cdb HTTP/1.1" 200 OK
+[Vrew] 씬9 오디오: vrew_0c0df3a4_4hw0xzdwDN.mp3 (10 KB)
+[Vrew] 로컬 파일 복사 성공 (상대 경로): C:\Users\ongam\antigravity project\realhunalo_local\output\Whisk_44a0b3e85e29dfabb7f48a7986e766b5dr.png -> C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_0c0df3a4_ddfbdb60-5494-4c74-b85e-89037f8b1b83.png
+[Vrew] 씬9 이미지: vrew_0c0df3a4_ddfbdb60-5494-4c74-b85e-89037f8b1b83.png (1262 KB)
+[Caption Style Debug] 자막 스타일 적용:
+  - enabled: True
+  - fontFamily: Pretendard-Vrew_700, fontSize: 100
+  - fontColor: #ffffff, fontWeight: 700
+  - outlineEnabled: True, outlineWidth: 6
+  - position: bottom, alignment: center, yOffset: 0
+[OK] VREW 생성 완료: vrew_0c0df3a4.vrew (44 KB)
+     미디어 18개 → output/ 폴더 (relativePath 상대경로 참조)
+     D13 방지: .vrew와 미디어 파일을 같은 폴더로 유지하세요
+INFO:     127.0.0.1:7604 - "GET /api/tasks/7e43c999-b5be-4823-81ce-8a786f246cdb HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7604 - "GET /output/vrew_0c0df3a4.vrew HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4929 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7604 - "POST /api/export-vrew HTTP/1.1" 200 OK
+
+============================================================
+VREW 프로젝트 생성 시작
+============================================================
+[Vrew] 로컬 파일 복사 성공: C:\Users\ongam\antigravity project\realhunalo_local\output\segments/2ab137ee/merged_audio.mp3 -> C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_e81f8f7f.mp3
+[Vrew] 씬1 오디오: vrew_81957603_b83hJmBSrQ.mp3 (18 KB)
+[Vrew] 로컬 파일 복사 성공 (상대 경로): C:\Users\ongam\antigravity project\realhunalo_local\output\grok-video-251a2bac-efd4-48d1-af1c-e541cb396f87.mp4 -> C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_81957603_4ad4ba59-6395-442b-b4db-3a75adfbbb4b.mp4
+[Vrew] 씬1 영상: vrew_81957603_4ad4ba59-6395-442b-b4db-3a75adfbbb4b.mp4 (1580 KB)
+[Vrew] 로컬 파일 복사 성공: C:\Users\ongam\antigravity project\realhunalo_local\output\segments/2ab137ee/merged_audio.mp3 -> C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_481db636.mp3
+[Vrew] 씬2 오디오: vrew_81957603_nqmyGTGpBC.mp3 (4 KB)
+[Vrew] 로컬 파일 복사 성공 (상대 경로): C:\Users\ongam\antigravity project\realhunalo_local\output\grok-video-398d01c0-8703-4ab3-b32a-a1162d6407a7.mp4 -> C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_81957603_070a7798-6473-4599-ab31-76f54302f659.mp4
+[Vrew] 씬2 영상: vrew_81957603_070a7798-6473-4599-ab31-76f54302f659.mp4 (2605 KB)
+[Vrew] 로컬 파일 복사 성공: C:\Users\ongam\antigravity project\realhunalo_local\output\segments/2ab137ee/merged_audio.mp3 -> C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_c50ff407.mp3
+[Vrew] 씬3 오디오: vrew_81957603_d352UzVwDX.mp3 (13 KB)
+[Vrew] 로컬 파일 복사 성공 (상대 경로): C:\Users\ongam\antigravity project\realhunalo_local\output\grok-video-4394d29d-ec22-4e76-8fc7-f55a1c41ff6a.mp4 -> C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_81957603_0cfaddf9-7d4d-41ce-a7c7-b9a72e260376.mp4
+[Vrew] 씬3 영상: vrew_81957603_0cfaddf9-7d4d-41ce-a7c7-b9a72e260376.mp4 (2525 KB)
+[Vrew] 로컬 파일 복사 성공: C:\Users\ongam\antigravity project\realhunalo_local\output\segments/2ab137ee/merged_audio.mp3 -> C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_35593dab.mp3
+[Vrew] 씬4 오디오: vrew_81957603_WhXLtvHX8Q.mp3 (18 KB)
+[Vrew] 로컬 파일 복사 성공 (상대 경로): C:\Users\ongam\antigravity project\realhunalo_local\output\grok-video-519d0bec-eaf0-4fbd-a225-73ac71838a08.mp4 -> C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_81957603_076f0ef9-e14c-44c3-9c4e-e532fcb413c5.mp4
+[Vrew] 씬4 영상: vrew_81957603_076f0ef9-e14c-44c3-9c4e-e532fcb413c5.mp4 (3010 KB)
+[Vrew] 로컬 파일 복사 성공: C:\Users\ongam\antigravity project\realhunalo_local\output\segments/2ab137ee/merged_audio.mp3 -> C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_3158ef2d.mp3
+[Vrew] 씬5 오디오: vrew_81957603_SiQEckxMwK.mp3 (16 KB)
+[Vrew] 로컬 파일 복사 성공 (상대 경로): C:\Users\ongam\antigravity project\realhunalo_local\output\grok-video-c2f2f720-0e6e-4937-8b7d-6d9678b7df77.mp4 -> C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_81957603_5154a4be-4a51-414c-80a2-3668ad77b803.mp4
+[Vrew] 씬5 영상: vrew_81957603_5154a4be-4a51-414c-80a2-3668ad77b803.mp4 (2574 KB)
+[Vrew] 로컬 파일 복사 성공: C:\Users\ongam\antigravity project\realhunalo_local\output\segments/2ab137ee/merged_audio.mp3 -> C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_3829dc3e.mp3
+[Vrew] 씬6 오디오: vrew_81957603_uTjFrsRtQb.mp3 (8 KB)
+[Vrew] 로컬 파일 복사 성공 (상대 경로): C:\Users\ongam\antigravity project\realhunalo_local\output\grok-video-d53bce23-0773-4d4f-8d97-c20cc7521a5e.mp4 -> C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_81957603_bc128916-f2fc-428c-b277-bb0c02345c02.mp4
+[Vrew] 씬6 영상: vrew_81957603_bc128916-f2fc-428c-b277-bb0c02345c02.mp4 (2586 KB)
+[Vrew] 로컬 파일 복사 성공: C:\Users\ongam\antigravity project\realhunalo_local\output\segments/2ab137ee/merged_audio.mp3 -> C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_c0a3ee8f.mp3
+[Vrew] 씬7 오디오: vrew_81957603_fSu5CNxabm.mp3 (14 KB)
+[Vrew] 로컬 파일 복사 성공 (상대 경로): C:\Users\ongam\antigravity project\realhunalo_local\output\grok-video-eaa54052-9b3f-47cd-a067-c7c78935f268.mp4 -> C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_81957603_6db3e3e4-a331-46cd-8f7b-b8a4d9680f34.mp4
+[Vrew] 씬7 영상: vrew_81957603_6db3e3e4-a331-46cd-8f7b-b8a4d9680f34.mp4 (4749 KB)
+[Vrew] 로컬 파일 복사 성공: C:\Users\ongam\antigravity project\realhunalo_local\output\segments/2ab137ee/merged_audio.mp3 -> C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_9246d923.mp3
+[Vrew] 씬8 오디오: vrew_81957603_p6eGysVCQi.mp3 (16 KB)
+[Vrew] 로컬 파일 복사 성공 (상대 경로): C:\Users\ongam\antigravity project\realhunalo_local\output\Whisk_31a01f6c152e926bb6c492ff66aeb241dr.png -> C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_81957603_cce940f9-8e5e-4dcb-b111-49a95d05ab18.png
+[Vrew] 씬8 이미지: vrew_81957603_cce940f9-8e5e-4dcb-b111-49a95d05ab18.png (1597 KB)
+[Vrew] 로컬 파일 복사 성공: C:\Users\ongam\antigravity project\realhunalo_local\output\segments/2ab137ee/merged_audio.mp3 -> C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_e84a34a2.mp3
+INFO:     127.0.0.1:7604 - "GET /api/tasks/6aa73b34-ea78-48ff-9744-00aad81579ae HTTP/1.1" 200 OK
+[Vrew] 씬9 오디오: vrew_81957603_BB49mHFdA6.mp3 (10 KB)
+[Vrew] 로컬 파일 복사 성공 (상대 경로): C:\Users\ongam\antigravity project\realhunalo_local\output\Whisk_44a0b3e85e29dfabb7f48a7986e766b5dr.png -> C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_81957603_c4f2ea2b-9513-47b9-960f-91154efd4e20.png
+[Vrew] 씬9 이미지: vrew_81957603_c4f2ea2b-9513-47b9-960f-91154efd4e20.png (1262 KB)
+[Caption Style Debug] 자막 스타일 적용:
+  - enabled: True
+  - fontFamily: Pretendard-Vrew_700, fontSize: 100
+  - fontColor: #ffffff, fontWeight: 700
+  - outlineEnabled: True, outlineWidth: 6
+  - position: bottom, alignment: center, yOffset: 0
+[OK] VREW 생성 완료: vrew_81957603.vrew (44 KB)
+     미디어 18개 → output/ 폴더 (relativePath 상대경로 참조)
+     D13 방지: .vrew와 미디어 파일을 같은 폴더로 유지하세요
+INFO:     127.0.0.1:7604 - "GET /api/tasks/6aa73b34-ea78-48ff-9744-00aad81579ae HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7604 - "GET /output/vrew_81957603.vrew HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7604 - "GET /api/video/status HTTP/1.1" 200 OK

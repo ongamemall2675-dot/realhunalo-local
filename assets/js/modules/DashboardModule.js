@@ -168,7 +168,7 @@ export class DashboardModule extends Module {
                     </div>
                 </div>
 
-                <button id="btn-validate-keys" class="mt-4 w-full bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2">
+                <button id="btn-validate-keys" class="mt-4 w-full glass hover:bg-white/5 text-blue-400 px-4 py-3 rounded-2xl text-sm font-bold transition flex items-center justify-center gap-2 border border-blue-500/20">
                     <i data-lucide="refresh-cw" class="w-4 h-4"></i> API 키 검증
                 </button>
             </div>
@@ -231,12 +231,18 @@ export class DashboardModule extends Module {
                 <!-- Header -->
                 <div class="flex items-center justify-between">
                     <div>
-                        <h1 class="text-3xl font-black text-white mb-2">📊 서비스 대시보드</h1>
-                        <p class="text-sm text-slate-400">전체 서비스 상태 및 통계를 한눈에 확인하세요</p>
+                        <h1 class="text-4xl font-black text-white tracking-tighter mb-2 italic">RealHunalo <span class="text-blue-500">STUDIO</span></h1>
+                        <p class="text-sm text-slate-400 font-medium">부동산 시니어 타겟 AI 영상 콘텐츠의 핵심 허브</p>
                     </div>
-                    <button id="btn-refresh-dashboard" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2">
-                        <i data-lucide="refresh-cw" class="w-4 h-4"></i> 새로고침
-                    </button>
+                    <div class="flex gap-3">
+                        <button id="btn-refresh-dashboard" class="glass hover:bg-white/5 text-white px-6 py-3 rounded-2xl text-sm font-bold transition flex items-center gap-2 border border-white/5">
+                            <i data-lucide="refresh-cw" class="w-4 h-4"></i> 새로고침
+                        </button>
+                        <button onclick="app.route('script')" class="btn-primary-cinematic flex items-center gap-2 px-8 py-3 rounded-2xl text-sm shadow-xl">
+                            <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                            <span>새 콘텐츠 제작</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Service Status Cards -->

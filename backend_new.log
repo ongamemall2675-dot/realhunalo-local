@@ -1,0 +1,952 @@
+
+============================================================
+[ENV] .env loaded: C:\Users\ongam\antigravity project\realhunalo_local\.env
+   file_exists: True
+   OPENAI_API_KEY: set
+   GEMINI_API_KEY: set
+   ANTHROPIC_API_KEY: set
+   DEEPSEEK_API_KEY: set
+   REPLICATE_API_TOKEN: set
+============================================================
+
+C:\Users\ongam\antigravity project\realhunalo_local\backend.py:109: DeprecationWarning: 
+        on_event is deprecated, use lifespan event handlers instead.
+
+        Read more about it in the
+        [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+        
+  @app.on_event("startup")
+
+============================================================
+[ENV] .env 파일 로드: C:\Users\ongam\antigravity project\realhunalo_local\.env
+   파일 존재: True
+   OPENAI_API_KEY: 설정됨 (sk-proj-...Dj0A)
+   GEMINI_API_KEY: 설정됨 (AIzaSyBt...DALo)
+   ANTHROPIC_API_KEY: 설정됨 (sk-ant-a...qQAA)
+   DEEPSEEK_API_KEY: 설정됨 (sk-b6458...d65e)
+   REPLICATE_API_TOKEN: 설정됨 (r8_RgyDU...XRmh)
+============================================================
+
+[ENV] VREW_OUTPUT_DIR: C:\Users\ongam\antigravity project\realhunalo_local\output\vrew_projects
+[OK] DeepSeek Client 초기화 완료 (Primary, timeout: 60s)
+[OK] OpenAI Client 초기화 완료 (Backup, timeout: 30s)
+[OK] Script Service 초기화 완료 (Primary Client: DeepSeek)
+[OK] Character Anchor Mode: FIXED
+[OK] Camera Motion Guide loaded (11826 chars)
+[OK] Image Service 초기화 완료
+[OK] Motion Service 초기화 완료
+[NOTICE] Google TTS is set as PRIMARY engine (NO FALLBACK MODE)
+[OK] TTS Service 초기화 완료
+   - Primary Engine: google
+   - Available Engines: ['azure', 'elevenlabs', 'google']
+[OK] FFmpeg 확인: ffmpeg version 8.0.1-full_build-www.gyan.dev Copyright (c) 2000-2025 the FFmpeg developers
+
+============================================================
+[VideoService] 초기화 완료
+   - 해상도: 1920x1080
+   - FPS: 30
+   - 프리셋: medium
+   - 비트레이트: 8M
+============================================================
+
+[OK] Vrew Service (New) 초기화 완료
+     출력 경로: C:\Users\ongam\antigravity project\realhunalo_local\output
+[OK] Vrew Batch Service 초기화 완료
+[OK] Trend Service 초기화 완료
+[OK] YouTube API 초기화 완료
+
+[AI] AI Service 초기화
+  [OK] openai: sk-proj-...Dj0A
+  [OK] anthropic: sk-ant-a...qQAA
+  [OK] gemini: AIzaSyBt...DALo
+  [OK] deepseek: sk-b6458...d65e
+  [OK] perplexity: pplx-Znk...8e76
+[OK] Google Drive Service 초기화 완료
+[OK] Cache Service 초기화 (max_size=500, default_ttl=1800s)
+[OK] ScriptAnalyzer: DeepSeek Client 초기화 완료
+[OK] HighlightExtractor: DeepSeek Client 초기화 완료
+[OK] Audio Segmentation Service 초기화 완료
+[OK] Cache Service 초기화 (max_size=500, default_ttl=1800s)
+[INFO] Redis 캐시 비활성화, 인메모리 캐시만 사용
+[OK] Async Service 초기화 (max_workers=24)
+[OK] Memory Monitor Service 초기화 (interval=10.0s)
+[MEMORY] 모니터링 시작 (간격: 10.0초)
+[OK] 메모리 모니터링 시작됨
+[OK] 메모리 모니터링 자동 시작됨
+[OK] Large File Processing Service 초기화
+   - Max Concurrent: 4
+   - Chunk Size: 20MB
+   - Max Memory: 1024MB
+   - Temp Dir: C:\Users\Public\Documents\ESTsoft\CreatorTemp\realhunalo_file_chunks
+INFO:     Started server process [21784]
+INFO:     Waiting for application startup.
+
+============================================================
+[ENV] .env loaded: C:\Users\ongam\antigravity project\realhunalo_local\.env
+   file_exists: True
+   OPENAI_API_KEY: set
+   GEMINI_API_KEY: set
+   ANTHROPIC_API_KEY: set
+   DEEPSEEK_API_KEY: set
+   REPLICATE_API_TOKEN: set
+============================================================
+
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+
+============================================================
+[OK] RealHunalo Backend Started - Version: 2026.02.14.01
+[OK] Logic 2.0 (Master Audio) is active
+[OK] /api/generate-script endpoint confirmed
+[OK] /api/script/segment endpoint confirmed
+[OK] /api/analyze-shorts endpoint confirmed
+============================================================
+
+INFO:     127.0.0.1:9833 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3128 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3128 - "GET /assets/style.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13202 - "GET /assets/css/shorts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3128 - "GET /assets/js/app.js?v=20250214-1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3128 - "GET /assets/js/state.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13202 - "GET /assets/js/config.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13772 - "GET /assets/js/lightbox.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3128 - "GET /assets/js/utils.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13772 - "GET /assets/js/cache.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13202 - "GET /assets/js/modules/DashboardModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3128 - "GET /assets/js/modules/ProjectModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13772 - "GET /assets/js/modules/TrendModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13202 - "GET /assets/js/modules/YoutubeModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3128 - "GET /assets/js/modules/ScriptModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13772 - "GET /assets/js/modules/MotionModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13202 - "GET /assets/js/modules/ImageModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3128 - "GET /assets/js/modules/TTSModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13772 - "GET /assets/js/modules/VideoModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13202 - "GET /assets/js/modules/ShortsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3128 - "GET /assets/js/modules/ShortsEditModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13202 - "GET /assets/js/modules/BatchVrewModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13772 - "GET /assets/js/modules/AudioSegmentationModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3128 - "GET /assets/js/modules/IntegratedWorkflowModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13202 - "GET /assets/js/modules/SettingsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13772 - "GET /assets/js/services/ProjectService.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3128 - "GET /assets/js/Module.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13202 - "GET /assets/js/styles.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13772 - "GET /assets/js/utils/download.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3128 - "GET /assets/js/guides.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3128 - "GET /api/check-saved-keys HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3128 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13202 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13772 - "GET /api/motion/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13772 - "GET /assets/placeholder.png HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13772 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13772 - "GET /api/video/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13772 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3128 - "GET /assets/js/app.js?v=20250214-1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13202 - "GET /assets/css/shorts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13772 - "GET /assets/style.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13772 - "GET /assets/js/state.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3128 - "GET /assets/js/config.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13202 - "GET /assets/js/lightbox.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10114 - "GET /assets/js/utils.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9139 - "GET /assets/js/cache.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9233 - "GET /assets/js/modules/DashboardModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13772 - "GET /assets/js/modules/ProjectModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3128 - "GET /assets/js/modules/TrendModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10114 - "GET /assets/js/modules/ScriptModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13202 - "GET /assets/js/modules/YoutubeModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9233 - "GET /assets/js/modules/MotionModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9139 - "GET /assets/js/modules/ImageModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13772 - "GET /assets/js/modules/TTSModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10114 - "GET /assets/js/modules/ShortsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3128 - "GET /assets/js/modules/VideoModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9233 - "GET /assets/js/modules/ShortsEditModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13202 - "GET /assets/js/modules/BatchVrewModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9139 - "GET /assets/js/modules/AudioSegmentationModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13772 - "GET /assets/js/modules/IntegratedWorkflowModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10114 - "GET /assets/js/modules/SettingsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9233 - "GET /assets/js/services/ProjectService.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13202 - "GET /assets/js/Module.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3128 - "GET /assets/js/styles.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9139 - "GET /assets/js/utils/download.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9139 - "GET /assets/js/guides.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9139 - "GET /api/check-saved-keys HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9139 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3128 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13202 - "GET /api/motion/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13202 - "GET /assets/placeholder.png HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13202 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13202 - "GET /api/video/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4220 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4220 - "GET /assets/style.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14341 - "GET /assets/css/shorts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14341 - "GET /assets/js/app.js?v=20250214-1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14341 - "GET /assets/js/state.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4220 - "GET /assets/js/config.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10537 - "GET /assets/js/lightbox.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4220 - "GET /assets/js/cache.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10537 - "GET /assets/js/modules/DashboardModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14341 - "GET /assets/js/utils.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4220 - "GET /assets/js/modules/ProjectModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14341 - "GET /assets/js/modules/TrendModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10537 - "GET /assets/js/modules/YoutubeModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4220 - "GET /assets/js/modules/ScriptModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14341 - "GET /assets/js/modules/ImageModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4220 - "GET /assets/js/modules/MotionModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10537 - "GET /assets/js/modules/TTSModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14341 - "GET /assets/js/modules/VideoModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14341 - "GET /assets/js/modules/ShortsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4220 - "GET /assets/js/modules/ShortsEditModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4220 - "GET /assets/js/modules/BatchVrewModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14341 - "GET /assets/js/modules/AudioSegmentationModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4220 - "GET /assets/js/modules/IntegratedWorkflowModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10537 - "GET /assets/js/modules/SettingsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10537 - "GET /assets/js/services/ProjectService.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10537 - "GET /assets/js/Module.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10537 - "GET /assets/js/styles.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14341 - "GET /assets/js/utils/download.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4220 - "GET /assets/js/guides.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4220 - "GET /api/check-saved-keys HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4220 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10537 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14341 - "GET /api/motion/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14341 - "GET /assets/placeholder.png HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14341 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14341 - "GET /api/video/settings HTTP/1.1" 200 OK
+[MEMORY WARNING] 메모리 사용량 경고: 75.8%
+[MEMORY WARNING] 메모리 사용량 경고: 79.5%
+[MEMORY WARNING] 메모리 사용량 경고: 78.6%
+[MEMORY WARNING] 메모리 사용량 경고: 76.2%
+INFO:     127.0.0.1:12620 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /assets/style.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3527 - "GET /assets/css/shorts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3527 - "GET /assets/js/app.js?v=20250218-1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3527 - "GET /assets/js/state.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /assets/js/config.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6546 - "GET /assets/js/lightbox.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3527 - "GET /assets/js/utils.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /assets/js/cache.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6546 - "GET /assets/js/modules/DashboardModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /assets/js/modules/TrendModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3527 - "GET /assets/js/modules/ProjectModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6546 - "GET /assets/js/modules/YoutubeModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /assets/js/modules/ImageModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3527 - "GET /assets/js/modules/ScriptModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6546 - "GET /assets/js/modules/MotionModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3527 - "GET /assets/js/modules/TTSModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6546 - "GET /assets/js/modules/VideoModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3527 - "GET /assets/js/modules/ShortsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6546 - "GET /assets/js/modules/ShortsEditModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3527 - "GET /assets/js/modules/BatchVrewModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6546 - "GET /assets/js/modules/AudioSegmentationModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3527 - "GET /assets/js/modules/IntegratedWorkflowModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6546 - "GET /assets/js/modules/SettingsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3527 - "GET /assets/js/services/ProjectService.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /assets/js/Module.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6546 - "GET /assets/js/styles.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /assets/js/utils/download.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6546 - "GET /assets/js/guides.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6546 - "GET /api/check-saved-keys HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6546 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3527 - "GET /api/motion/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3527 - "GET /assets/placeholder.png HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3527 - "GET /api/tts/voices HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3527 - "GET /output/tts_gemini_a73b91ae-3f73-4d58-b51a-990cd98514a0.mp3 HTTP/1.1" 206 Partial Content
+[TTS] 생성 시작 (Scene: full_script, 엔진: google, 글자수: 266)
+🎤 [Gemini TTS] Requesting Voice: Achernar (Origin: Achernar)
+[OK] TTS 생성 완료 (엔진: google, 처리시간: 16.56s)
+INFO:     127.0.0.1:3527 - "POST /api/generate-tts HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3527 - "GET /output/tts_gemini_9f256d74-f5e6-4c35-b599-c69bfedbcc35.mp3 HTTP/1.1" 206 Partial Content
+Exception in callback _ProactorBasePipeTransport._call_connection_lost()
+handle: <Handle _ProactorBasePipeTransport._call_connection_lost()>
+Traceback (most recent call last):
+  File "C:\Users\ongam\AppData\Local\Python\pythoncore-3.14-64\Lib\asyncio\events.py", line 94, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ongam\AppData\Local\Python\pythoncore-3.14-64\Lib\asyncio\proactor_events.py", line 165, in _call_connection_lost
+    self._sock.shutdown(socket.SHUT_RDWR)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] 현재 연결은 원격 호스트에 의해 강제로 끊겼습니다
+[SEGMENT] Server file segmentation requested: C:\Users\ongam\antigravity project\realhunalo_local\output\tts_gemini_9f256d74-f5e6-4c35-b599-c69bfedbcc35.mp3
+INFO:     127.0.0.1:12620 - "POST /api/segment-audio-from-path HTTP/1.1" 200 OK
+
+============================================================
+오디오 세분화 시작: tts_gemini_9f256d74-f5e6-4c35-b599-c69bfedbcc35.mp3
+최대 문자 수: 50자
+============================================================
+
+[Step 1/3] Whisper 음성 인식 중...
+[Whisper] 음성 인식 시작: tts_gemini_9f256d74-f5e6-4c35-b599-c69bfedbcc35.mp3
+  - 파일 형식: .mp3
+  - 파일 크기: 0.5MB
+[Whisper] API 호출 중...
+INFO:     127.0.0.1:12620 - "GET /api/tasks/8d6b9cf8-97fe-4b31-96d9-e9ccd2d4eaa9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/8d6b9cf8-97fe-4b31-96d9-e9ccd2d4eaa9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/8d6b9cf8-97fe-4b31-96d9-e9ccd2d4eaa9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/8d6b9cf8-97fe-4b31-96d9-e9ccd2d4eaa9 HTTP/1.1" 200 OK
+[Whisper] API 응답 수신 완료
+[Whisper] 완료: 58개 타임스탬프 추출
+[Whisper] 전체 텍스트: 자, 이제 옆집 김소장의 15년 필살기 나갑니다. 딱 세 가지만 하세요. 첫째, 증거는 시간이 나오게 찍으세요. 그냥 사진 말고 날짜와 시간이 바뀌는 앱으로 영상 꼭 찍어두세요. ...
+[OK] 전체 텍스트: 238자
+[OK] 단어 수: 58개
+
+[Step 2/3] Logic 3.1: 텍스트 정렬 기반 그룹화...
+[Align] 문단 수: 9 / Whisper 단어 수: 58
+[OK] 9개 구간으로 분할됨
+  #001: 19자 (0.00s ~ 3.94s)
+  #002: 8자 (4.82s ~ 5.78s)
+  #003: 15자 (6.52s ~ 9.40s)
+  #004: 26자 (10.04s ~ 14.72s)
+  #005: 26자 (15.52s ~ 19.30s)
+  #006: 11자 (20.10s ~ 22.22s)
+  #007: 22자 (23.16s ~ 26.78s)
+  #008: 21자 (26.78s ~ 31.00s)
+  #009: 19자 (31.78s ~ 34.22s)
+
+[Step 3/3] Master Audio 복사 및 메타데이터 생성...
+저장 위치: C:\Users\ongam\antigravity project\realhunalo_local\output\segments\cff89cc1
+[OK] manifest.json 저장 완료
+
+[OK] 오디오 세분화 완료!
+  - 총 9개 씬 생성
+  - 저장 위치: C:\Users\ongam\antigravity project\realhunalo_local\output\segments\cff89cc1
+============================================================
+
+INFO:     127.0.0.1:12620 - "GET /api/tasks/8d6b9cf8-97fe-4b31-96d9-e9ccd2d4eaa9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "POST /api/generate-image-prompts-batch HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/daec3a28-62db-4b81-9597-7b76a72677b9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "POST /api/generate-motion-prompts-batch HTTP/1.1" 200 OK
+[OK] 배치 모션 프롬프트 생성 시작 (9개 씬)
+INFO:     127.0.0.1:12620 - "GET /api/tasks/b399141a-df2b-4b24-8344-76e45c10bd36 HTTP/1.1" 200 OK
+  ✓ Scene 1: Director Kim slams his fist on the table with a triumphant roar, papers fluttering in the air, as the camera pushes in to capture his intense, confident expression.
+INFO:     127.0.0.1:12620 - "GET /api/tasks/b399141a-df2b-4b24-8344-76e45c10bd36 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/b399141a-df2b-4b24-8344-76e45c10bd36 HTTP/1.1" 200 OK
+  ✓ Scene 2: The character holds up three fingers with intense focus, leaning forward as the camera subtly pushes in to emphasize their commanding presence.
+INFO:     127.0.0.1:12620 - "GET /api/tasks/b399141a-df2b-4b24-8344-76e45c10bd36 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/b399141a-df2b-4b24-8344-76e45c10bd36 HTTP/1.1" 200 OK
+  ✓ Scene 3: The character urgently points at the clock, their face tense with determination, as the camera pushes in to emphasize the ticking second hand.
+INFO:     127.0.0.1:12620 - "GET /api/tasks/b399141a-df2b-4b24-8344-76e45c10bd36 HTTP/1.1" 200 OK
+  ✓ Scene 4: The character urgently taps their phone screen with a determined focus, the city lights blurring behind them, as the camera pushes in to emphasize the moment.
+INFO:     127.0.0.1:12620 - "GET /api/tasks/b399141a-df2b-4b24-8344-76e45c10bd36 HTTP/1.1" 200 OK
+  ✓ Scene 5: The judge slowly nods in solemn agreement, his robe shifting subtly, as the camera respectfully holds on this moment of profound conviction.
+INFO:     127.0.0.1:12620 - "GET /api/tasks/b399141a-df2b-4b24-8344-76e45c10bd36 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/b399141a-df2b-4b24-8344-76e45c10bd36 HTTP/1.1" 200 OK
+  ✓ Scene 6: The character slams the desk with a frustrated shout, demanding a text, as the camera pushes in to capture their intense, impatient glare.
+INFO:     127.0.0.1:12620 - "GET /api/tasks/b399141a-df2b-4b24-8344-76e45c10bd36 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/tasks/b399141a-df2b-4b24-8344-76e45c10bd36 HTTP/1.1" 200 OK
+  ✓ Scene 7: A weary janitor points a trembling finger at a dripping ceiling pipe, his face etched with quiet desperation as the camera slowly pushes in on the water's steady, rhythmic fall.
+INFO:     127.0.0.1:12620 - "GET /api/tasks/b399141a-df2b-4b24-8344-76e45c10bd36 HTTP/1.1" 200 OK
+  ✓ Scene 8: The character adjusts their glasses with a tense, deliberate motion, their expression hardening with resolve as the camera subtly pushes in to emphasize their determination.
+INFO:     127.0.0.1:12620 - "GET /api/tasks/b399141a-df2b-4b24-8344-76e45c10bd36 HTTP/1.1" 200 OK
+  ✓ Scene 9: The landlord flinches and shifts uncomfortably, a wave of shame washing over their face as the camera subtly pushes in to capture their guilt.
+[OK] 배치 모션 프롬프트 생성 완료 (9개)
+INFO:     127.0.0.1:12620 - "GET /api/tasks/b399141a-df2b-4b24-8344-76e45c10bd36 HTTP/1.1" 200 OK
+[UPLOAD] File saved: C:\Users\ongam\antigravity project\realhunalo_local\output\1. 20260201_204849_321.jpg
+INFO:     127.0.0.1:12620 - "POST /api/upload-asset HTTP/1.1" 200 OK
+[UPLOAD] File saved: C:\Users\ongam\antigravity project\realhunalo_local\output\2. 20260201_204849_373.jpg
+INFO:     127.0.0.1:12620 - "POST /api/upload-asset HTTP/1.1" 200 OK
+[UPLOAD] File saved: C:\Users\ongam\antigravity project\realhunalo_local\output\3. 20260201_204903_321.jpg
+INFO:     127.0.0.1:12620 - "POST /api/upload-asset HTTP/1.1" 200 OK
+[UPLOAD] File saved: C:\Users\ongam\antigravity project\realhunalo_local\output\4. 20260201_204903_385.jpg
+INFO:     127.0.0.1:12620 - "POST /api/upload-asset HTTP/1.1" 200 OK
+[UPLOAD] File saved: C:\Users\ongam\antigravity project\realhunalo_local\output\5. 20260201_204919_324.jpg
+INFO:     127.0.0.1:12620 - "POST /api/upload-asset HTTP/1.1" 200 OK
+[UPLOAD] File saved: C:\Users\ongam\antigravity project\realhunalo_local\output\6. 20260201_204919_386.jpg
+INFO:     127.0.0.1:12620 - "POST /api/upload-asset HTTP/1.1" 200 OK
+[UPLOAD] File saved: C:\Users\ongam\antigravity project\realhunalo_local\output\7. 20260201_204937_323.jpg
+INFO:     127.0.0.1:12620 - "POST /api/upload-asset HTTP/1.1" 200 OK
+[UPLOAD] File saved: C:\Users\ongam\antigravity project\realhunalo_local\output\8. 20260201_205003_325.jpg
+INFO:     127.0.0.1:12620 - "POST /api/upload-asset HTTP/1.1" 200 OK
+[UPLOAD] File saved: C:\Users\ongam\antigravity project\realhunalo_local\output\9. 20260201_205007_326.jpg
+INFO:     127.0.0.1:12620 - "POST /api/upload-asset HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /output/1.%2020260201_204849_321.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6546 - "GET /output/2.%2020260201_204849_373.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6546 - "GET /output/3.%2020260201_204903_321.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /output/4.%2020260201_204903_385.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /output/6.%2020260201_204919_386.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6546 - "GET /output/5.%2020260201_204919_324.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /output/7.%2020260201_204937_323.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6546 - "GET /output/8.%2020260201_205003_325.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1860 - "GET /output/9.%2020260201_205007_326.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1860 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1860 - "GET /api/video/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1860 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:1860 - "POST /api/youtube/metadata HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1860 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1860 - "GET /api/video/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1860 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:1860 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1860 - "GET /api/video/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1860 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:1860 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1860 - "GET /api/check-saved-keys HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1860 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6546 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/motion/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/video/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /output/1.%2020260201_204849_321.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:6546 - "GET /output/2.%2020260201_204849_373.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:7557 - "GET /output/4.%2020260201_204903_385.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:1860 - "GET /output/3.%2020260201_204903_321.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:6738 - "GET /output/6.%2020260201_204919_386.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:4460 - "GET /output/5.%2020260201_204919_324.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:1860 - "GET /output/9.%2020260201_205007_326.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:6738 - "GET /output/8.%2020260201_205003_325.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:4460 - "GET /output/7.%2020260201_204937_323.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:4460 - "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:4460 - "GET /output/1.%2020260201_204849_321.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6738 - "GET /output/2.%2020260201_204849_373.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7557 - "GET /output/4.%2020260201_204903_385.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1860 - "GET /output/3.%2020260201_204903_321.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6546 - "GET /output/5.%2020260201_204919_324.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /output/6.%2020260201_204919_386.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1860 - "GET /output/7.%2020260201_204937_323.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6546 - "GET /output/8.%2020260201_205003_325.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /output/9.%2020260201_205007_326.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /output/1.%2020260201_204849_321.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1860 - "GET /output/3.%2020260201_204903_321.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6738 - "GET /output/4.%2020260201_204903_385.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7557 - "GET /output/6.%2020260201_204919_386.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4460 - "GET /output/5.%2020260201_204919_324.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6546 - "GET /output/2.%2020260201_204849_373.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1860 - "GET /api/video/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12620 - "GET /output/8.%2020260201_205003_325.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7557 - "GET /output/7.%2020260201_204937_323.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4460 - "GET /output/9.%2020260201_205007_326.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4460 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:6738 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:1860 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:12620 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:7557 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:6546 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+Exception in callback _ProactorBasePipeTransport._call_connection_lost()
+handle: <Handle _ProactorBasePipeTransport._call_connection_lost()>
+Traceback (most recent call last):
+  File "C:\Users\ongam\AppData\Local\Python\pythoncore-3.14-64\Lib\asyncio\events.py", line 94, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ongam\AppData\Local\Python\pythoncore-3.14-64\Lib\asyncio\proactor_events.py", line 165, in _call_connection_lost
+    self._sock.shutdown(socket.SHUT_RDWR)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] 현재 연결은 원격 호스트에 의해 강제로 끊겼습니다
+Exception in callback _ProactorBasePipeTransport._call_connection_lost()
+handle: <Handle _ProactorBasePipeTransport._call_connection_lost()>
+Traceback (most recent call last):
+  File "C:\Users\ongam\AppData\Local\Python\pythoncore-3.14-64\Lib\asyncio\events.py", line 94, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ongam\AppData\Local\Python\pythoncore-3.14-64\Lib\asyncio\proactor_events.py", line 165, in _call_connection_lost
+    self._sock.shutdown(socket.SHUT_RDWR)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] 현재 연결은 원격 호스트에 의해 강제로 끊겼습니다
+Exception in callback _ProactorBasePipeTransport._call_connection_lost()
+handle: <Handle _ProactorBasePipeTransport._call_connection_lost()>
+Traceback (most recent call last):
+  File "C:\Users\ongam\AppData\Local\Python\pythoncore-3.14-64\Lib\asyncio\events.py", line 94, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ongam\AppData\Local\Python\pythoncore-3.14-64\Lib\asyncio\proactor_events.py", line 165, in _call_connection_lost
+    self._sock.shutdown(socket.SHUT_RDWR)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] 현재 연결은 원격 호스트에 의해 강제로 끊겼습니다
+Exception in callback _ProactorBasePipeTransport._call_connection_lost()
+handle: <Handle _ProactorBasePipeTransport._call_connection_lost()>
+Traceback (most recent call last):
+  File "C:\Users\ongam\AppData\Local\Python\pythoncore-3.14-64\Lib\asyncio\events.py", line 94, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ongam\AppData\Local\Python\pythoncore-3.14-64\Lib\asyncio\proactor_events.py", line 165, in _call_connection_lost
+    self._sock.shutdown(socket.SHUT_RDWR)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] 현재 연결은 원격 호스트에 의해 강제로 끊겼습니다
+INFO:     127.0.0.1:11315 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:1139 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+Exception in callback _ProactorBasePipeTransport._call_connection_lost()
+handle: <Handle _ProactorBasePipeTransport._call_connection_lost()>
+Traceback (most recent call last):
+  File "C:\Users\ongam\AppData\Local\Python\pythoncore-3.14-64\Lib\asyncio\events.py", line 94, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ongam\AppData\Local\Python\pythoncore-3.14-64\Lib\asyncio\proactor_events.py", line 165, in _call_connection_lost
+    self._sock.shutdown(socket.SHUT_RDWR)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] 현재 연결은 원격 호스트에 의해 강제로 끊겼습니다
+INFO:     127.0.0.1:10622 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:1026 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:5871 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:4065 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+Exception in callback _ProactorBasePipeTransport._call_connection_lost()
+handle: <Handle _ProactorBasePipeTransport._call_connection_lost()>
+Traceback (most recent call last):
+  File "C:\Users\ongam\AppData\Local\Python\pythoncore-3.14-64\Lib\asyncio\events.py", line 94, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ongam\AppData\Local\Python\pythoncore-3.14-64\Lib\asyncio\proactor_events.py", line 165, in _call_connection_lost
+    self._sock.shutdown(socket.SHUT_RDWR)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] 현재 연결은 원격 호스트에 의해 강제로 끊겼습니다
+Exception in callback _ProactorBasePipeTransport._call_connection_lost()
+handle: <Handle _ProactorBasePipeTransport._call_connection_lost()>
+Traceback (most recent call last):
+  File "C:\Users\ongam\AppData\Local\Python\pythoncore-3.14-64\Lib\asyncio\events.py", line 94, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ongam\AppData\Local\Python\pythoncore-3.14-64\Lib\asyncio\proactor_events.py", line 165, in _call_connection_lost
+    self._sock.shutdown(socket.SHUT_RDWR)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] 현재 연결은 원격 호스트에 의해 강제로 끊겼습니다
+INFO:     127.0.0.1:12140 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:7702 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+Exception in callback _ProactorBasePipeTransport._call_connection_lost()
+handle: <Handle _ProactorBasePipeTransport._call_connection_lost()>
+Traceback (most recent call last):
+  File "C:\Users\ongam\AppData\Local\Python\pythoncore-3.14-64\Lib\asyncio\events.py", line 94, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ongam\AppData\Local\Python\pythoncore-3.14-64\Lib\asyncio\proactor_events.py", line 165, in _call_connection_lost
+    self._sock.shutdown(socket.SHUT_RDWR)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] 현재 연결은 원격 호스트에 의해 강제로 끊겼습니다
+INFO:     127.0.0.1:7692 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:9886 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:7692 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:9886 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:7692 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+Exception in callback _ProactorBasePipeTransport._call_connection_lost()
+handle: <Handle _ProactorBasePipeTransport._call_connection_lost()>
+Traceback (most recent call last):
+  File "C:\Users\ongam\AppData\Local\Python\pythoncore-3.14-64\Lib\asyncio\events.py", line 94, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ongam\AppData\Local\Python\pythoncore-3.14-64\Lib\asyncio\proactor_events.py", line 165, in _call_connection_lost
+    self._sock.shutdown(socket.SHUT_RDWR)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] 현재 연결은 원격 호스트에 의해 강제로 끊겼습니다
+INFO:     127.0.0.1:14307 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+Exception in callback _ProactorBasePipeTransport._call_connection_lost()
+handle: <Handle _ProactorBasePipeTransport._call_connection_lost()>
+Traceback (most recent call last):
+  File "C:\Users\ongam\AppData\Local\Python\pythoncore-3.14-64\Lib\asyncio\events.py", line 94, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ongam\AppData\Local\Python\pythoncore-3.14-64\Lib\asyncio\proactor_events.py", line 165, in _call_connection_lost
+    self._sock.shutdown(socket.SHUT_RDWR)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] 현재 연결은 원격 호스트에 의해 강제로 끊겼습니다
+INFO:     127.0.0.1:4108 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+Exception in callback _ProactorBasePipeTransport._call_connection_lost()
+handle: <Handle _ProactorBasePipeTransport._call_connection_lost()>
+Traceback (most recent call last):
+  File "C:\Users\ongam\AppData\Local\Python\pythoncore-3.14-64\Lib\asyncio\events.py", line 94, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ongam\AppData\Local\Python\pythoncore-3.14-64\Lib\asyncio\proactor_events.py", line 165, in _call_connection_lost
+    self._sock.shutdown(socket.SHUT_RDWR)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] 현재 연결은 원격 호스트에 의해 강제로 끊겼습니다
+INFO:     127.0.0.1:7209 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:7209 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+[MEMORY WARNING] 메모리 사용량 경고: 75.0%
+[MEMORY WARNING] 메모리 사용량 경고: 76.4%
+[MEMORY WARNING] 메모리 사용량 경고: 76.2%
+[MEMORY WARNING] 메모리 사용량 경고: 76.2%
+[MEMORY WARNING] 메모리 사용량 경고: 75.9%
+[MEMORY WARNING] 메모리 사용량 경고: 76.9%
+[MEMORY WARNING] 메모리 사용량 경고: 77.1%
+[MEMORY WARNING] 메모리 사용량 경고: 76.9%
+[MEMORY WARNING] 메모리 사용량 경고: 76.3%
+[MEMORY WARNING] 메모리 사용량 경고: 76.1%
+[MEMORY WARNING] 메모리 사용량 경고: 77.2%
+[MEMORY WARNING] 메모리 사용량 경고: 77.6%
+[MEMORY WARNING] 메모리 사용량 경고: 78.6%
+[MEMORY WARNING] 메모리 사용량 경고: 77.6%
+[MEMORY WARNING] 메모리 사용량 경고: 77.5%
+[MEMORY WARNING] 메모리 사용량 경고: 77.5%
+[MEMORY WARNING] 메모리 사용량 경고: 77.5%
+[MEMORY WARNING] 메모리 사용량 경고: 77.9%
+[MEMORY WARNING] 메모리 사용량 경고: 77.7%
+[MEMORY WARNING] 메모리 사용량 경고: 77.9%
+[MEMORY WARNING] 메모리 사용량 경고: 77.8%
+[MEMORY WARNING] 메모리 사용량 경고: 81.6%
+[MEMORY WARNING] 메모리 사용량 경고: 81.0%
+[MEMORY WARNING] 메모리 사용량 경고: 81.0%
+[MEMORY WARNING] 메모리 사용량 경고: 80.6%
+[MEMORY WARNING] 메모리 사용량 경고: 79.8%
+[MEMORY WARNING] 메모리 사용량 경고: 80.0%
+[MEMORY WARNING] 메모리 사용량 경고: 81.1%
+[MEMORY WARNING] 메모리 사용량 경고: 80.5%
+[MEMORY WARNING] 메모리 사용량 경고: 80.5%
+[MEMORY WARNING] 메모리 사용량 경고: 79.7%
+[MEMORY WARNING] 메모리 사용량 경고: 80.1%
+[MEMORY WARNING] 메모리 사용량 경고: 79.7%
+[MEMORY WARNING] 메모리 사용량 경고: 79.9%
+[MEMORY WARNING] 메모리 사용량 경고: 79.8%
+[MEMORY WARNING] 메모리 사용량 경고: 79.9%
+[MEMORY WARNING] 메모리 사용량 경고: 79.5%
+[MEMORY WARNING] 메모리 사용량 경고: 79.2%
+[MEMORY WARNING] 메모리 사용량 경고: 78.1%
+INFO:     127.0.0.1:7988 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7988 - "GET /assets/style.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5084 - "GET /assets/css/shorts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7988 - "GET /assets/js/app.js?v=20250218-1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7988 - "GET /assets/js/state.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5084 - "GET /assets/js/config.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7543 - "GET /assets/js/lightbox.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5084 - "GET /assets/js/cache.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7988 - "GET /assets/js/utils.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7543 - "GET /assets/js/modules/DashboardModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7988 - "GET /assets/js/modules/TrendModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5084 - "GET /assets/js/modules/ProjectModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7543 - "GET /assets/js/modules/YoutubeModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5084 - "GET /assets/js/modules/ScriptModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7988 - "GET /assets/js/modules/ImageModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7543 - "GET /assets/js/modules/MotionModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5084 - "GET /assets/js/modules/TTSModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7543 - "GET /assets/js/modules/VideoModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7988 - "GET /assets/js/modules/ShortsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5084 - "GET /assets/js/modules/ShortsEditModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7543 - "GET /assets/js/modules/BatchVrewModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7988 - "GET /assets/js/modules/AudioSegmentationModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5084 - "GET /assets/js/modules/IntegratedWorkflowModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7543 - "GET /assets/js/modules/SettingsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7988 - "GET /assets/js/services/ProjectService.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5084 - "GET /assets/js/Module.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7543 - "GET /assets/js/utils/download.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7988 - "GET /assets/js/styles.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7988 - "GET /assets/js/guides.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7988 - "GET /api/check-saved-keys HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7988 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7543 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5084 - "GET /api/motion/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5084 - "GET /assets/placeholder.png HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5084 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5084 - "GET /api/video/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7543 - "GET /output/2.%2020260201_204849_373.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:7988 - "GET /output/3.%2020260201_204903_321.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:5084 - "GET /output/1.%2020260201_204849_321.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:12783 - "GET /output/4.%2020260201_204903_385.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:6523 - "GET /output/5.%2020260201_204919_324.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:14860 - "GET /output/6.%2020260201_204919_386.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:14860 - "GET /output/7.%2020260201_204937_323.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:6523 - "GET /output/8.%2020260201_205003_325.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:12783 - "GET /output/9.%2020260201_205007_326.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:12783 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:6523 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+Exception in callback _ProactorBasePipeTransport._call_connection_lost()
+handle: <Handle _ProactorBasePipeTransport._call_connection_lost()>
+Traceback (most recent call last):
+  File "C:\Users\ongam\AppData\Local\Python\pythoncore-3.14-64\Lib\asyncio\events.py", line 94, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ongam\AppData\Local\Python\pythoncore-3.14-64\Lib\asyncio\proactor_events.py", line 165, in _call_connection_lost
+    self._sock.shutdown(socket.SHUT_RDWR)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] 현재 연결은 원격 호스트에 의해 강제로 끊겼습니다
+INFO:     127.0.0.1:14860 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+INFO:     127.0.0.1:14860 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 206 Partial Content
+[MEMORY WARNING] 메모리 사용량 경고: 77.5%
+[MEMORY WARNING] 메모리 사용량 경고: 76.8%
+[MEMORY WARNING] 메모리 사용량 경고: 76.7%
+[MEMORY WARNING] 메모리 사용량 경고: 75.7%
+[MEMORY WARNING] 메모리 사용량 경고: 75.4%
+[MEMORY WARNING] 메모리 사용량 경고: 75.2%
+[MEMORY WARNING] 메모리 사용량 경고: 75.3%
+[MEMORY WARNING] 메모리 사용량 경고: 76.0%
+[MEMORY WARNING] 메모리 사용량 경고: 75.5%
+[MEMORY WARNING] 메모리 사용량 경고: 75.7%
+[MEMORY WARNING] 메모리 사용량 경고: 76.6%
+[MEMORY WARNING] 메모리 사용량 경고: 78.0%
+[MEMORY WARNING] 메모리 사용량 경고: 79.0%
+[MEMORY WARNING] 메모리 사용량 경고: 79.2%
+[MEMORY WARNING] 메모리 사용량 경고: 81.2%
+[MEMORY WARNING] 메모리 사용량 경고: 80.5%
+[MEMORY WARNING] 메모리 사용량 경고: 80.9%
+[MEMORY WARNING] 메모리 사용량 경고: 82.4%
+INFO:     127.0.0.1:4899 - "GET /api/video/settings HTTP/1.1" 200 OK
+[VideoService] 해상도 변경: vertical -> 1080x1920
+INFO:     127.0.0.1:4903 - "POST /api/video/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8384 - "GET /api/video/status HTTP/1.1" 200 OK
+[MEMORY WARNING] 메모리 사용량 경고: 82.5%
+INFO:     127.0.0.1:8462 - "POST /api/generate-script HTTP/1.1" 200 OK
+[OK] Segmenting script (len=14)
+[OK] Using default style: 졸라맨 (Stickman)
+[MEMORY WARNING] 메모리 사용량 경고: 82.5%
+[OK] Generating image with prompt: futuristic real estate building, hyper-realistic, ...
+[OK] Image generated in 2.4s
+INFO:     127.0.0.1:8465 - "POST /api/generate-image HTTP/1.1" 200 OK
+[OK] Generating motion for scene scene_01...
+[X] Unexpected error: 예상치 못한 오류: Error code: 422 - {'title': 'Invalid version or not permitted', 'detail': "The specified version does not exist (or perhaps you don't have permission to use it?)", 'status': 422}
+INFO:     127.0.0.1:11162 - "POST /api/generate-motion HTTP/1.1" 200 OK
+INFO:     127.0.0.1:11164 - "POST /api/generate-tts HTTP/1.1" 422 Unprocessable Content
+[MEMORY WARNING] 메모리 사용량 경고: 82.7%
+INFO:     127.0.0.1:14632 - "POST /api/generate-video HTTP/1.1" 200 OK
+Traceback (most recent call last):
+  File "C:\Users\ongam\antigravity project\realhunalo_local\services\video_service.py", line 765, in generate_final_video
+    if subtitle_enabled:
+       ^^^^^^^^^^^^^^^^
+NameError: name 'subtitle_enabled' is not defined
+Traceback (most recent call last):
+  File "C:\Users\ongam\antigravity project\realhunalo_local\backend.py", line 685, in process_video_generation
+    async def api_generate_video(background_tasks: BackgroundTasks, request: VideoGenerationRequest):
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    
+    
+  File "C:\Users\ongam\antigravity project\realhunalo_local\services\video_service.py", line 765, in generate_final_video
+    if subtitle_enabled:
+       ^^^^^^^^^^^^^^^^
+NameError: name 'subtitle_enabled' is not defined
+
+[VIDEO GEN] 수신된 씬 수: mergedGroups=0, standalone=1, total=1
+  씬 #scene_01: visual=NONE | audio=http://localhost:8000/assets/placeholder.mp3 | duration=5.0
+
+============================================================
+최종 영상 생성 시작
+============================================================
+[VideoService] 총 1개 씬 처리
+
+[VideoService] 씬 1/1 처리 중 (ID: scene_01)...
+  - Visual: None
+  - Audio: http://localhost:8000/assets/placeholder.mp3
+  - Duration: 5.0초
+  - Scene data: ['sceneId', 'visualUrl', 'audioUrl', 'duration', 'script']
+[X] Video generation error: name 'subtitle_enabled' is not defined
+[ERROR] Video generation task failed: name 'subtitle_enabled' is not defined
+INFO:     127.0.0.1:14634 - "GET /api/tasks/96f916e9-c56a-4b75-a5f5-4d809b77ea37 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9237 - "POST /api/export-vrew HTTP/1.1" 200 OK
+
+============================================================
+VREW 프로젝트 생성 시작 (IN_MEMORY)
+============================================================
+[Vrew] HTTP 다운로드 시도: http://localhost:8000/assets/placeholder.mp3
+INFO:     127.0.0.1:9240 - "GET /assets/placeholder.mp3 HTTP/1.1" 200 OK
+[Vrew] 파일 크기: 88244 bytes
+[Vrew] 다운로드 완료: C:\Users\ongam\antigravity project\realhunalo_local\output\_tmp_17c744f0.mp3 (88244 bytes)
+[MEMORY WARNING] 메모리 사용량 경고: 82.8%
+[Vrew] 씬1 오디오: vrew_642fa108_GVNffTOUIu.mp3 (8 KB)
+[Vrew] 포함: media/vrew_642fa108_GVNffTOUIu.mp3 (8 KB)
+[OK] VREW 생성 완료: vrew_642fa108.vrew (14 KB, 미디어 1개 포함)
+INFO:     127.0.0.1:9241 - "GET /api/tasks/63baf321-c19f-4fd5-8088-c52c2010c534 HTTP/1.1" 200 OK
+[MEMORY WARNING] 메모리 사용량 경고: 82.5%
+[DEBUG] Finish Reason: stop
+[DEBUG] Raw Content: {
+  "title": "부동산 투자 전략 2026",
+  "masterCharacterPrompt": "Stickman, blue shirt, red tie",
+  "scenes": [
+    {
+      "sceneId": 1,
+      "imagePrompt": "(Style) 2D flat vector style, minimal design, 4K, (Shot) Wide shot, full body, NO CLOSE-UP, (Subject) Pointing to a chart labeled '2026 Real Estate Trends', (Environment) Modern office with a city skyline view, desk with financial documents, (Anchor) Stickman, blue shirt, red tie, (Negative) NO 3D, NO realistic photo, NO blurry, --ar 16:9",
+      "motionPrompt": "The stickman confidently points to a chart showing rising investment trends, with papers rustling on the desk and the cityscape glowing softly outside, evoking a sense of strategic planning.",
+      "originalScript": "부동산 투자 전략 2026"
+    }
+  ]
+}
+[OK] Master character prompt generated: Stickman, blue shirt, red tie...
+[MEMORY WARNING] 메모리 사용량 경고: 82.5%
+[MEMORY WARNING] 메모리 사용량 경고: 82.5%
+[MEMORY WARNING] 메모리 사용량 경고: 83.0%
+[MEMORY WARNING] 메모리 사용량 경고: 83.8%
+[MEMORY WARNING] 메모리 사용량 경고: 83.6%
+[MEMORY WARNING] 메모리 사용량 경고: 83.9%
+[MEMORY WARNING] 메모리 사용량 경고: 83.6%
+[MEMORY WARNING] 메모리 사용량 경고: 83.7%
+[MEMORY WARNING] 메모리 사용량 경고: 83.7%
+[MEMORY WARNING] 메모리 사용량 경고: 83.7%
+[MEMORY WARNING] 메모리 사용량 경고: 83.5%
+[MEMORY WARNING] 메모리 사용량 경고: 83.5%
+[MEMORY WARNING] 메모리 사용량 경고: 83.0%
+[MEMORY WARNING] 메모리 사용량 경고: 82.1%
+[MEMORY WARNING] 메모리 사용량 경고: 81.8%
+[MEMORY WARNING] 메모리 사용량 경고: 81.5%
+[MEMORY WARNING] 메모리 사용량 경고: 80.9%
+[MEMORY WARNING] 메모리 사용량 경고: 80.3%
+[MEMORY WARNING] 메모리 사용량 경고: 80.1%
+[MEMORY WARNING] 메모리 사용량 경고: 79.9%
+[MEMORY WARNING] 메모리 사용량 경고: 79.1%
+[MEMORY WARNING] 메모리 사용량 경고: 78.9%
+[MEMORY WARNING] 메모리 사용량 경고: 79.0%
+[MEMORY WARNING] 메모리 사용량 경고: 79.8%
+[MEMORY WARNING] 메모리 사용량 경고: 79.3%
+[MEMORY WARNING] 메모리 사용량 경고: 78.6%
+[MEMORY WARNING] 메모리 사용량 경고: 77.8%
+[MEMORY WARNING] 메모리 사용량 경고: 78.0%
+[MEMORY WARNING] 메모리 사용량 경고: 78.3%
+[MEMORY WARNING] 메모리 사용량 경고: 78.2%
+[MEMORY WARNING] 메모리 사용량 경고: 78.0%
+[MEMORY WARNING] 메모리 사용량 경고: 78.3%
+[MEMORY WARNING] 메모리 사용량 경고: 79.7%
+[MEMORY WARNING] 메모리 사용량 경고: 81.2%
+[MEMORY WARNING] 메모리 사용량 경고: 81.0%
+[MEMORY WARNING] 메모리 사용량 경고: 80.4%
+[MEMORY WARNING] 메모리 사용량 경고: 79.6%
+[MEMORY WARNING] 메모리 사용량 경고: 79.7%
+[MEMORY WARNING] 메모리 사용량 경고: 79.9%
+[MEMORY WARNING] 메모리 사용량 경고: 80.3%
+[MEMORY WARNING] 메모리 사용량 경고: 79.8%
+[MEMORY WARNING] 메모리 사용량 경고: 80.6%
+[MEMORY WARNING] 메모리 사용량 경고: 80.5%
+[MEMORY WARNING] 메모리 사용량 경고: 80.3%
+[MEMORY WARNING] 메모리 사용량 경고: 80.3%
+[MEMORY WARNING] 메모리 사용량 경고: 80.2%
+[MEMORY WARNING] 메모리 사용량 경고: 80.1%
+[MEMORY WARNING] 메모리 사용량 경고: 78.7%
+[MEMORY WARNING] 메모리 사용량 경고: 78.4%
+[MEMORY WARNING] 메모리 사용량 경고: 78.3%
+[MEMORY WARNING] 메모리 사용량 경고: 78.7%
+[MEMORY WARNING] 메모리 사용량 경고: 79.8%
+[MEMORY WARNING] 메모리 사용량 경고: 79.7%
+[MEMORY WARNING] 메모리 사용량 경고: 79.2%
+[MEMORY WARNING] 메모리 사용량 경고: 78.7%
+[MEMORY WARNING] 메모리 사용량 경고: 79.2%
+[MEMORY WARNING] 메모리 사용량 경고: 79.3%
+[MEMORY WARNING] 메모리 사용량 경고: 79.3%
+[MEMORY WARNING] 메모리 사용량 경고: 79.1%
+[MEMORY WARNING] 메모리 사용량 경고: 79.1%
+[MEMORY WARNING] 메모리 사용량 경고: 79.2%
+[MEMORY WARNING] 메모리 사용량 경고: 80.7%
+[MEMORY WARNING] 메모리 사용량 경고: 80.5%
+[MEMORY WARNING] 메모리 사용량 경고: 80.6%
+[MEMORY WARNING] 메모리 사용량 경고: 80.3%
+[MEMORY WARNING] 메모리 사용량 경고: 80.3%
+[MEMORY WARNING] 메모리 사용량 경고: 79.9%
+[MEMORY WARNING] 메모리 사용량 경고: 79.9%
+[MEMORY WARNING] 메모리 사용량 경고: 79.7%
+[MEMORY WARNING] 메모리 사용량 경고: 79.8%
+[MEMORY WARNING] 메모리 사용량 경고: 79.8%
+[MEMORY WARNING] 메모리 사용량 경고: 79.8%
+[MEMORY WARNING] 메모리 사용량 경고: 79.6%
+[MEMORY WARNING] 메모리 사용량 경고: 79.3%
+[MEMORY WARNING] 메모리 사용량 경고: 78.9%
+[MEMORY WARNING] 메모리 사용량 경고: 79.4%
+[MEMORY WARNING] 메모리 사용량 경고: 79.5%
+[MEMORY WARNING] 메모리 사용량 경고: 79.5%
+[MEMORY WARNING] 메모리 사용량 경고: 79.2%
+[MEMORY WARNING] 메모리 사용량 경고: 79.3%
+[MEMORY WARNING] 메모리 사용량 경고: 79.3%
+[MEMORY WARNING] 메모리 사용량 경고: 79.5%
+[MEMORY WARNING] 메모리 사용량 경고: 79.4%
+[MEMORY WARNING] 메모리 사용량 경고: 79.3%
+[MEMORY WARNING] 메모리 사용량 경고: 79.3%
+[MEMORY WARNING] 메모리 사용량 경고: 79.3%
+[MEMORY WARNING] 메모리 사용량 경고: 79.1%
+[MEMORY WARNING] 메모리 사용량 경고: 79.0%
+[MEMORY WARNING] 메모리 사용량 경고: 79.1%
+[MEMORY WARNING] 메모리 사용량 경고: 77.1%
+[MEMORY WARNING] 메모리 사용량 경고: 76.9%
+[MEMORY WARNING] 메모리 사용량 경고: 77.1%
+[MEMORY WARNING] 메모리 사용량 경고: 77.3%
+[MEMORY WARNING] 메모리 사용량 경고: 77.4%
+[MEMORY WARNING] 메모리 사용량 경고: 77.5%
+[MEMORY WARNING] 메모리 사용량 경고: 77.5%
+INFO:     127.0.0.1:14145 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14145 - "GET /assets/style.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7573 - "GET /assets/css/shorts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14145 - "GET /assets/js/app.js?v=20250218-1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14145 - "GET /assets/js/state.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7573 - "GET /assets/js/config.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4458 - "GET /assets/js/lightbox.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4458 - "GET /assets/js/modules/DashboardModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14145 - "GET /assets/js/utils.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7573 - "GET /assets/js/cache.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4458 - "GET /assets/js/modules/ProjectModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14145 - "GET /assets/js/modules/TrendModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7573 - "GET /assets/js/modules/YoutubeModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4458 - "GET /assets/js/modules/ScriptModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7573 - "GET /assets/js/modules/ImageModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14145 - "GET /assets/js/modules/MotionModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4458 - "GET /assets/js/modules/TTSModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7573 - "GET /assets/js/modules/VideoModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14145 - "GET /assets/js/modules/ShortsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14145 - "GET /assets/js/modules/ShortsEditModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7573 - "GET /assets/js/modules/AudioSegmentationModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4458 - "GET /assets/js/modules/BatchVrewModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14145 - "GET /assets/js/modules/IntegratedWorkflowModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7573 - "GET /assets/js/modules/SettingsModule.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4458 - "GET /assets/js/services/ProjectService.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14145 - "GET /assets/js/Module.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7573 - "GET /assets/js/styles.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4458 - "GET /assets/js/utils/download.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4458 - "GET /assets/js/guides.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4458 - "GET /api/check-saved-keys HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4458 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7573 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14145 - "GET /api/motion/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14145 - "GET /assets/placeholder.png HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14145 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14145 - "GET /api/video/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14145 - "GET /output/1.%2020260201_204849_321.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:7573 - "GET /output/2.%2020260201_204849_373.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:4458 - "GET /output/3.%2020260201_204903_321.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:6446 - "GET /output/5.%2020260201_204919_324.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:13715 - "GET /output/4.%2020260201_204903_385.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:4309 - "GET /output/6.%2020260201_204919_386.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:13715 - "GET /output/8.%2020260201_205003_325.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:4309 - "GET /output/7.%2020260201_204937_323.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:6446 - "GET /output/9.%2020260201_205007_326.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:6446 - "GET /output/segments/cff89cc1/merged_audio.mp3 HTTP/1.1" 304 Not Modified
+[MEMORY WARNING] 메모리 사용량 경고: 77.8%
+INFO:     127.0.0.1:6446 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6446 - "GET /api/check-saved-keys HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6446 - "GET /api/tts/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4309 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13715 - "GET /api/motion/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13715 - "GET /api/video/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13715 - "GET /api/video/settings HTTP/1.1" 200 OK

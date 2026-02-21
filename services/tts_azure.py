@@ -220,40 +220,44 @@ class AzureTTSEngine(TTSEngineBase):
             # SSML 생성 (속도 조절 포함)
             ssml = self._create_ssml(text, voice_name, speed)
 
+            # 오디오 파일 경로 미리 생성
+            audio_filename = f"tts_{uuid.uuid4()}.mp3"
+            audio_path = os.path.join(OUTPUT_DIR, audio_filename)
+            
+            # 파일 출력을 위한 AudioConfig 설정
+            audio_config = speechsdk.audio.AudioOutputConfig(filename=audio_path)
+            
             # Synthesizer 생성
-            # Windows 환경에서 speaker 오류 방지를 위해 try-except로 처리
-            try:
-                synthesizer = speechsdk.SpeechSynthesizer(
-                    speech_config=self.speech_config,
-                    audio_config=None  # None으로 설정하면 result.audio_data로 직접 접근 가능
-                )
-            except Exception as e:
-                # Speaker 초기화 오류 시 재시도 (환경변수 설정 후)
-                os.environ['AUDIODEV'] = 'null'  # Linux/Unix용
-                synthesizer = speechsdk.SpeechSynthesizer(
-                    speech_config=self.speech_config,
-                    audio_config=None
-                )
+            synthesizer = speechsdk.SpeechSynthesizer(
+                speech_config=self.speech_config,
+                audio_config=audio_config
+            )
 
             # Word Boundary 이벤트 연결
             synthesizer.synthesis_word_boundary.connect(self._on_word_boundary)
 
             # 음성 합성 실행
             print(f"[TTS] Azure TTS 생성 중... (음성: {voice_name}, 속도: {speed}x)")
+            
             result = synthesizer.speak_ssml_async(ssml).get()
             
             # 결과 확인
             if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
-                # 오디오 데이터 저장
-                audio_data = result.audio_data
-                audio_filename = f"tts_{uuid.uuid4()}.mp3"
-                audio_path = os.path.join(OUTPUT_DIR, audio_filename)
-                
-                with open(audio_path, "wb") as f:
-                    f.write(audio_data)
-                
-                # Base64 인코딩
-                audio_base64 = base64.b64encode(audio_data).decode('utf-8')
+                # 파일이 생성되었는지 확인 및 데이터 로드
+                if os.path.exists(audio_path) and os.path.getsize(audio_path) > 0:
+                    with open(audio_path, "rb") as f:
+                        audio_data = f.read()
+                    audio_base64 = base64.b64encode(audio_data).decode('utf-8')
+                else:
+                    # 파일이 없으면 audio_data에서 시도 (Fallback)
+                    audio_data = result.audio_data
+                    if audio_data:
+                         with open(audio_path, "wb") as f:
+                            f.write(audio_data)
+                         audio_base64 = base64.b64encode(audio_data).decode('utf-8')
+                    else:
+                        raise Exception("TTS 완료되었으나 오디오 데이터가 없습니다.")
+
                 audio_url = f"data:audio/mpeg;base64,{audio_base64}"
                 
                 # 총 길이 계산 (마지막 단어의 end_ms)

@@ -1,0 +1,702 @@
+{
+  "version": 15,
+  "projectId": "519bf8aa-0895-461b-89c1-903a9482a035",
+  "comment": "3.6.2\t2026-02-14T12:32:05.070451Z",
+  "files": [
+    {
+      "version": 1,
+      "mediaId": "PAO7nJWUwt",
+      "sourceOrigin": "VREW_RESOURCE",
+      "fileSize": 91584,
+      "name": "김씨는 이달 중순 입주할 새 아파트 .mp3",
+      "type": "AVMedia",
+      "videoAudioMetaInfo": {
+        "duration": 4.76,
+        "audioInfo": {
+          "sampleRate": 24000,
+          "codec": "mp3"
+        }
+      },
+      "sourceFileType": "TTS",
+      "fileLocation": "IN_MEMORY"
+    },
+    {
+      "version": 1,
+      "mediaId": "140978a3-6da9-4563-82c0-e1ed64487cfe",
+      "sourceOrigin": "AI_GENERATED",
+      "fileSize": 402880,
+      "name": "140978a3-6da9-4563-82c0-e1ed64487cfe.png",
+      "type": "Image",
+      "fileLocation": "IN_MEMORY",
+      "isTransparent": false
+    },
+    {
+      "version": 1,
+      "mediaId": "CbJEy6RWf0",
+      "sourceOrigin": "VREW_RESOURCE",
+      "fileSize": 91584,
+      "name": "모아뒀던 금 15돈을 중고거래 앱에 .mp3",
+      "type": "AVMedia",
+      "videoAudioMetaInfo": {
+        "duration": 6.72,
+        "audioInfo": {
+          "sampleRate": 24000,
+          "codec": "mp3"
+        }
+      },
+      "sourceFileType": "TTS",
+      "fileLocation": "IN_MEMORY"
+    },
+    {
+      "version": 1,
+      "mediaId": "IiRuSk3JgO",
+      "sourceOrigin": "VREW_RESOURCE",
+      "fileSize": 91584,
+      "name": "입주 잔금으로는 턱없이 부족하지만 대.mp3",
+      "type": "AVMedia",
+      "videoAudioMetaInfo": {
+        "duration": 5.14,
+        "audioInfo": {
+          "sampleRate": 24000,
+          "codec": "mp3"
+        }
+      },
+      "sourceFileType": "TTS",
+      "fileLocation": "IN_MEMORY"
+    },
+    {
+      "version": 1,
+      "mediaId": "fdc48242-9280-41eb-8de4-9cc69abbca24",
+      "sourceOrigin": "AI_GENERATED",
+      "fileSize": 116597,
+      "name": "fdc48242-9280-41eb-8de4-9cc69abbca24.png",
+      "type": "Image",
+      "fileLocation": "IN_MEMORY",
+      "isTransparent": false
+    },
+    {
+      "version": 1,
+      "mediaId": "nmYZ2LGe55",
+      "sourceOrigin": "VREW_RESOURCE",
+      "fileSize": 91584,
+      "name": "불을 끄기엔 절실한 돈이었죠 다행히 .mp3",
+      "type": "AVMedia",
+      "videoAudioMetaInfo": {
+        "duration": 5.24,
+        "audioInfo": {
+          "sampleRate": 24000,
+          "codec": "mp3"
+        }
+      },
+      "sourceFileType": "TTS",
+      "fileLocation": "IN_MEMORY"
+    }
+  ],
+  "transcript": {
+    "scenes": [
+      {
+        "id": "laC4P7XGfc",
+        "clips": [
+          {
+            "id": "Xc4Ws8DkW3",
+            "words": [
+              {
+                "id": "Lr1xOEJ1gz",
+                "text": "김씨는 이달 중순 입주할 새 아파트 잔금을 마련하기 위해 그동안 소중히",
+                "startTime": 0,
+                "duration": 4.76,
+                "aligned": false,
+                "type": 0,
+                "originalDuration": 4.76,
+                "originalStartTime": 0,
+                "truncatedWords": [],
+                "autoControl": false,
+                "mediaId": "PAO7nJWUwt",
+                "audioIds": [],
+                "assetIds": [
+                  "3d5ee2fa-2277-44a4-886c-70a2f34ccebe"
+                ],
+                "playbackRate": 1
+              },
+              {
+                "id": "50uVd0C93R",
+                "text": "",
+                "startTime": 4.76,
+                "duration": 0,
+                "aligned": false,
+                "type": 2,
+                "originalDuration": 0,
+                "originalStartTime": 4.76,
+                "truncatedWords": [],
+                "autoControl": false,
+                "mediaId": "PAO7nJWUwt",
+                "audioIds": [],
+                "assetIds": [],
+                "playbackRate": 1
+              }
+            ],
+            "captionMode": "MANUAL",
+            "captions": [
+              {
+                "text": [
+                  {
+                    "insert": "김씨는 이달 중순 입주할 새 아파트 잔금을 마련하기 위해 그동안 소중히\n"
+                  }
+                ]
+              },
+              {
+                "text": [
+                  {
+                    "insert": "\n"
+                  }
+                ]
+              }
+            ],
+            "assetIds": [
+              "3d5ee2fa-2277-44a4-886c-70a2f34ccebe"
+            ],
+            "dirty": {
+              "blankDeleted": false,
+              "caption": false,
+              "video": false
+            },
+            "translationModified": {
+              "result": false,
+              "source": false
+            },
+            "audioIds": []
+          },
+          {
+            "id": "KZDla7GdQf",
+            "words": [
+              {
+                "id": "GOLBQcBnl8",
+                "text": "모아뒀던 금 15돈을 중고거래 앱에 내놨습니다 판매금액은 870만원",
+                "startTime": 0,
+                "duration": 6.72,
+                "aligned": false,
+                "type": 0,
+                "originalDuration": 6.72,
+                "originalStartTime": 0,
+                "truncatedWords": [],
+                "autoControl": false,
+                "mediaId": "CbJEy6RWf0",
+                "audioIds": [],
+                "assetIds": [],
+                "playbackRate": 1
+              },
+              {
+                "id": "NDVZI4GotP",
+                "text": "",
+                "startTime": 6.72,
+                "duration": 0,
+                "aligned": false,
+                "type": 2,
+                "originalDuration": 0,
+                "originalStartTime": 6.72,
+                "truncatedWords": [],
+                "autoControl": false,
+                "mediaId": "CbJEy6RWf0",
+                "audioIds": [],
+                "assetIds": [],
+                "playbackRate": 1
+              }
+            ],
+            "captionMode": "MANUAL",
+            "captions": [
+              {
+                "text": [
+                  {
+                    "insert": "모아뒀던 금 15돈을 중고거래 앱에 내놨습니다 판매금액은 870만원\n"
+                  }
+                ]
+              },
+              {
+                "text": [
+                  {
+                    "insert": "\n"
+                  }
+                ]
+              }
+            ],
+            "assetIds": [],
+            "dirty": {
+              "blankDeleted": false,
+              "caption": false,
+              "video": false
+            },
+            "translationModified": {
+              "result": false,
+              "source": false
+            },
+            "audioIds": []
+          },
+          {
+            "id": "hodRm64YBb",
+            "words": [
+              {
+                "id": "ill8V58o1v",
+                "text": "입주 잔금으로는 턱없이 부족하지만 대출서류기며 이사비용이며 급한",
+                "startTime": 0,
+                "duration": 5.14,
+                "aligned": false,
+                "type": 0,
+                "originalDuration": 5.14,
+                "originalStartTime": 0,
+                "truncatedWords": [],
+                "autoControl": false,
+                "mediaId": "IiRuSk3JgO",
+                "audioIds": [],
+                "assetIds": [
+                  "7ccee479-b813-4953-a2f8-eb851226de51"
+                ],
+                "playbackRate": 1
+              },
+              {
+                "id": "YkqOWvx5Is",
+                "text": "",
+                "startTime": 5.14,
+                "duration": 0,
+                "aligned": false,
+                "type": 2,
+                "originalDuration": 0,
+                "originalStartTime": 5.14,
+                "truncatedWords": [],
+                "autoControl": false,
+                "mediaId": "IiRuSk3JgO",
+                "audioIds": [],
+                "assetIds": [],
+                "playbackRate": 1
+              }
+            ],
+            "captionMode": "MANUAL",
+            "captions": [
+              {
+                "text": [
+                  {
+                    "insert": "입주 잔금으로는 턱없이 부족하지만 대출서류기며 이사비용이며 급한\n"
+                  }
+                ]
+              },
+              {
+                "text": [
+                  {
+                    "insert": "\n"
+                  }
+                ]
+              }
+            ],
+            "assetIds": [
+              "7ccee479-b813-4953-a2f8-eb851226de51"
+            ],
+            "dirty": {
+              "blankDeleted": false,
+              "caption": false,
+              "video": false
+            },
+            "translationModified": {
+              "result": false,
+              "source": false
+            },
+            "audioIds": []
+          },
+          {
+            "id": "K8jH8HM63i",
+            "words": [
+              {
+                "id": "bUmeVzwSU8",
+                "text": "불을 끄기엔 절실한 돈이었죠 다행히 구매자는 금방 나타났습니다",
+                "startTime": 0,
+                "duration": 5.24,
+                "aligned": false,
+                "type": 0,
+                "originalDuration": 5.24,
+                "originalStartTime": 0,
+                "truncatedWords": [],
+                "autoControl": false,
+                "mediaId": "nmYZ2LGe55",
+                "audioIds": [],
+                "assetIds": [],
+                "playbackRate": 1
+              },
+              {
+                "id": "FL7ycfPij0",
+                "text": "",
+                "startTime": 5.24,
+                "duration": 0,
+                "aligned": false,
+                "type": 2,
+                "originalDuration": 0,
+                "originalStartTime": 5.24,
+                "truncatedWords": [],
+                "autoControl": false,
+                "mediaId": "nmYZ2LGe55",
+                "audioIds": [],
+                "assetIds": [],
+                "playbackRate": 1
+              }
+            ],
+            "captionMode": "MANUAL",
+            "captions": [
+              {
+                "text": [
+                  {
+                    "insert": "불을 끄기엔 절실한 돈이었죠 다행히 구매자는 금방 나타났습니다\n"
+                  }
+                ]
+              },
+              {
+                "text": [
+                  {
+                    "insert": "\n"
+                  }
+                ]
+              }
+            ],
+            "assetIds": [],
+            "dirty": {
+              "blankDeleted": false,
+              "caption": false,
+              "video": false
+            },
+            "translationModified": {
+              "result": false,
+              "source": false
+            },
+            "audioIds": []
+          }
+        ],
+        "name": "",
+        "dirty": {
+          "video": false
+        }
+      }
+    ]
+  },
+  "props": {
+    "assets": {
+      "3d5ee2fa-2277-44a4-886c-70a2f34ccebe": {
+        "mediaId": "140978a3-6da9-4563-82c0-e1ed64487cfe",
+        "xPos": 0,
+        "yPos": -0.1666,
+        "height": 1.3333,
+        "width": 1,
+        "rotation": 0,
+        "zIndex": 0,
+        "type": "image",
+        "originalWidthHeightRatio": 1.7777,
+        "importType": "ttv",
+        "kenburnsAnimationInfo": {
+          "from": {
+            "scale": 0.94,
+            "centerX": 0.5,
+            "centerY": 0.5
+          },
+          "to": {
+            "scale": 0.7,
+            "centerX": 0.5,
+            "centerY": 0.5
+          },
+          "type": "custom"
+        },
+        "editInfo": {},
+        "stats": {
+          "fillType": "cut"
+        }
+      },
+      "7ccee479-b813-4953-a2f8-eb851226de51": {
+        "mediaId": "fdc48242-9280-41eb-8de4-9cc69abbca24",
+        "xPos": 0,
+        "yPos": -0.1666,
+        "height": 1.3333,
+        "width": 1,
+        "rotation": 0,
+        "zIndex": 2,
+        "type": "image",
+        "originalWidthHeightRatio": 1.7777,
+        "importType": "ttv",
+        "kenburnsAnimationInfo": {
+          "from": {
+            "scale": 0.94,
+            "centerX": 0.5,
+            "centerY": 0.5
+          },
+          "to": {
+            "scale": 0.7,
+            "centerX": 0.5,
+            "centerY": 0.5
+          },
+          "type": "custom"
+        },
+        "editInfo": {},
+        "stats": {
+          "fillType": "cut"
+        }
+      }
+    },
+    "audios": {},
+    "overdubInfos": {},
+    "analyzeDate": "2026-02-14 12:32:05",
+    "captionDisplayMode": {
+      "0": true,
+      "1": false
+    },
+    "mediaEffectMap": {},
+    "markerNames": {
+      "0": "",
+      "1": "",
+      "2": "",
+      "3": "",
+      "4": "",
+      "5": ""
+    },
+    "flipSetting": {},
+    "videoRatio": 1.7777777777777777,
+    "globalVideoTransform": {
+      "zoom": 1,
+      "xPos": 0,
+      "yPos": 0,
+      "rotation": 0
+    },
+    "videoSize": {
+      "width": 1920,
+      "height": 1080
+    },
+    "backgroundMap": {},
+    "globalCaptionStyle": {
+      "captionStyleSetting": {
+        "mediaId": "uc-0010-simple-textbox",
+        "yAlign": "bottom",
+        "yOffset": 0,
+        "xOffset": 0,
+        "rotation": 0,
+        "width": 0.96,
+        "customAttributes": [
+          {
+            "attributeName": "--textbox-color",
+            "type": "color-hex",
+            "value": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "attributeName": "--textbox-align",
+            "type": "textbox-align",
+            "value": "center"
+          }
+        ],
+        "scaleFactor": 1.75
+      },
+      "quillStyle": {
+        "font": "Pretendard-Vrew_700",
+        "size": "100",
+        "color": "#ffffff",
+        "outline-on": "true",
+        "outline-color": "#000000",
+        "outline-width": "6"
+      }
+    },
+    "lastTTSSettings": {
+      "pitch": 0,
+      "speed": 1,
+      "volume": 0,
+      "speaker": {
+        "age": "middle",
+        "gender": "female",
+        "lang": "ko-KR",
+        "name": "va19",
+        "speakerId": "va19",
+        "provider": "vrew",
+        "badge": "Recommended",
+        "versions": [
+          "v2"
+        ],
+        "tags": [
+          "voice_actor"
+        ]
+      },
+      "version": "v2"
+    },
+    "initProjectVideoSize": {
+      "width": 1920,
+      "height": 1080
+    },
+    "pronunciationDisplay": true,
+    "projectAudioLanguage": "ko",
+    "audioLanguagesMap": {},
+    "originalClipsMap": {},
+    "ttsClipInfosMap": {
+      "PAO7nJWUwt": {
+        "duration": 4.76,
+        "text": {
+          "raw": "김씨는 이달 중순 입주할 새 아파트 잔금을 마련하기 위해 그동안 소중히",
+          "textAspectLang": "ko-KR",
+          "processed": "김씨는 이달 중순 입주할 새 아파트 잔금을 마련하기 위해 그동안 소중히"
+        },
+        "speaker": {
+          "gender": "female",
+          "age": "middle",
+          "provider": "vrew",
+          "lang": "ko-KR",
+          "name": "va19",
+          "speakerId": "va19",
+          "badge": "Recommended",
+          "versions": [
+            "v2"
+          ],
+          "tags": [
+            "voice_actor"
+          ]
+        },
+        "volume": 0,
+        "speed": 1,
+        "pitch": 0,
+        "version": "v2"
+      },
+      "CbJEy6RWf0": {
+        "duration": 6.72,
+        "text": {
+          "raw": "모아뒀던 금 15돈을 중고거래 앱에 내놨습니다 판매금액은 870만원",
+          "textAspectLang": "ko-KR",
+          "processed": "모아뒀던 금 15돈을 중고거래 앱에 내놨습니다 판매금액은 870만원"
+        },
+        "speaker": {
+          "gender": "female",
+          "age": "middle",
+          "provider": "vrew",
+          "lang": "ko-KR",
+          "name": "va19",
+          "speakerId": "va19",
+          "badge": "Recommended",
+          "versions": [
+            "v2"
+          ],
+          "tags": [
+            "voice_actor"
+          ]
+        },
+        "volume": 0,
+        "speed": 1,
+        "pitch": 0,
+        "version": "v2"
+      },
+      "IiRuSk3JgO": {
+        "duration": 5.14,
+        "text": {
+          "raw": "입주 잔금으로는 턱없이 부족하지만 대출서류기며 이사비용이며 급한",
+          "textAspectLang": "ko-KR",
+          "processed": "입주 잔금으로는 턱없이 부족하지만 대출서류기며 이사비용이며 급한"
+        },
+        "speaker": {
+          "gender": "female",
+          "age": "middle",
+          "provider": "vrew",
+          "lang": "ko-KR",
+          "name": "va19",
+          "speakerId": "va19",
+          "badge": "Recommended",
+          "versions": [
+            "v2"
+          ],
+          "tags": [
+            "voice_actor"
+          ]
+        },
+        "volume": 0,
+        "speed": 1,
+        "pitch": 0,
+        "version": "v2"
+      },
+      "nmYZ2LGe55": {
+        "duration": 5.24,
+        "text": {
+          "raw": "불을 끄기엔 절실한 돈이었죠 다행히 구매자는 금방 나타났습니다",
+          "textAspectLang": "ko-KR",
+          "processed": "불을 끄기엔 절실한 돈이었죠 다행히 구매자는 금방 나타났습니다"
+        },
+        "speaker": {
+          "gender": "female",
+          "age": "middle",
+          "provider": "vrew",
+          "lang": "ko-KR",
+          "name": "va19",
+          "speakerId": "va19",
+          "badge": "Recommended",
+          "versions": [
+            "v2"
+          ],
+          "tags": [
+            "voice_actor"
+          ]
+        },
+        "volume": 0,
+        "speed": 1,
+        "pitch": 0,
+        "version": "v2"
+      }
+    }
+  },
+  "statistics": {
+    "wordCursorCount": {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0
+    },
+    "wordSelectionCount": {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0
+    },
+    "wordCorrectionCount": {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0
+    },
+    "projectStartMode": "text_to_video",
+    "saveInfo": {
+      "created": {
+        "version": "3.6.2",
+        "date": "2026-02-14T12:32:05.071520",
+        "stage": "release"
+      },
+      "updated": {
+        "version": "3.6.2",
+        "date": "2026-02-14T12:32:05.071520",
+        "stage": "release"
+      },
+      "loadCount": 0,
+      "saveCount": 1
+    },
+    "savedStyleApplyCount": 0,
+    "cumulativeTemplateApplyCount": 0,
+    "ratioChangedByTemplate": false,
+    "videoRemixInfos": {},
+    "isAIWritingUsed": true,
+    "aiWritingMode": "advanced",
+    "sttLinebreakOptions": {
+      "mode": 0,
+      "maxLineLength": 30
+    },
+    "clientLinebreakExecuteCount": 0,
+    "agentStats": {
+      "isEdited": false,
+      "requestCount": 0,
+      "responseCount": 0,
+      "toolCallCount": 0,
+      "toolErrorCount": 0
+    }
+  }
+}

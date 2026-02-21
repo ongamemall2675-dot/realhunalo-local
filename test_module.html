@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module Test</title>
+</head>
+
+<body>
+    <h1>Module Loading Test</h1>
+    <div id="status">Loading...</div>
+    <div id="error" style="color: red; white-space: pre-wrap;"></div>
+
+    <script type="module">
+        const statusEl = document.getElementById('status');
+        const errorEl = document.getElementById('error');
+
+        try {
+            statusEl.textContent = 'Importing app.js...';
+
+            // Try to import the main app
+            import('./assets/js/app.js')
+                .then(() => {
+                    statusEl.textContent = '✅ SUCCESS: All modules loaded correctly!';
+                    statusEl.style.color = 'green';
+                    statusEl.style.fontSize = '24px';
+                    statusEl.style.fontWeight = 'bold';
+                })
+                .catch(err => {
+                    statusEl.textContent = '❌ FAILED: Module loading error';
+                    statusEl.style.color = 'red';
+                    statusEl.style.fontSize = '24px';
+                    statusEl.style.fontWeight = 'bold';
+                    errorEl.textContent = 'Error Details:\n' + err.message + '\n\nStack:\n' + err.stack;
+                    console.error('Module loading error:', err);
+                });
+        } catch (err) {
+            statusEl.textContent = '❌ CRITICAL ERROR';
+            statusEl.style.color = 'red';
+            errorEl.textContent = err.message + '\n\n' + err.stack;
+            console.error(err);
+        }
+    </script>
+</body>
+
+</html>

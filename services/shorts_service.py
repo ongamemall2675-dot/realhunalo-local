@@ -1,174 +1,300 @@
-"""
-Shorts Service
-AI 기반 Shorts 후보 분석 및 추천
-"""
 import os
-import openai
 import json
-from typing import Dict, List, Any
+import logging
+import asyncio
+import difflib
+from typing import List, Dict, Optional
+from services.script_analyzer import ScriptAnalyzer
+from services.highlight_extractor import HighlightExtractor
+from services.image_service import image_service
+from services.tts_service import tts_service
+from services.video_service import video_service
+from services.project_service import project_service
+
+logger = logging.getLogger(__name__)
 
 class ShortsService:
-    """YouTube Shorts 추천 서비스"""
+    """
+    쇼츠 영상 생성 워크플로우를 총괄하는 서비스입니다.
+    Mode A(단독 생성)와 Mode B(리퍼퍼징)를 모두 지원하며,
+    대본 분석 -> 자산 생성 -> 렌더링 과정을 조율합니다.
+    """
 
     def __init__(self):
-        self.api_key = os.getenv('OPENAI_API_KEY')
-        if not self.api_key:
-            print("[WARN] OPENAI_API_KEY가 설정되지 않았습니다.")
-        else:
-            openai.api_key = self.api_key
-            # OpenAI 클라이언트에 타임아웃 설정 (Cloudflare 100초 제한 고려)
-            self.client = openai.OpenAI(api_key=self.api_key, timeout=60.0)
-            print("[OK] Shorts Service 초기화 완료 (timeout: 60s)")
+        self.script_analyzer = ScriptAnalyzer()
+        self.highlight_extractor = HighlightExtractor()
+        
+        # 임시 저장 경로
+        self.output_dir = os.path.join(os.getcwd(), "output", "shorts")
+        os.makedirs(self.output_dir, exist_ok=True)
 
-    def analyze_script_for_shorts(self, full_script: str, scenes: List[Dict]) -> Dict[str, Any]:
+    async def create_shorts_from_script(self, script_text: str, style_context: Dict = None, progress_callback=None) -> Dict:
         """
-        전체 스크립트를 분석하여 Shorts 후보 5개 추천
-
+        [Mode A] 사용자가 입력한 대본으로 쇼츠 프로젝트를 생성하고 최종 영상까지 제작합니다.
+        
         Args:
-            full_script: 전체 대본 텍스트
-            scenes: 씬 리스트 (각 씬은 sceneId, originalScript, imagePrompt 등 포함)
-
-        Returns:
-            성공 여부 및 추천 목록
+            script_text: 대본 텍스트
+            style_context: 스타일 설정 (name, style_prompt 등)
+            progress_callback: 진행률 콜백 함수
         """
-        if not self.api_key:
-            return {"success": False, "error": "OpenAI API 키가 설정되지 않았습니다"}
-
         try:
-            print("[OK] Shorts 후보 분석 시작...")
-            print(f"[OK] 전체 스크립트 길이: {len(full_script)} 글자, {len(scenes)}개 씬")
+            logger.info(f"Mode A: 쇼츠 생성 시작 (대본 길이: {len(script_text)})")
+            
+            if progress_callback:
+                progress_callback(5, "대본 분석 중...")
 
-            # 씬 정보를 간략하게 정리
-            scenes_summary = []
-            for scene in scenes:
-                scenes_summary.append({
-                    "sceneId": scene.get("sceneId"),
-                    "script": scene.get("originalScript", ""),
-                    "duration_estimate": len(scene.get("originalScript", "")) / 10  # 대략적인 초 단위 추정
-                })
+            # 1. 대본 분석 (장면 분할 & 프롬프트 생성)
+            scenes = self.script_analyzer.analyze_script(script_text, style_context)
+            
+            # 프로젝트 ID 생성
+            project_id = f"shorts_{int(asyncio.get_event_loop().time())}"
+            project_path = os.path.join(self.output_dir, project_id)
+            os.makedirs(project_path, exist_ok=True)
+            
+            # 중간 저장
+            self._save_scenes(project_path, scenes)
 
-            prompt = f"""당신은 YouTube Shorts 콘텐츠 전문가입니다.
+            if progress_callback:
+                progress_callback(15, "자산 생성 시작 (이미지/음성)...")
 
-다음 영상 스크립트를 분석하여 가장 효과적인 Shorts 후보 5개를 추천해주세요.
+            # 2. 자산 생성 (병렬 처리 권장, 현재는 순차 처리)
+            generated_scenes = await self._generate_assets_for_scenes(scenes, project_path, style_context, progress_callback)
 
-**선정 기준:**
-1. **후킹 포인트**: 놀라운 사실, 감정적 순간, 호기심 유발
-2. **독립성**: 전체 맥락 없이도 이해 가능
-3. **최적 길이**: 30-60초 (너무 짧거나 길지 않게)
-4. **바이럴 가능성**: 공유하고 싶은 요소
-5. **완결성**: 명확한 시작-중간-끝 구조
+            # 중간 저장 (자산 포함)
+            self._save_scenes(project_path, generated_scenes)
 
-**전체 스크립트:**
-{full_script}
+            if progress_callback:
+                progress_callback(50, "영상 렌더링 중...")
 
-**씬 정보:**
-{json.dumps(scenes_summary, ensure_ascii=False, indent=2)}
+            # 3. 최종 영상 렌더링
+            video_url = await self._render_video(generated_scenes, progress_callback)
 
-**출력 형식 (JSON만):**
-{{
-  "recommendations": [
-    {{
-      "rank": 1,
-      "title": "Shorts 제목 (10자 이내)",
-      "startSceneId": 2,
-      "endSceneId": 4,
-      "estimatedDuration": 45,
-      "hookReason": "이 구간이 효과적인 이유 (간결하게)",
-      "extractedScript": "해당 구간의 실제 스크립트",
-      "viralPotential": "high/medium/low"
-    }}
-  ]
-}}
-
-반드시 5개의 추천을 제공하세요. 가장 좋은 것부터 순위를 매기세요.
-"""
-
-            response = self.client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": "You are a YouTube Shorts content strategy expert."},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.7,
-                max_tokens=2000
-            )
-
-            content = response.choices[0].message.content.strip()
-
-            # JSON 파싱
-            if "```json" in content:
-                content = content.replace("```json", "").replace("```", "")
-            elif "```" in content:
-                content = content.replace("```", "")
-
-            content = content.strip()
-
-            try:
-                result_data = json.loads(content)
-            except json.JSONDecodeError:
-                # JSON 패턴 찾기 시도
-                import re
-                match = re.search(r'\{.*\}', content, re.DOTALL)
-                if match:
-                    result_data = json.loads(match.group())
-                else:
-                    raise ValueError("AI 응답을 JSON으로 파싱할 수 없습니다")
-
-            recommendations = result_data.get("recommendations", [])
-
-            # 유효성 검증
-            for rec in recommendations:
-                if "startSceneId" not in rec or "endSceneId" not in rec:
-                    continue
-
-                # sceneId 범위 검증
-                start_id = rec["startSceneId"]
-                end_id = rec["endSceneId"]
-
-                if start_id < 1 or end_id > len(scenes):
-                    print(f"[WARN] 잘못된 씬 범위: {start_id}-{end_id}")
-                    continue
-
-            print(f"[OK] Shorts 추천 완료: {len(recommendations)}개 후보 발견")
+            if progress_callback:
+                progress_callback(100, "완료!")
 
             return {
                 "success": True,
-                "recommendations": recommendations,
-                "totalScenes": len(scenes)
+                "project_id": project_id,
+                "video_url": video_url,
+                "scenes": generated_scenes,
+                "message": "쇼츠 영상 생성이 완료되었습니다."
             }
 
         except Exception as e:
-            print(f"[X] Shorts 분석 오류: {e}")
+            logger.error(f"쇼츠 생성 중 오류: {str(e)}")
             import traceback
-            traceback.print_exc()
+            logger.error(traceback.format_exc())
+            return {"success": False, "error": str(e)}
+
+    def _save_scenes(self, path: str, scenes: List[Dict]):
+        try:
+            with open(os.path.join(path, "scenes.json"), "w", encoding="utf-8") as f:
+                json.dump(scenes, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            logger.error(f"장면 저장 실패: {e}")
+
+    async def analyze_project(self, project_path: str) -> Dict:
+        """
+        [Mode B] 기존 프로젝트 폴더를 분석하여 추천 쇼츠 대본(하이라이트)을 반환합니다.
+        project_path는 실제로는 project_id가 전달될 수 있으므로 처리가 필요합니다.
+        """
+        try:
+            # project_path가 ID인 경우 로드 시도
+            project_data = project_service.load_project(project_path)
+            if not project_data:
+                # 경로로 간주하고 시도 (혹시 모를 하위 호환성)
+                if os.path.exists(os.path.join(project_path, "script.json")):
+                     return self.highlight_extractor.analyze_project_script(project_path)
+                return {"success": False, "error": "Project not found"}
+
+            # 전체 스크립트 추출
+            full_script = project_data.get("script", "")
+            if not full_script and project_data.get("scenes"):
+                full_script = " ".join([s.get("originalScript", "") for s in project_data["scenes"]])
+
+            if not full_script:
+                 return {"success": False, "error": "No script found in project"}
+
+            logger.info(f"프로젝트 분석 시작: {project_data.get('name')} (길이: {len(full_script)})")
+            
+            # 하이라이트 추출
+            highlights = self.highlight_extractor.extract_highlights(full_script)
+            
             return {
-                "success": False,
-                "error": str(e)
+                "success": True,
+                "highlights": highlights,
+                "original_project_id": project_path
             }
 
-    def extract_short_scenes(self, scenes: List[Dict], start_scene_id: int, end_scene_id: int) -> List[Dict]:
+        except Exception as e:
+            logger.error(f"프로젝트 분석 실패: {e}")
+            return {"success": False, "error": str(e)}
+
+    async def create_shorts_from_highlight(self, highlight_type: str, scenes: List[Dict], original_project_path: str) -> Dict:
         """
-        특정 씬 범위를 추출하여 Shorts용 씬 리스트 생성
-
-        Args:
-            scenes: 전체 씬 리스트
-            start_scene_id: 시작 씬 ID
-            end_scene_id: 종료 씬 ID
-
-        Returns:
-            추출된 씬 리스트
+        [Mode B] 선택된 하이라이트 대본으로 쇼츠 프로젝트를 생성합니다.
+        기존 자산(이미지/음성)이 있다면 재활용합니다.
         """
-        extracted = []
+        try:
+            logger.info(f"Mode B: 하이라이트 쇼츠 생성 ({highlight_type})")
+            
+            # 1. 원본 프로젝트 로드 (자산 재사용을 위해)
+            original_project = project_service.load_project(original_project_path)
+            original_scenes = original_project.get("scenes", []) if original_project else []
+            
+            logger.info(f"원본 프로젝트 로드 완료: {len(original_scenes)} scenes found.")
 
-        for scene in scenes:
-            scene_id = scene.get("sceneId")
-            if start_scene_id <= scene_id <= end_scene_id:
-                extracted.append(scene)
+            # 2. 자산 재사용 로직 적용
+            reused_count = 0
+            for scene in scenes:
+                # 텍스트 유사도 기반 매칭
+                best_match = None
+                highest_ratio = 0.0
+                target_text = scene.get("text", "")
 
-        print(f"[OK] Shorts 씬 추출: {start_scene_id}-{end_scene_id} → {len(extracted)}개 씬")
+                for org_scene in original_scenes:
+                    org_text = org_scene.get("originalScript", "")
+                    
+                    # 1. 완전 일치 (오디오까지 재사용 가능)
+                    if target_text == org_text:
+                        best_match = org_scene
+                        highest_ratio = 1.0
+                        break
+                    
+                    # 2. 부분 일치 (이미지만 재사용 가능)
+                    ratio = difflib.SequenceMatcher(None, target_text, org_text).ratio()
+                    if ratio > highest_ratio:
+                        highest_ratio = ratio
+                        best_match = org_scene
+                
+                # 매칭된 자산 적용 (임계값 0.7 이상)
+                if best_match and highest_ratio > 0.7:
+                    logger.info(f"자산 재사용 매칭 성공 (유사도: {highest_ratio:.2f}): '{target_text[:10]}...' <- '{best_match.get('originalScript', '')[:10]}...'")
+                    
+                    # 이미지 재사용
+                    if best_match.get("generatedUrl"):
+                         scene['visualUrl'] = best_match['generatedUrl']
+                         scene['reused_visual'] = True
+                    elif best_match.get("visualUrl"): # 다른 필드명 대응
+                         scene['visualUrl'] = best_match['visualUrl']
+                         scene['reused_visual'] = True
 
-        return extracted
+                    # 100% 일치 시 오디오도 재사용
+                    if highest_ratio == 1.0 and best_match.get("audioPath") and os.path.exists(best_match["audioPath"]):
+                        scene['audioUrl'] = best_match.get('audioUrl')
+                        scene['audioPath'] = best_match.get('audioPath')
+                        scene['srtData'] = best_match.get('srtData')
+                        # duration은 원본 그대로 사용
+                        if best_match.get("audioDuration"):
+                            scene['duration'] = best_match['audioDuration']
+                        scene['reused_audio'] = True
+                        reused_count += 1
+            
+            logger.info(f"총 {len(scenes)}개 장면 중 {reused_count}개 장면에서 오디오/이미지 완전 재사용 예정.")
 
+            # 3. 부족한 자산 생성 및 영상 렌더링
+            return await self._process_scenes_to_video(scenes)
+
+        except Exception as e:
+            logger.error(f"하이라이트 쇼츠 생성 실패: {str(e)}")
+            import traceback
+            logger.error(traceback.format_exc())
+            return {"success": False, "error": str(e)}
+
+    async def _generate_assets_for_scenes(self, scenes: List[Dict], project_path: str, style_context: Dict = None, progress_callback=None) -> List[Dict]:
+        """
+        장면 리스트에 대해 부족한 자산(이미지, 오디오)을 생성합니다.
+        """
+        generated_scenes = []
+        total_scenes = len(scenes)
+        
+        for idx, scene in enumerate(scenes):
+            logger.info(f"Processing Scene {idx+1}/{total_scenes}")
+            if progress_callback:
+                progress_callback(15 + int((idx/total_scenes)*30), f"장면 {idx+1} 자산 생성 중...")
+
+            # A. 이미지 생성 (이미 존재하면 스킵)
+            if not scene.get('visualUrl'):
+                visual_keyword = scene.get('visual_keyword', '')
+                # 스타일 프롬프트 결합 (이미 analyzer에서 처리되었을 수 있음)
+                
+                image_res = image_service.generate(
+                    prompt=visual_keyword,
+                    aspect_ratio="9:16",
+                    model="black-forest-labs/flux-schnell" # 빠른 모델 사용
+                )
+                
+                if image_res.get('success'):
+                    scene['visualUrl'] = image_res.get('imageUrl')
+                else:
+                    logger.error(f"이미지 생성 실패: {image_res.get('error')}")
+                    scene['visualUrl'] = None 
+
+            # B. TTS 생성 (이미 존재하면 스킵)
+            if not scene.get('audioUrl'):
+                tts_res = tts_service.generate(
+                    text=scene.get('text', ''),
+                    scene_id=str(scene.get('sceneId', idx)),
+                    speed=1.1 # 쇼츠는 약간 빠르게
+                )
+                
+                if tts_res.get('success'):
+                    scene['audioUrl'] = tts_res.get('audioUrl')
+                    scene['audioPath'] = tts_res.get('audioPath')
+                    scene['srtData'] = tts_res.get('srtData')
+                    scene['duration'] = tts_res.get('duration_ms', 3000) / 1000 
+                else:
+                    logger.error(f"TTS 생성 실패: {tts_res.get('error')}")
+                    scene['audioUrl'] = None
+
+            generated_scenes.append(scene)
+            
+        return generated_scenes
+
+    async def _render_video(self, scenes: List[Dict], progress_callback=None) -> str:
+        """
+        장면 리스트를 기반으로 최종 영상을 렌더링합니다.
+        """
+        video_url = video_service.generate_final_video(
+            merged_groups=[],
+            standalone=scenes,
+            resolution="shorts", # 9:16 강제
+            subtitle_style={ 
+                "enabled": True, 
+                "fontFamily": "Malgun Gothic", 
+                "fontSize": 70,  # 모바일 화면 고려
+                "position": "center",
+                "fontColor": "#FFFF00", # 노란색 자막
+                "outlineColor": "#000000"
+            },
+            progress_callback=lambda p, m: progress_callback(50 + int(p * 0.5), m) if progress_callback else None
+        )
+        return video_url
+
+    async def _process_scenes_to_video(self, scenes: List[Dict], progress_callback=None) -> Dict:
+        """
+        (내부 helper) 장면 리스트를 받아 부족한 자산을 생성하고 영상 합성을 수행합니다.
+        (create_shorts_from_highlight 전용, 프로젝트 ID 생성 포함)
+        """
+        project_id = f"shorts_repurpose_{int(asyncio.get_event_loop().time())}"
+        project_path = os.path.join(self.output_dir, project_id)
+        os.makedirs(project_path, exist_ok=True)
+        
+        # 자산 생성 (재사용된 것은 건너뜀)
+        generated_scenes = await self._generate_assets_for_scenes(scenes, project_path, progress_callback=progress_callback)
+        
+        # 중간 저장
+        self._save_scenes(project_path, generated_scenes)
+
+        # 렌더링
+        video_url = await self._render_video(generated_scenes, progress_callback)
+        
+        return {
+            "success": True, 
+            "project_id": project_id,
+            "video_url": video_url,
+            "scenes": generated_scenes
+        }
 
 # 싱글톤 인스턴스
 shorts_service = ShortsService()

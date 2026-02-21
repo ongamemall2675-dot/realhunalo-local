@@ -5,26 +5,11 @@
 
 import { Module } from '../Module.js';
 import { AppState } from '../state.js';
-import { CONFIG } from '../config.js';
+import { CONFIG, API_BASE_URL } from '../config.js';
 
 export class ShortsEditModule extends Module {
     constructor() {
         super('shorts-edit', '쇼츠 편집실', 'smartphone', '9:16 세로 포맷 Shorts 영상 편집 및 생성');
-
-        // 자막 설정 (기본값)
-        this.subtitleSettings = {
-            enabled: true,
-            fontFamily: 'Pretendard-Vrew_700',
-            fontSize: 120,  // 쇼츠는 폰트 크기가 더 큼
-            fontColor: '#ffffff',
-            outlineEnabled: true,
-            outlineColor: '#000000',
-            outlineWidth: 8,  // 쇼츠는 외곽선이 더 두꺼움
-            position: 'center',  // 쇼츠는 중앙 배치 권장
-            alignment: 'center'
-        };
-
-        // 현재 편집 중인 쇼츠
         this.currentShorts = [];
     }
 
@@ -72,9 +57,6 @@ export class ShortsEditModule extends Module {
                     </div>
                 </div>
 
-                <!-- 자막 설정 -->
-                ${this.renderSubtitleSettings()}
-
                 <!-- Shorts 목록 -->
                 ${this.renderShortsList(generatedShorts)}
 
@@ -100,67 +82,6 @@ export class ShortsEditModule extends Module {
 
                 <!-- 결과 표시 -->
                 <div id="result-container" class="hidden"></div>
-            </div>
-        `;
-    }
-
-    renderSubtitleSettings() {
-        return `
-            <div class="bg-slate-800/40 border border-slate-700 rounded-2xl p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="p-2 bg-purple-500/20 rounded-lg text-purple-400">
-                            <i data-lucide="captions" class="w-5 h-5"></i>
-                        </div>
-                        <h4 class="font-bold text-white">자막 설정 (Shorts 최적화)</h4>
-                    </div>
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <span class="text-xs text-slate-400">자막 표시</span>
-                        <input type="checkbox" id="subtitle-enabled" ${this.subtitleSettings.enabled ? 'checked' : ''} class="w-4 h-4 rounded border-slate-600 bg-slate-800 text-purple-600 focus:ring-purple-500">
-                    </label>
-                </div>
-
-                <div id="subtitle-options" class="grid grid-cols-2 gap-4">
-                    <!-- 크기 -->
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">
-                            크기: <span id="subtitle-size-value" class="text-purple-400">${this.subtitleSettings.fontSize}</span>
-                        </label>
-                        <input type="range" id="subtitle-size" min="80" max="200" value="${this.subtitleSettings.fontSize}"
-                            class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-500">
-                    </div>
-
-                    <!-- 위치 -->
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">위치</label>
-                        <select id="subtitle-position" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-purple-500">
-                            <option value="bottom" ${this.subtitleSettings.position === 'bottom' ? 'selected' : ''}>하단</option>
-                            <option value="center" ${this.subtitleSettings.position === 'center' ? 'selected' : ''}>중앙 (권장)</option>
-                            <option value="top" ${this.subtitleSettings.position === 'top' ? 'selected' : ''}>상단</option>
-                        </select>
-                    </div>
-
-                    <!-- 텍스트 색상 -->
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">텍스트 색상</label>
-                        <input type="color" id="subtitle-color" value="${this.subtitleSettings.fontColor}"
-                            class="w-full h-10 bg-slate-900 border border-slate-700 rounded cursor-pointer">
-                    </div>
-
-                    <!-- 외곽선 색상 -->
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">외곽선 색상</label>
-                        <input type="color" id="subtitle-outline-color" value="${this.subtitleSettings.outlineColor}"
-                            class="w-full h-10 bg-slate-900 border border-slate-700 rounded cursor-pointer">
-                    </div>
-                </div>
-
-                <!-- 미리보기 -->
-                <div class="mt-4 bg-black rounded-lg p-6 text-center relative overflow-hidden" style="aspect-ratio: 9/16; max-height: 200px;">
-                    <div id="subtitle-preview" class="absolute inset-0 flex items-center justify-center text-white font-bold">
-                        자막 미리보기
-                    </div>
-                </div>
             </div>
         `;
     }
@@ -237,92 +158,11 @@ export class ShortsEditModule extends Module {
             });
         }
 
-        // 자막 설정 초기화
-        this.initializeSubtitleSettings();
-
         // Shorts 생성 버튼
         const btnGenerate = document.getElementById('btn-generate-all-shorts');
         if (btnGenerate) {
             btnGenerate.addEventListener('click', () => this.generateAllShorts());
         }
-    }
-
-    initializeSubtitleSettings() {
-        const subtitleEnabled = document.getElementById('subtitle-enabled');
-        const subtitleOptions = document.getElementById('subtitle-options');
-
-        if (subtitleEnabled && subtitleOptions) {
-            subtitleEnabled.addEventListener('change', (e) => {
-                this.subtitleSettings.enabled = e.target.checked;
-                if (e.target.checked) {
-                    subtitleOptions.classList.remove('opacity-50', 'pointer-events-none');
-                } else {
-                    subtitleOptions.classList.add('opacity-50', 'pointer-events-none');
-                }
-                this.updateSubtitlePreview();
-            });
-        }
-
-        // 크기 슬라이더
-        const subtitleSize = document.getElementById('subtitle-size');
-        const subtitleSizeValue = document.getElementById('subtitle-size-value');
-        if (subtitleSize && subtitleSizeValue) {
-            subtitleSize.addEventListener('input', (e) => {
-                this.subtitleSettings.fontSize = parseInt(e.target.value);
-                subtitleSizeValue.textContent = e.target.value;
-                this.updateSubtitlePreview();
-            });
-        }
-
-        // 위치 선택
-        const subtitlePosition = document.getElementById('subtitle-position');
-        if (subtitlePosition) {
-            subtitlePosition.addEventListener('change', (e) => {
-                this.subtitleSettings.position = e.target.value;
-                this.updateSubtitlePreview();
-            });
-        }
-
-        // 색상 선택
-        const subtitleColor = document.getElementById('subtitle-color');
-        if (subtitleColor) {
-            subtitleColor.addEventListener('input', (e) => {
-                this.subtitleSettings.fontColor = e.target.value;
-                this.updateSubtitlePreview();
-            });
-        }
-
-        const outlineColor = document.getElementById('subtitle-outline-color');
-        if (outlineColor) {
-            outlineColor.addEventListener('input', (e) => {
-                this.subtitleSettings.outlineColor = e.target.value;
-                this.updateSubtitlePreview();
-            });
-        }
-
-        // 초기 미리보기
-        this.updateSubtitlePreview();
-    }
-
-    updateSubtitlePreview() {
-        const preview = document.getElementById('subtitle-preview');
-        if (!preview) return;
-
-        if (!this.subtitleSettings.enabled) {
-            preview.style.opacity = '0.3';
-            return;
-        }
-
-        preview.style.opacity = '1';
-        preview.style.fontSize = `${this.subtitleSettings.fontSize / 6}px`;
-        preview.style.color = this.subtitleSettings.fontColor;
-        preview.style.webkitTextStroke = `${this.subtitleSettings.outlineWidth / 3}px ${this.subtitleSettings.outlineColor}`;
-        preview.style.paintOrder = 'stroke fill';
-        preview.style.textAlign = this.subtitleSettings.alignment;
-
-        // 위치에 따라 배치
-        preview.style.alignItems = this.subtitleSettings.position === 'top' ? 'flex-start' :
-                                    this.subtitleSettings.position === 'center' ? 'center' : 'flex-end';
     }
 
     async generateAllShorts() {
@@ -377,13 +217,12 @@ export class ShortsEditModule extends Module {
                 );
 
                 // 영상 생성 API 호출 (9:16 포맷)
-                const response = await fetch(CONFIG.endpoints.video, {
+                const response = await fetch(`${CONFIG.endpoints.video}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        scenes: shortsScenes,
-                        aspectRatio: '9:16',  // 세로 포맷
-                        subtitleStyle: this.subtitleSettings
+                        standalone: shortsScenes,
+                        resolution: 'vertical'
                     })
                 });
 
@@ -429,7 +268,7 @@ export class ShortsEditModule extends Module {
         return new Promise((resolve, reject) => {
             const interval = setInterval(async () => {
                 try {
-                    const response = await fetch(`http://localhost:8000/api/video/status?taskId=${taskId}`);
+                    const response = await fetch(`${CONFIG.endpoints.videoStatus}?taskId=${taskId}`);
                     if (!response.ok) {
                         clearInterval(interval);
                         reject(new Error('Failed to check task status'));

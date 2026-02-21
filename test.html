@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RealHunalo Test Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .log-entry {
+            padding: 8px;
+            margin: 4px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .log-success { background: #d4edda; color: #155724; }
+        .log-error { background: #f8d7da; color: #721c24; }
+        .log-info { background: #d1ecf1; color: #0c5460; }
+        .log-warning { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-4xl font-bold mb-8">RealHunalo Studio - 모듈 테스트</h1>
+
+        <!-- 서버 상태 -->
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+            <h2 class="text-2xl font-bold mb-4">서버 상태</h2>
+            <div class="flex gap-4">
+                <div class="flex items-center gap-2">
+                    <div id="backend-status" class="w-3 h-3 rounded-full bg-gray-500"></div>
+                    <span>백엔드: <span id="backend-url">http://localhost:8000</span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 테스트 버튼들 -->
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <!-- 1. 대본 생성 -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h3 class="text-xl font-bold mb-4">1. 대본 생성</h3>
+                <input type="text" id="topic" placeholder="주제 입력"
+                    class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 mb-4"
+                    value="AI 기술의 발전">
+                <select id="imageStyle" class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 mb-4">
+                    <option value="stickman">스틱맨</option>
+                    <option value="animation">애니메이션</option>
+                    <option value="cinematic_photorealistic">시네마틱 실사</option>
+                </select>
+                <button onclick="testScriptGeneration()"
+                    class="w-full bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded font-bold">
+                    대본 생성 테스트
+                </button>
+            </div>
+
+            <!-- 2. 이미지 생성 -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h3 class="text-xl font-bold mb-4">2. 이미지 생성</h3>
+                <textarea id="imagePrompt" placeholder="이미지 프롬프트 입력"
+                    class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 mb-4 h-20"></textarea>
+                <button onclick="testImageGeneration()"
+                    class="w-full bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded font-bold">
+                    이미지 생성 테스트
+                </button>
+            </div>
+
+            <!-- 3. 모션 생성 -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h3 class="text-xl font-bold mb-4">3. 모션 생성</h3>
+                <input type="text" id="imageUrl" placeholder="이미지 URL"
+                    class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 mb-2">
+                <input type="text" id="motionPrompt" placeholder="모션 프롬프트"
+                    class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 mb-4"
+                    value="Slow cinematic camera movement">
+                <button onclick="testMotionGeneration()"
+                    class="w-full bg-pink-600 hover:bg-pink-500 text-white px-4 py-2 rounded font-bold">
+                    모션 생성 테스트
+                </button>
+            </div>
+
+            <!-- 4. TTS 생성 -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h3 class="text-xl font-bold mb-4">4. TTS 생성</h3>
+                <textarea id="ttsText" placeholder="텍스트 입력"
+                    class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 mb-4 h-20"></textarea>
+                <button onclick="testTTSGeneration()"
+                    class="w-full bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded font-bold">
+                    TTS 생성 테스트
+                </button>
+            </div>
+        </div>
+
+        <!-- 로그 영역 -->
+        <div class="bg-gray-800 rounded-lg p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold">로그</h2>
+                <button onclick="clearLog()"
+                    class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm">
+                    로그 지우기
+                </button>
+            </div>
+            <div id="log" class="bg-gray-900 rounded p-4 h-96 overflow-y-auto"></div>
+        </div>
+
+        <!-- 결과 미리보기 -->
+        <div id="preview" class="hidden bg-gray-800 rounded-lg p-6 mt-6">
+            <h2 class="text-2xl font-bold mb-4">결과 미리보기</h2>
+            <div id="preview-content"></div>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://localhost:8000';
+        let currentScenes = [];
+
+        // 서버 상태 확인
+        async function checkBackendStatus() {
+            try {
+                const response = await fetch(`${BASE_URL}/docs`);
+                if (response.ok) {
+                    document.getElementById('backend-status').className = 'w-3 h-3 rounded-full bg-green-500';
+                    log('백엔드 서버 연결됨', 'success');
+                }
+            } catch (e) {
+                document.getElementById('backend-status').className = 'w-3 h-3 rounded-full bg-red-500';
+                log('백엔드 서버 연결 실패', 'error');
+            }
+        }
+
+        // 로그 함수
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        // 1. 대본 생성 테스트
+        async function testScriptGeneration() {
+            const topic = document.getElementById('topic').value;
+            const imageStyle = document.getElementById('imageStyle').value;
+
+            if (!topic) {
+                log('주제를 입력하세요', 'warning');
+                return;
+            }
+
+            log(`대본 생성 시작: ${topic} (스타일: ${imageStyle})`, 'info');
+
+            try {
+                const response = await fetch(`${BASE_URL}/api/generate-script`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ topic, style: 'informative', imageStyle })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    currentScenes = result.scenes;
+                    log(`✅ 대본 생성 성공! ${result.scenes.length}개 장면 생성됨`, 'success');
+
+                    // 첫 번째 장면 정보 표시
+                    if (result.scenes.length > 0) {
+                        const scene = result.scenes[0];
+                        log(`Scene 1 - 대본: ${scene.originalScript}`, 'info');
+                        log(`Scene 1 - 이미지 프롬프트: ${scene.imagePrompt.substring(0, 80)}...`, 'info');
+                        log(`Scene 1 - 모션 프롬프트: ${scene.motionPrompt}`, 'info');
+
+                        // 자동으로 프롬프트 필드 채우기
+                        document.getElementById('imagePrompt').value = scene.imagePrompt;
+                        document.getElementById('motionPrompt').value = scene.motionPrompt;
+                        document.getElementById('ttsText').value = scene.originalScript;
+                    }
+
+                    showPreview(result);
+                } else {
+                    log(`❌ 실패: ${result.error}`, 'error');
+                }
+            } catch (e) {
+                log(`❌ 오류: ${e.message}`, 'error');
+            }
+        }
+
+        // 2. 이미지 생성 테스트
+        async function testImageGeneration() {
+            const prompt = document.getElementById('imagePrompt').value;
+
+            if (!prompt) {
+                log('이미지 프롬프트를 입력하세요', 'warning');
+                return;
+            }
+
+            log('이미지 생성 시작...', 'info');
+
+            try {
+                const response = await fetch(`${BASE_URL}/api/generate-image`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        prompt,
+                        settings: {
+                            model: 'black-forest-labs/flux-schnell',
+                            aspectRatio: '16:9',
+                            numOutputs: 1
+                        }
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success && result.imageUrl) {
+                    log(`✅ 이미지 생성 성공!`, 'success');
+                    log(`URL: ${result.imageUrl}`, 'info');
+
+                    // 이미지 URL을 모션 생성 필드에 자동 입력
+                    document.getElementById('imageUrl').value = result.imageUrl;
+
+                    // 미리보기 표시
+                    showImagePreview(result.imageUrl);
+                } else {
+                    log(`❌ 실패: ${result.error}`, 'error');
+                }
+            } catch (e) {
+                log(`❌ 오류: ${e.message}`, 'error');
+            }
+        }
+
+        // 3. 모션 생성 테스트
+        async function testMotionGeneration() {
+            const imageUrl = document.getElementById('imageUrl').value;
+            const motionPrompt = document.getElementById('motionPrompt').value;
+
+            if (!imageUrl) {
+                log('이미지 URL을 입력하세요', 'warning');
+                return;
+            }
+
+            log('비디오 생성 시작... (30-120초 소요)', 'info');
+
+            try {
+                const response = await fetch(`${BASE_URL}/api/generate-motion`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sceneId: 1,
+                        imageUrl,
+                        motionPrompt: motionPrompt || 'Slow cinematic camera movement',
+                        duration: 5,
+                        aspectRatio: '16:9',
+                        model: 'bytedance/seedance-1-lite'
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.videoUrl) {
+                    log(`✅ 비디오 생성 성공!`, 'success');
+                    log(`URL: ${result.videoUrl}`, 'info');
+
+                    // 미리보기 표시
+                    showVideoPreview(result.videoUrl);
+                } else {
+                    log(`❌ 실패: ${result.error || 'Unknown error'}`, 'error');
+                }
+            } catch (e) {
+                log(`❌ 오류: ${e.message}`, 'error');
+            }
+        }
+
+        // 4. TTS 생성 테스트
+        async function testTTSGeneration() {
+            const text = document.getElementById('ttsText').value;
+
+            if (!text) {
+                log('텍스트를 입력하세요', 'warning');
+                return;
+            }
+
+            log('음성 생성 시작...', 'info');
+
+            try {
+                const response = await fetch(`${BASE_URL}/api/generate-tts`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text,
+                        sceneId: 1,
+                        settings: {
+                            engine: 'elevenlabs',
+                            voiceId: 'nPczCjzI2devNBz1zQrb',
+                            stability: 0.5,
+                            similarity: 0.75,
+                            speed: 1.0
+                        }
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.audioUrl) {
+                    log(`✅ 음성 생성 성공!`, 'success');
+                    log(`URL: ${result.audioUrl}`, 'info');
+
+                    // 미리보기 표시
+                    showAudioPreview(result.audioUrl);
+                } else {
+                    log(`❌ 실패: ${result.error || 'Unknown error'}`, 'error');
+                }
+            } catch (e) {
+                log(`❌ 오류: ${e.message}`, 'error');
+            }
+        }
+
+        // 미리보기 함수들
+        function showPreview(data) {
+            const preview = document.getElementById('preview');
+            const content = document.getElementById('preview-content');
+
+            let html = `<h3 class="font-bold mb-2">생성된 장면들:</h3>`;
+            data.scenes.forEach((scene, idx) => {
+                html += `
+                    <div class="bg-gray-900 rounded p-4 mb-4">
+                        <div class="font-bold mb-2">Scene ${scene.sceneId}</div>
+                        <div class="text-sm">
+                            <div><strong>대본:</strong> ${scene.originalScript}</div>
+                            <div class="mt-2"><strong>이미지 프롬프트:</strong> ${scene.imagePrompt.substring(0, 100)}...</div>
+                            <div class="mt-2"><strong>모션 프롬프트:</strong> ${scene.motionPrompt}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            content.innerHTML = html;
+            preview.classList.remove('hidden');
+        }
+
+        function showImagePreview(url) {
+            const preview = document.getElementById('preview');
+            const content = document.getElementById('preview-content');
+
+            content.innerHTML = `
+                <h3 class="font-bold mb-2">생성된 이미지:</h3>
+                <img src="${url}" class="w-full rounded" alt="Generated Image">
+            `;
+
+            preview.classList.remove('hidden');
+        }
+
+        function showVideoPreview(url) {
+            const preview = document.getElementById('preview');
+            const content = document.getElementById('preview-content');
+
+            content.innerHTML = `
+                <h3 class="font-bold mb-2">생성된 비디오:</h3>
+                <video src="${url}" controls class="w-full rounded"></video>
+            `;
+
+            preview.classList.remove('hidden');
+        }
+
+        function showAudioPreview(url) {
+            const preview = document.getElementById('preview');
+            const content = document.getElementById('preview-content');
+
+            content.innerHTML = `
+                <h3 class="font-bold mb-2">생성된 음성:</h3>
+                <audio src="${url}" controls class="w-full"></audio>
+            `;
+
+            preview.classList.remove('hidden');
+        }
+
+        // 페이지 로드 시 서버 상태 확인
+        checkBackendStatus();
+        log('테스트 페이지 로드됨', 'success');
+        log('각 버튼을 클릭하여 모듈을 테스트하세요', 'info');
+    </script>
+</body>
+</html>

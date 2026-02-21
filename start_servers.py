@@ -60,10 +60,12 @@ class ServerManager:
         
         try:
             self.frontend_process = subprocess.Popen(
-                [sys.executable, "-m", "http.server", "8080", "--bind", "127.0.0.1"],
+                [sys.executable, "simple_http_server.py"],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
-                text=True
+                text=True,
+                bufsize=1,
+                universal_newlines=True
             )
             
             time.sleep(2)  # 시작 대기
@@ -74,6 +76,7 @@ class ServerManager:
                 
             print(f"[OK] 프론트엔드 서버 실행 중 (PID: {self.frontend_process.pid})")
             print(f"[접속] http://localhost:8080")
+            print(f"[MIME] JavaScript ES6 모듈 MIME 타입 설정 완료")
             return True
             
         except Exception as e:

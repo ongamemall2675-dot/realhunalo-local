@@ -27,7 +27,16 @@
       "WebFetch(domain:infohelpful.com)",
       "Bash(node -c:*)",
       "Bash(nslookup:*)",
-      "Bash(cloudflared tunnel route dns:*)"
+      "Bash(cloudflared tunnel route dns:*)",
+      "Bash(git checkout:*)",
+      "Bash(for pid in 45732 23752 48276 31592 1580 41576 40660)",
+      "Bash(do taskkill //F //PID $pid)",
+      "Bash(done)",
+      "Bash(.venvScriptspython.exe -c \"import pydub; print\\(f''pydub version: {pydub.__version__}''\\); print\\(f''pydub location: {pydub.__file__}''\\)\")",
+      "Bash(.venv/Scripts/python.exe:*)",
+      "Bash(.venv/Scripts/pip.exe install:*)",
+      "Bash(node --check:*)",
+      "Bash(echo:*)"
     ]
   }
 }

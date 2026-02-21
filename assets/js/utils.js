@@ -32,6 +32,7 @@ export async function processInBatches(items, batchSize, asyncFn, onProgress) {
  */
 export function handleAssetDrop(event, dropZone) {
     event.preventDefault();
+    event.stopPropagation();
     dropZone.classList.remove('border-blue-500', 'bg-blue-500/10', 'border-purple-500', 'bg-purple-500/10');
 
     const sceneId = dropZone.getAttribute('data-scene-id');

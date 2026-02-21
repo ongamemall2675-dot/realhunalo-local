@@ -321,9 +321,9 @@ class AIService:
         print("="*60)
         print(f"스크립트 길이: {len(script)} 글자")
 
-        # 사용 가능한 모델 찾기 (우선순위: openai > deepseek > gemini > anthropic)
+        # 사용 가능한 모델 찾기 (우선순위: deepseek > openai > gemini > anthropic)
         available_model = None
-        for m in ['openai', 'deepseek', 'gemini', 'anthropic']:
+        for m in ['deepseek', 'openai', 'gemini', 'anthropic']:
             if self.api_keys.get(m):
                 available_model = m
                 print(f"✅ 사용 가능한 API 키 발견: {m}")
@@ -479,9 +479,9 @@ class AIService:
         print("="*60)
         print(f"스크립트 길이: {len(script)} 글자")
 
-        # 사용 가능한 모델 찾기
+        # 사용 가능한 모델 찾기 (우선순위: deepseek > openai > gemini > anthropic)
         available_model = None
-        for m in ['openai', 'deepseek', 'gemini', 'anthropic']:
+        for m in ['deepseek', 'openai', 'gemini', 'anthropic']:
             if self.api_keys.get(m):
                 available_model = m
                 print(f"✅ 사용 가능한 API 키 발견: {m}")
