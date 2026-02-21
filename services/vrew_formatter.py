@@ -1,6 +1,7 @@
 """
 Vrew Formatter Module
 TTS 타임스탬프를 Vrew 프로젝트 포맷으로 변환하는 모듈
+[업데이트] 양도세 중과유예.vrew 분석 결과를 반영한 완전한 구조
 """
 import os
 import uuid
@@ -25,14 +26,21 @@ class VrewClip:
     visual_ids: List[str]  # 비주얼 파일 ID 목록
 
     def to_dict(self) -> Dict[str, Any]:
-        """Vrew project.json 클립 포맷으로 변환"""
-        return {
-            "id": self.id,
+        """
+        Vrew project.json 클립 포맷으로 변환
+        [업데이트] 완전한 Clip 구조 (words, captions, captionMode 포함)
+        """
+        word_id = str(uuid.uuid4())
+        end_marker_id = str(uuid.uuid4())
+
+        # Word 구조 (실제 텍스트)
+        word = {
+            "id": word_id,
             "text": self.text,
             "startTime": self.start_time,
             "duration": self.duration,
             "aligned": True,
-            "type": 0,
+            "type": 0,  # 0 = 단어
             "originalDuration": self.duration,
             "originalStartTime": self.start_time,
             "truncatedWords": [],
@@ -41,6 +49,46 @@ class VrewClip:
             "audioIds": [],
             "assetIds": self.visual_ids,
             "playbackRate": 1
+        }
+
+        # 종료 마커 (필수!)
+        end_marker = {
+            "id": end_marker_id,
+            "text": "",
+            "startTime": self.start_time + self.duration,
+            "duration": 0,
+            "aligned": False,
+            "type": 2,  # 2 = 종료 마커
+            "originalDuration": 0,
+            "originalStartTime": self.start_time + self.duration,
+            "truncatedWords": [],
+            "autoControl": False,
+            "mediaId": self.media_id,
+            "audioIds": [],
+            "assetIds": [],
+            "playbackRate": 1
+        }
+
+        # 완전한 Clip 구조
+        return {
+            "id": self.id,
+            "words": [word, end_marker],  # words 배열
+            "captionMode": "TRANSCRIPT",
+            "captions": [  # Quill 델타 형식
+                {"text": [{"insert": f"{self.text}\n"}]},
+                {"text": [{"insert": "\n"}]}
+            ],
+            "assetIds": self.visual_ids,
+            "audioIds": [],
+            "dirty": {
+                "blankDeleted": False,
+                "caption": False,
+                "video": False
+            },
+            "translationModified": {
+                "result": False,
+                "source": False
+            }
         }
 
 
@@ -52,9 +100,16 @@ class VrewMediaFile:
     file_type: str  # "Image", "Video", "AVMedia"
     file_size: int
     local_path: str
+    duration: float = 0.0  # 오디오/비디오 길이 (초)
 
     def to_dict(self) -> Dict[str, Any]:
-        """Vrew project.json 파일 메타데이터 포맷으로 변환"""
+        """
+        Vrew project.json 파일 메타데이터 포맷으로 변환
+        [업데이트] 완전한 미디어 파일 구조
+        """
+        # 가상의 로컬 경로 생성 (실제로는 ZIP 내부에 있지만 Vrew는 LOCAL 형식 선호)
+        fake_local_path = os.path.abspath(self.name)
+
         base = {
             "version": 1,
             "mediaId": self.media_id,
@@ -62,15 +117,43 @@ class VrewMediaFile:
             "fileSize": self.file_size,
             "name": self.name,
             "type": self.file_type,
-            "fileLocation": "IN_MEMORY"
+            "fileLocation": "IN_MEMORY", # Reverted to IN_MEMORY based on analysis
+            # "path": f"media/{self.name}",  # Removed as Vrew does not use this field for packaged files
+            # "relativePath": f"./media/{self.name}" # Removed as Vrew does not use this field for packaged files
         }
 
-        if self.file_type == "AVMedia":
-            base["videoAudioMetaInfo"] = {"fileType": "VIDEO_AUDIO"}
-            base["path"] = f"./{self.name}"
-            base["relativePath"] = f"./{self.name}"
+        if self.file_type in ["AVMedia", "Video"]:
+            # 오디오/비디오 메타 정보
+            ext = os.path.splitext(self.name)[1].lower()
+            base["type"] = "AVMedia"
+
+            base["videoAudioMetaInfo"] = {
+                "audioInfo": {
+                    "sampleRate": 44100,
+                    "codec": "mp3" if ext == ".mp3" else "aac",
+                    "channelCount": 1 if ext == ".mp3" else 2
+                },
+                "duration": self.duration,
+                "presumedDevice": "unknown",
+                "mediaContainer": ext[1:]  # .mp3 -> mp3
+            }
+            
+            if ext in [".mp4", ".mov"]:
+                base["videoAudioMetaInfo"]["videoInfo"] = {
+                    "size": {
+                        "width": 1080, # default 9:16 vertical video
+                        "height": 1920
+                    },
+                    "frameRate": 30.0,
+                    "codec": "h264"
+                }
+                base["sourceFileType"] = "ASSET_VIDEO"
+            else:
+                base["sourceFileType"] = "VIDEO_AUDIO"
+
         elif self.file_type == "Image":
             base["isTransparent"] = False
+            base["sourceFileType"] = "IMAGE"
 
         return base
 
@@ -81,7 +164,7 @@ class VrewFormatter:
 
     주요 기능:
     - WordTimestamp → VrewClip 변환
-    - project.json 생성
+    - project.json 생성 (완전한 구조)
     - ZIP 패키징 (.vrew 파일 생성)
     """
 
@@ -128,7 +211,7 @@ class VrewFormatter:
                     sentence_duration = ts.end_seconds - sentence_start
 
                     clips.append(VrewClip(
-                        id=str(uuid.uuid4())[:10],
+                        id=str(uuid.uuid4()),
                         text=sentence_text,
                         start_time=sentence_start,
                         duration=sentence_duration,
@@ -142,7 +225,7 @@ class VrewFormatter:
             # 단어 단위 클립 생성
             for ts in timestamps:
                 clips.append(VrewClip(
-                    id=str(uuid.uuid4())[:10],
+                    id=str(uuid.uuid4()),
                     text=ts.text,
                     start_time=ts.start_seconds,
                     duration=ts.duration_seconds,
@@ -161,6 +244,7 @@ class VrewFormatter:
     ) -> Dict[str, Any]:
         """
         Vrew project.json 구조 생성
+        [업데이트] 완전한 Vrew 프로젝트 구조 (scenes, props, statistics 포함)
 
         Args:
             clips: VrewClip 목록
@@ -172,6 +256,8 @@ class VrewFormatter:
             project.json 딕셔너리
         """
         project_id = project_id or str(uuid.uuid4())
+        now = datetime.now()
+        iso_date = now.strftime("%Y-%m-%dT%H:%M:%S+09:00")
 
         # 전체 duration 계산
         total_duration = 0.0
@@ -179,25 +265,154 @@ class VrewFormatter:
             last_clip = max(clips, key=lambda c: c.start_time + c.duration)
             total_duration = last_clip.start_time + last_clip.duration
 
+        width, height = resolution
+        video_ratio = width / height
+
         return {
             "version": 15,
-            "files": [mf.to_dict() for mf in media_files],
-            "transcript": {
-                "version": 1,
-                "clips": [clip.to_dict() for clip in clips]
-            },
-            "props": {
-                "version": 2,
-                "duration": total_duration,
-                "resolution": {
-                    "width": resolution[0],
-                    "height": resolution[1]
-                }
-            },
-            "comment": "Generated by RealHunalo Studio",
             "projectId": project_id,
-            "statistics": {},
-            "lastTTSSettings": {}
+            "comment": f"3.5.4\t{now.isoformat()}Z",
+
+            # 파일 목록
+            "files": [mf.to_dict() for mf in media_files],
+
+            # Transcript (Scene 구조로 감싸기!)
+            "transcript": {
+                "scenes": [
+                    {
+                        "id": str(uuid.uuid4()),
+                        "clips": [clip.to_dict() for clip in clips],
+                        "name": "",
+                        "dirty": {"video": False}
+                    }
+                ]
+            },
+
+            # Props (완전한 구조)
+            "props": {
+                "assets": {},
+                "audios": {},
+                "overdubInfos": {},
+                "backgroundMap": {},
+                "flipSetting": {},
+                "ttsClipInfosMap": {},
+
+                "analyzeDate": now.strftime("%Y-%m-%d %H:%M:%S"),
+                "videoRatio": video_ratio,
+                "videoSize": {"width": width, "height": height},
+                "initProjectVideoSize": {"width": width, "height": height},
+
+                "globalVideoTransform": {
+                    "zoom": 1,
+                    "xPos": 0,
+                    "yPos": 0,
+                    "rotation": 0
+                },
+
+                "captionDisplayMode": {"0": True, "1": False},
+
+                # 자막 스타일
+                "globalCaptionStyle": {
+                    "captionStyleSetting": {
+                        "mediaId": "uc-0010-simple-textbox",
+                        "yAlign": "bottom",
+                        "yOffset": 0,
+                        "xOffset": 0,
+                        "rotation": 0,
+                        "width": 0.96,
+                        "customAttributes": [
+                            {
+                                "attributeName": "--textbox-color",
+                                "type": "color-hex",
+                                "value": "rgba(0, 0, 0, 0)"
+                            },
+                            {
+                                "attributeName": "--textbox-align",
+                                "type": "textbox-align",
+                                "value": "center"
+                            }
+                        ],
+                        "scaleFactor": video_ratio
+                    },
+                    "quillStyle": {
+                        "font": "Pretendard-Vrew_700",
+                        "size": "100",
+                        "color": "#ffffff",
+                        "outline-on": "true",
+                        "outline-color": "#000000",
+                        "outline-width": "6"
+                    }
+                },
+
+                "mediaEffectMap": {},
+                "markerNames": {},
+
+                # TTS 설정
+                "lastTTSSettings": {
+                    "pitch": 0,
+                    "speed": 1,
+                    "volume": 0,
+                    "speaker": {
+                        "age": "middle",
+                        "gender": "female",
+                        "lang": "ko-KR",
+                        "name": "va19",
+                        "speakerId": "va19",
+                        "provider": "vrew",
+                        "versions": ["v2"],
+                        "tags": ["voice_actor"]
+                    },
+                    "version": "v2"
+                },
+
+                "pronunciationDisplay": True,
+                "projectAudioLanguage": "ko",
+                "audioLanguagesMap": {},
+                "originalClipsMap": {}
+            },
+
+            # Statistics (완전한 구조)
+            "statistics": {
+                "wordCursorCount": {},
+                "wordSelectionCount": {},
+                "wordCorrectionCount": {},
+                "projectStartMode": "video_audio",
+
+                "saveInfo": {
+                    "created": {
+                        "version": "3.5.4",
+                        "date": iso_date,
+                        "stage": "release"
+                    },
+                    "updated": {
+                        "version": "3.5.4",
+                        "date": iso_date,
+                        "stage": "release"
+                    },
+                    "loadCount": 0,
+                    "saveCount": 1
+                },
+
+                "savedStyleApplyCount": 0,
+                "cumulativeTemplateApplyCount": 0,
+                "ratioChangedByTemplate": False,
+                "videoRemixInfos": {},
+                "isAIWritingUsed": False,
+
+                "sttLinebreakOptions": {
+                    "mode": 0,
+                    "maxLineLength": 30
+                },
+                "clientLinebreakExecuteCount": 0,
+
+                "agentStats": {
+                    "isEdited": False,
+                    "requestCount": 0,
+                    "responseCount": 0,
+                    "toolCallCount": 0,
+                    "toolErrorCount": 0
+                }
+            }
         }
 
     def create_vrew_package(
@@ -224,28 +439,47 @@ class VrewFormatter:
         os.makedirs(media_dir, exist_ok=True)
 
         try:
+            print(f"\n[Vrew Formatter] ZIP 패키징 시작...")
+
             # 미디어 파일 복사
             for mf in media_files:
                 if os.path.exists(mf.local_path):
-                    shutil.copy(mf.local_path, os.path.join(media_dir, mf.name))
+                    dest_path = os.path.join(media_dir, mf.name)
+                    shutil.copy(mf.local_path, dest_path)
+                    print(f"  ✓ 미디어 복사: {mf.name} ({mf.file_size} bytes)")
+                else:
+                    print(f"  ⚠️ 파일 없음: {mf.local_path}")
 
             # project.json 저장
             project_json_path = os.path.join(work_dir, "project.json")
             with open(project_json_path, 'w', encoding='utf-8') as f:
                 json.dump(project_data, f, ensure_ascii=False, indent=2)
+            print(f"  ✓ project.json 생성")
 
-            # ZIP 생성
+            # ZIP 생성 (ZIP_STORED 사용 - 압축 없음, Vrew 호환성 향상)
             output_filename = output_filename or f"project_{int(datetime.now().timestamp())}.vrew"
             vrew_path = os.path.join(OUTPUT_DIR, output_filename)
 
-            with zipfile.ZipFile(vrew_path, 'w', zipfile.ZIP_DEFLATED) as zf:
-                zf.write(project_json_path, "project.json")
+            with zipfile.ZipFile(vrew_path, 'w', zipfile.ZIP_STORED) as zf:
+                zf.write(project_json_path, "project.json", compress_type=zipfile.ZIP_STORED)
 
                 for media_file in os.listdir(media_dir):
                     media_path = os.path.join(media_dir, media_file)
-                    zf.write(media_path, f"media/{media_file}")
+                    zf.write(media_path, f"media/{media_file}", compress_type=zipfile.ZIP_STORED)
 
-            print(f"✅ Vrew 패키지 생성 완료: {output_filename}")
+            # ZIP 파일 검증 (PK 헤더 확인)
+            if os.path.exists(vrew_path):
+                with open(vrew_path, 'rb') as f:
+                    header = f.read(2)
+                    if header == b'PK':
+                        print(f"  ✓ ZIP 파일 검증 성공 (PK 헤더 확인)")
+                    else:
+                        print(f"  ⚠️ 경고: ZIP 헤더 이상 - {header.hex()}")
+
+            file_size = os.path.getsize(vrew_path)
+            print(f"  ✓ ZIP 생성 완료: {output_filename} ({file_size:,} bytes)")
+            print(f"[OK] Vrew 패키지 생성 완료!\n")
+
             return f"http://localhost:8000/output/{output_filename}"
 
         finally:
@@ -257,6 +491,7 @@ class VrewFormatter:
 class VrewProjectBuilder:
     """
     TTS 결과와 미디어 에셋을 조합하여 Vrew 프로젝트를 빌드하는 고수준 빌더
+    [업데이트] 완전한 Vrew 구조 적용
     """
 
     def __init__(self):
@@ -297,12 +532,18 @@ class VrewProjectBuilder:
         audio_id = str(uuid.uuid4())
         audio_name = f"{audio_id}.mp3"
 
+        # 오디오 duration 계산
+        audio_duration = 0.0
+        if timestamps:
+            audio_duration = timestamps[-1].end_seconds
+
         self.media_files.append(VrewMediaFile(
             media_id=audio_id,
             name=audio_name,
             file_type="AVMedia",
             file_size=os.path.getsize(audio_local),
-            local_path=audio_local
+            local_path=audio_local,
+            duration=audio_duration  # duration 추가!
         ))
 
         # 비주얼 파일 처리 (있는 경우)
@@ -321,7 +562,8 @@ class VrewProjectBuilder:
                     name=visual_name,
                     file_type=visual_type,
                     file_size=os.path.getsize(visual_local),
-                    local_path=visual_local
+                    local_path=visual_local,
+                    duration=audio_duration if visual_ext == ".mp4" else 0.0
                 ))
                 visual_ids.append(visual_id)
 
